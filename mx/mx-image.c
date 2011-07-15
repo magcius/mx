@@ -901,6 +901,14 @@ mx_image_prepare_texture (MxImage  *image)
   cogl_material_set_layer (priv->material, 1, priv->old_texture);
   cogl_material_set_layer (priv->material, 0, priv->texture);
 
+  cogl_material_set_layer_filters (priv->material, 1,
+                                   COGL_MATERIAL_FILTER_LINEAR_MIPMAP_LINEAR,
+                                   COGL_MATERIAL_FILTER_NEAREST);
+
+  cogl_material_set_layer_filters (priv->material, 0,
+                                   COGL_MATERIAL_FILTER_LINEAR_MIPMAP_LINEAR,
+                                   COGL_MATERIAL_FILTER_NEAREST);
+
   /* start the cross fade animation */
   clutter_timeline_stop (priv->timeline);
   clutter_timeline_start (priv->timeline);
