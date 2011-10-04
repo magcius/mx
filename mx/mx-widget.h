@@ -143,6 +143,8 @@ void          mx_widget_get_available_area   (MxWidget              *widget,
                                               const ClutterActorBox *allocation,
                                               ClutterActorBox       *area);
 
+StThemeNode *
+mx_widget_get_theme_node (MxWidget *widget);
 
 G_END_DECLS
 

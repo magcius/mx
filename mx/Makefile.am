@@ -97,6 +97,10 @@ source_h = \
 	$(top_srcdir)/mx/st-theme.h		\
 	$(top_srcdir)/mx/st-theme-context.h	\
 	$(top_srcdir)/mx/st-theme-node.h	\
+	$(top_srcdir)/mx/st-theme-node.h	\
+	$(top_srcdir)/mx/st-border-image.h	\
+	$(top_srcdir)/mx/st-shadow.h	\
+	$(top_srcdir)/mx/st-texture-cache.h	\
 	$(NULL)
 
 source_h_priv = \
@@ -178,6 +182,9 @@ source_c = \
 	$(top_srcdir)/mx/st-theme-context.c	\
 	$(top_srcdir)/mx/st-theme-node.c	\
 	$(top_srcdir)/mx/st-theme-node-drawing.c	\
+	$(top_srcdir)/mx/st-border-image.c	\
+	$(top_srcdir)/mx/st-shadow.c	\
+	$(top_srcdir)/mx/st-texture-cache.c	\
 	$(NULL)
 
 EXTRA_DIST = \

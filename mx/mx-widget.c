@@ -62,6 +62,7 @@ struct _MxWidgetPrivate
   MxStyle       *style;
   gchar         *pseudo_class;
   gchar         *style_class;
+  gchar         *inline_style;
   MxBorderImage *mx_border_image;
 
   ClutterActor *border_image;
@@ -493,14 +494,15 @@ mx_widget_real_paint_background (MxWidget           *self,
 static void
 mx_widget_paint (ClutterActor *self)
 {
-  MxWidgetPrivate *priv = MX_WIDGET (self)->priv;
-  MxWidgetClass *klass = MX_WIDGET_GET_CLASS (self);
+  StThemeNode *theme_node;
+  ClutterActorBox allocation;
+  guint8 opacity;
 
-  theme_node = st_widget_get_theme_node (self);
+  theme_node = mx_widget_get_theme_node (MX_WIDGET (self));
 
-  clutter_actor_get_allocation_box (actor, &allocation);
+  clutter_actor_get_allocation_box (self, &allocation);
 
-  opacity = clutter_actor_get_paint_opacity (actor);
+  opacity = clutter_actor_get_paint_opacity (self);
 
   st_theme_node_paint (theme_node, &allocation, opacity);
 
@@ -1851,7 +1853,20 @@ scriptable_iface_init (ClutterScriptableIface *iface)
 
 
 
+static StThemeNode *
+get_root_theme_node (ClutterStage *stage)
+{
+  StThemeContext *context = st_theme_context_get_for_stage (stage);
 
+  if (!g_object_get_data (G_OBJECT (context), "st-theme-initialized"))
+    {
+      g_object_set_data (G_OBJECT (context), "st-theme-initialized", GUINT_TO_POINTER (1));
+      /* g_signal_connect (G_OBJECT (context), "changed", */
+      /*                   G_CALLBACK (on_theme_context_changed), stage); */
+    }
+
+  return st_theme_context_get_root_node (context);
+}
 
 /**
  * mx_widget_get_theme_node:
@@ -1880,13 +1895,12 @@ mx_widget_get_theme_node (MxWidget *widget)
       StThemeNode *parent_node = NULL;
       ClutterStage *stage = NULL;
       ClutterActor *parent;
-      char *pseudo_class, *direction_pseudo_class;
 
       parent = clutter_actor_get_parent (CLUTTER_ACTOR (widget));
       while (parent != NULL)
         {
-          if (parent_node == NULL && ST_IS_WIDGET (parent))
-            parent_node = st_widget_get_theme_node (ST_WIDGET (parent));
+          if (parent_node == NULL && MX_IS_WIDGET (parent))
+            parent_node = mx_widget_get_theme_node (MX_WIDGET (parent));
           else if (CLUTTER_IS_STAGE (parent))
             stage = CLUTTER_STAGE (parent);
 
@@ -1901,31 +1915,13 @@ mx_widget_get_theme_node (MxWidget *widget)
       if (parent_node == NULL)
         parent_node = get_root_theme_node (CLUTTER_STAGE (stage));
 
-      /* Always append a "magic" pseudo class indicating the text
-       * direction, to allow to adapt the CSS when necessary without
-       * requiring separate style sheets.
-       */
-      if (st_widget_get_direction (widget) == ST_TEXT_DIRECTION_RTL)
-        direction_pseudo_class = "rtl";
-      else
-        direction_pseudo_class = "ltr";
-
-      if (priv->pseudo_class)
-        pseudo_class = g_strconcat(priv->pseudo_class, " ",
-                                   direction_pseudo_class, NULL);
-      else
-        pseudo_class = direction_pseudo_class;
-
       priv->theme_node = st_theme_node_new (st_theme_context_get_for_stage (stage),
                                             parent_node, priv->theme,
                                             G_OBJECT_TYPE (widget),
                                             clutter_actor_get_name (CLUTTER_ACTOR (widget)),
                                             priv->style_class,
-                                            pseudo_class,
+                                            priv->pseudo_class,
                                             priv->inline_style);
-
-      if (pseudo_class != direction_pseudo_class)
-        g_free (pseudo_class);
     }
 
   return priv->theme_node;
