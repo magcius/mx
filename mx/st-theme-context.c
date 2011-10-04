@@ -52,17 +52,10 @@ static guint signals[LAST_SIGNAL] = { 0, };
 
 G_DEFINE_TYPE (MxStThemeContext, mx_st_theme_context, G_TYPE_OBJECT)
 
-static void on_icon_theme_changed (MxStTextureCache *cache,
-                                   MxStThemeContext *context);
-
 static void
 mx_st_theme_context_finalize (GObject *object)
 {
   MxStThemeContext *context = MX_ST_THEME_CONTEXT (object);
-
-  g_signal_handlers_disconnect_by_func (mx_st_texture_cache_get_default (),
-                                       (gpointer) on_icon_theme_changed,
-                                       context);
 
   if (context->root_node)
     g_object_unref (context->root_node);
@@ -96,11 +89,6 @@ mx_st_theme_context_init (MxStThemeContext *context)
 {
   context->resolution = DEFAULT_RESOLUTION;
   context->font = pango_font_description_from_string (DEFAULT_FONT);
-
-  g_signal_connect (mx_st_texture_cache_get_default (),
-                    "icon-theme-changed",
-                    G_CALLBACK (on_icon_theme_changed),
-                    context);
 }
 
 /**
@@ -140,17 +128,6 @@ mx_st_theme_context_changed (MxStThemeContext *context)
 
   if (old_root)
     g_object_unref (old_root);
-}
-
-static void
-on_icon_theme_changed (MxStTextureCache *cache,
-                       MxStThemeContext *context)
-{
-  /* Note that an icon theme change isn't really a change of the MxStThemeContext;
-   * the style information has changed. But since the style factors into the
-   * icon_name => icon lookup, faking a theme context change is a good way
-   * to force users such as StIcon to look up icons again */
-  mx_st_theme_context_changed (context);
 }
 
 /**

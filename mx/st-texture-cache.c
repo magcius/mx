@@ -23,7 +23,7 @@
 
 #include "st-icon-colors.h"
 #include "st-texture-cache.h"
-#include <gtk/gtk.h>
+#include <gdk/gdk.h>
 #define GNOME_DESKTOP_USE_UNSTABLE_API
 #include <libgnome-desktop/gnome-desktop-thumbnail.h>
 #include <string.h>
@@ -38,8 +38,6 @@
 
 struct _MxStTextureCachePrivate
 {
-  GtkIconTheme *icon_theme;
-
   /* Things that were loaded with a cache policy != NONE */
   GHashTable *keyed_cache; /* char * -> CoglTexture* */
   /* Presently this is used to de-duplicate requests for GIcons,
@@ -53,14 +51,6 @@ struct _MxStTextureCachePrivate
 static void mx_st_texture_cache_dispose (GObject *object);
 static void mx_st_texture_cache_finalize (GObject *object);
 
-enum
-{
-  ICON_THEME_CHANGED,
-
-  LAST_SIGNAL
-};
-
-static guint signals[LAST_SIGNAL] = { 0, };
 G_DEFINE_TYPE(MxStTextureCache, mx_st_texture_cache, G_TYPE_OBJECT);
 
 /* We want to preserve the aspect ratio by default, also the default
@@ -90,55 +80,12 @@ mx_st_texture_cache_class_init (MxStTextureCacheClass *klass)
 
   gobject_class->dispose = mx_st_texture_cache_dispose;
   gobject_class->finalize = mx_st_texture_cache_finalize;
-
-  signals[ICON_THEME_CHANGED] =
-    g_signal_new ("icon-theme-changed",
-                  G_TYPE_FROM_CLASS (klass),
-                  G_SIGNAL_RUN_LAST,
-                  0, /* no default handler slot */
-                  NULL, NULL,
-                  g_cclosure_marshal_VOID__VOID,
-                  G_TYPE_NONE, 0);
-}
-
-/* Evicts all cached textures for named icons */
-static void
-mx_st_texture_cache_evict_icons (MxStTextureCache *cache)
-{
-  GHashTableIter iter;
-  gpointer key;
-  gpointer value;
-
-  g_hash_table_iter_init (&iter, cache->priv->keyed_cache);
-  while (g_hash_table_iter_next (&iter, &key, &value))
-    {
-      const char *cache_key = key;
-
-      /* This is too conservative - it takes out all cached textures
-       * for GIcons even when they aren't named icons, but it's not
-       * worth the complexity of parsing the key and calling
-       * g_icon_new_for_string(); icon theme changes aren't normal */
-      if (g_str_has_prefix (cache_key, "gicon:"))
-        g_hash_table_iter_remove (&iter);
-    }
-}
-
-static void
-on_icon_theme_changed (GtkIconTheme   *icon_theme,
-                       MxStTextureCache *cache)
-{
-  mx_st_texture_cache_evict_icons (cache);
-  g_signal_emit (cache, signals[ICON_THEME_CHANGED], 0);
 }
 
 static void
 mx_st_texture_cache_init (MxStTextureCache *self)
 {
   self->priv = g_new0 (MxStTextureCachePrivate, 1);
-
-  self->priv->icon_theme = gtk_icon_theme_get_default ();
-  g_signal_connect (self->priv->icon_theme, "changed",
-                    G_CALLBACK (on_icon_theme_changed), self);
 
   self->priv->keyed_cache = g_hash_table_new_full (g_str_hash, g_str_equal,
                                                    g_free, cogl_handle_unref);
@@ -151,14 +98,6 @@ static void
 mx_st_texture_cache_dispose (GObject *object)
 {
   MxStTextureCache *self = (MxStTextureCache*)object;
-
-  if (self->priv->icon_theme)
-    {
-      g_signal_handlers_disconnect_by_func (self->priv->icon_theme,
-                                            (gpointer) on_icon_theme_changed,
-                                            self);
-      self->priv->icon_theme = NULL;
-    }
 
   if (self->priv->keyed_cache)
     g_hash_table_destroy (self->priv->keyed_cache);
@@ -187,7 +126,6 @@ typedef struct {
   char *mimetype;
   gboolean thumbnail;
   GIcon *icon;
-  GtkIconInfo *icon_info;
   gint width;
   gint height;
   StIconColors *colors;
@@ -245,67 +183,6 @@ compute_pixbuf_scale (gint      width,
   return FALSE;
 }
 
-static void
-rgba_from_clutter (GdkRGBA      *rgba,
-                   ClutterColor *color)
-{
-  rgba->red = color->red / 255.;
-  rgba->green = color->green / 255.;
-  rgba->blue = color->blue / 255.;
-  rgba->alpha = color->alpha / 255.;
-}
-
-static GdkPixbuf *
-impl_load_pixbuf_gicon (GIcon        *icon,
-                        GtkIconInfo  *info,
-                        int           size,
-                        StIconColors *colors,
-                        GError      **error)
-{
-  int scaled_width, scaled_height;
-  GdkPixbuf *pixbuf;
-  int width, height;
-
-  if (colors)
-    {
-      GdkRGBA foreground_color;
-      GdkRGBA success_color;
-      GdkRGBA warning_color;
-      GdkRGBA error_color;
-
-      rgba_from_clutter (&foreground_color, &colors->foreground);
-      rgba_from_clutter (&success_color, &colors->success);
-      rgba_from_clutter (&warning_color, &colors->warning);
-      rgba_from_clutter (&error_color, &colors->error);
-
-      pixbuf = gtk_icon_info_load_symbolic (info,
-                                            &foreground_color, &success_color,
-                                            &warning_color, &error_color,
-                                            NULL, error);
-    }
-  else
-    {
-      pixbuf = gtk_icon_info_load_icon (info, error);
-    }
-
-  if (!pixbuf)
-    return NULL;
-
-  width = gdk_pixbuf_get_width (pixbuf);
-  height = gdk_pixbuf_get_height (pixbuf);
-
-  if (compute_pixbuf_scale (width,
-                            height,
-                            size, size,
-                            &scaled_width, &scaled_height))
-    {
-      GdkPixbuf *scaled = gdk_pixbuf_scale_simple (pixbuf, width, height, GDK_INTERP_BILINEAR);
-      g_object_unref (pixbuf);
-      pixbuf = scaled;
-    }
-  return pixbuf;
-}
-
 // A private structure for keeping width and height.
 typedef struct {
   int width;
@@ -317,12 +194,7 @@ icon_lookup_data_destroy (gpointer p)
 {
   AsyncIconLookupData *data = p;
 
-  if (data->icon)
-    {
-      g_object_unref (data->icon);
-      gtk_icon_info_free (data->icon_info);
-    }
-  else if (data->uri)
+  if (data->uri)
     g_free (data->uri);
   if (data->mimetype)
     g_free (data->mimetype);
@@ -578,21 +450,6 @@ impl_load_thumbnail (MxStTextureCache    *cache,
    return pixbuf;
 }
 
-static GIcon *
-icon_for_mimetype (const char *mimetype)
-{
-  char *content_type;
-  GIcon *icon;
-
-  content_type = g_content_type_from_mime_type (mimetype);
-  if (!content_type)
-    return NULL;
-
-  icon = g_content_type_get_icon (content_type);
-  g_free (content_type);
-  return icon;
-}
-
 static void
 load_pixbuf_thread (GSimpleAsyncResult *result,
                     GObject *object,
@@ -618,8 +475,6 @@ load_pixbuf_thread (GSimpleAsyncResult *result,
     }
   else if (data->uri)
     pixbuf = impl_load_pixbuf_file (data->uri, data->width, data->height, &error);
-  else if (data->icon)
-    pixbuf = impl_load_pixbuf_gicon (data->icon, data->icon_info, data->width, data->colors, &error);
   else
     g_assert_not_reached ();
 
@@ -632,44 +487,6 @@ load_pixbuf_thread (GSimpleAsyncResult *result,
   if (pixbuf)
     g_simple_async_result_set_op_res_gpointer (result, g_object_ref (pixbuf),
                                                g_object_unref);
-}
-
-/**
- * load_icon_pixbuf_async:
- *
- * Asynchronously load the #GdkPixbuf associated with a #GIcon.  Currently
- * the #GtkIconInfo must have already been provided.
- */
-static void
-load_icon_pixbuf_async (MxStTextureCache       *cache,
-                        GIcon                *icon,
-                        GtkIconInfo          *icon_info,
-                        gint                  size,
-                        StIconColors         *colors,
-                        GCancellable         *cancellable,
-                        GAsyncReadyCallback   callback,
-                        gpointer              user_data)
-{
-  GSimpleAsyncResult *result;
-  AsyncIconLookupData *data;
-
-  data = g_new0 (AsyncIconLookupData, 1);
-  data->cache = cache;
-  data->icon = g_object_ref (icon);
-  data->icon_info = gtk_icon_info_copy (icon_info);
-  data->width = data->height = size;
-  if (colors)
-    data->colors = st_icon_colors_ref (colors);
-  else
-    data->colors = NULL;
-  data->user_data = user_data;
-
-  result = g_simple_async_result_new (G_OBJECT (cache), callback, user_data, load_icon_pixbuf_async);
-
-  g_object_set_data_full (G_OBJECT (result), "load_pixbuf_async", data, icon_lookup_data_destroy);
-  g_simple_async_result_run_in_thread (result, load_pixbuf_thread, G_PRIORITY_DEFAULT, cancellable);
-
-  g_object_unref (result);
 }
 
 static void
@@ -746,7 +563,6 @@ typedef struct {
   char *mimetype;
   char *checksum;
   GIcon *icon;
-  GtkIconInfo *icon_info;
   guint width;
   guint height;
   GSList *textures;
@@ -817,42 +633,6 @@ pixbuf_to_cairo_surface (GdkPixbuf *pixbuf)
   return surface;
 }
 
-static GdkPixbuf *
-load_pixbuf_fallback(AsyncTextureLoadData *data)
-{
-  GdkPixbuf *pixbuf = NULL;
-
-  if (data->thumbnail)
-    {
-
-      GtkIconTheme *theme = gtk_icon_theme_get_default ();
-
-        {
-          GIcon *icon = icon_for_mimetype (data->mimetype);
-          if (icon != NULL)
-            {
-              GtkIconInfo *icon_info = gtk_icon_theme_lookup_by_gicon (theme,
-                                                                       icon,
-                                                                       data->width,
-                                                                       GTK_ICON_LOOKUP_USE_BUILTIN);
-              g_object_unref (icon);
-              if (icon_info != NULL)
-                pixbuf = gtk_icon_info_load_icon (icon_info, NULL);
-            }
-        }
-
-      if (pixbuf == NULL)
-        pixbuf = gtk_icon_theme_load_icon (theme,
-                                           "gtk-file",
-                                           data->width,
-                                           GTK_ICON_LOOKUP_USE_BUILTIN,
-                                           NULL);
-    }
-  /* Maybe we could need a fallback for outher image types? */
-
-  return pixbuf;
-}
-
 static void
 on_pixbuf_loaded (GObject      *source,
                   GAsyncResult *result,
@@ -871,8 +651,6 @@ on_pixbuf_loaded (GObject      *source,
   g_hash_table_remove (cache->priv->outstanding_requests, data->key);
 
   pixbuf = load_pixbuf_async_finish (cache, result, &error);
-  if (pixbuf == NULL)
-    pixbuf = load_pixbuf_fallback (data);
   if (pixbuf == NULL)
     goto out;
 
@@ -904,12 +682,7 @@ out:
     cogl_handle_unref (texdata);
   g_free (data->key);
 
-  if (data->icon)
-    {
-      gtk_icon_info_free (data->icon_info);
-      g_object_unref (data->icon);
-    }
-  else if (data->uri)
+  if (data->uri)
     g_free (data->uri);
 
   if (data->mimetype)
@@ -1069,164 +842,6 @@ mx_st_texture_cache_load (MxStTextureCache       *cache,
   return texture;
 }
 
-/**
- * create_texture_and_ensure_request:
- * @cache:
- * @key: A cache key
- * @size: Size in pixels
- * @request: (out): If no request is outstanding, one will be created and returned here
- * @texture: (out): A new texture, also added to the request
- *
- * Check for any outstanding load for the data represented by @key.  If there
- * is already a request pending, append it to that request to avoid loading
- * the data multiple times.
- *
- * Returns: %TRUE iff there is already a request pending
- */
-static gboolean
-create_texture_and_ensure_request (MxStTextureCache        *cache,
-                                   const char            *key,
-                                   guint                  size,
-                                   AsyncTextureLoadData **request,
-                                   ClutterActor         **texture)
-{
-  CoglHandle texdata;
-  AsyncTextureLoadData *pending;
-  gboolean had_pending;
-
-  *texture = (ClutterActor *) create_default_texture (cache);
-  clutter_actor_set_size (*texture, size, size);
-
-  texdata = g_hash_table_lookup (cache->priv->keyed_cache, key);
-
-  if (texdata != NULL)
-    {
-      /* We had this cached already, just set the texture and we're done. */
-      set_texture_cogl_texture (CLUTTER_TEXTURE (*texture), texdata);
-      return TRUE;
-    }
-
-  pending = g_hash_table_lookup (cache->priv->outstanding_requests, key);
-  had_pending = pending != NULL;
-
-  if (pending == NULL)
-    {
-      /* Not cached and no pending request, create it */
-      *request = g_new0 (AsyncTextureLoadData, 1);
-      g_hash_table_insert (cache->priv->outstanding_requests, g_strdup (key), *request);
-    }
-  else
-   *request = pending;
-
-  /* Regardless of whether there was a pending request, prepend our texture here. */
-  (*request)->textures = g_slist_prepend ((*request)->textures, g_object_ref (*texture));
-
-  return had_pending;
-}
-
-static ClutterActor *
-load_gicon_with_colors (MxStTextureCache    *cache,
-                        GIcon             *icon,
-                        gint               size,
-                        StIconColors      *colors)
-{
-  AsyncTextureLoadData *request;
-  ClutterActor *texture;
-  char *gicon_string;
-  char *key;
-  GtkIconTheme *theme;
-  GtkIconInfo *info;
-  MxStTextureCachePolicy policy;
-
-  gicon_string = g_icon_to_string (icon);
-  /* A return value of NULL indicates that the icon can not be serialized,
-   * so don't have a unique identifier for it as a cache key, and thus can't
-   * be cached. If it is cachable, we hardcode a policy of FOREVER here for
-   * now; we should actually blow this away on icon theme changes probably */
-  policy = gicon_string != NULL ? MX_ST_TEXTURE_CACHE_POLICY_FOREVER
-                                : MX_ST_TEXTURE_CACHE_POLICY_NONE;
-  if (colors)
-    {
-      /* This raises some doubts about the practice of using string keys */
-      key = g_strdup_printf (CACHE_PREFIX_GICON "icon=%s,size=%d,colors=%2x%2x%2x%2x,%2x%2x%2x%2x,%2x%2x%2x%2x,%2x%2x%2x%2x",
-                             gicon_string, size,
-                             colors->foreground.red, colors->foreground.blue, colors->foreground.green, colors->foreground.alpha,
-                             colors->warning.red, colors->warning.blue, colors->warning.green, colors->warning.alpha,
-                             colors->error.red, colors->error.blue, colors->error.green, colors->error.alpha,
-                             colors->success.red, colors->success.blue, colors->success.green, colors->success.alpha);
-    }
-  else
-    {
-      key = g_strdup_printf (CACHE_PREFIX_GICON "icon=%s,size=%d",
-                             gicon_string, size);
-    }
-  g_free (gicon_string);
-
-  if (create_texture_and_ensure_request (cache, key, size, &request, &texture))
-    {
-      g_free (key);
-      return texture;
-    }
-
-  /* Do theme lookups in the main thread to avoid thread-unsafety */
-  theme = cache->priv->icon_theme;
-
-  info = gtk_icon_theme_lookup_by_gicon (theme, icon, size, GTK_ICON_LOOKUP_USE_BUILTIN);
-  if (info != NULL)
-    {
-      /* Transfer ownership of key */
-      request->key = key;
-      request->policy = policy;
-      request->icon = g_object_ref (icon);
-      request->icon_info = info;
-      request->width = request->height = size;
-      request->enforced_square = TRUE;
-
-      load_icon_pixbuf_async (cache, icon, info, size, colors, NULL, on_pixbuf_loaded, request);
-    }
-  else
-    {
-      /* Blah; we failed to find the icon, but we've added our texture to the outstanding
-       * requests.  In that case, just undo what create_texture_and_ensure_request() did.
-       */
-       g_slist_foreach (request->textures, (GFunc) g_object_unref, NULL);
-       g_slist_free (request->textures);
-       g_free (request);
-       g_hash_table_remove (cache->priv->outstanding_requests, key);
-       g_free (key);
-       g_object_unref (texture);
-       texture = NULL;
-    }
-
-  return CLUTTER_ACTOR (texture);
-}
-
-/**
- * mx_st_texture_cache_load_gicon:
- * @cache: The texture cache instance
- * @theme_node: (allow-none): The #StThemeNode to use for colors, or NULL
- *                            if the icon must not be recolored
- * @icon: the #GIcon to load
- * @size: Size of themed
- *
- * This method returns a new #ClutterActor for a given #GIcon. If the
- * icon isn't loaded already, the texture will be filled
- * asynchronously.
- *
- * This will load @icon as a full-color icon; if you want a symbolic
- * icon, you must use mx_st_texture_cache_load_icon_name().
- *
- * Return Value: (transfer none): A new #ClutterActor for the icon, or %NULL if not found
- */
-ClutterActor *
-mx_st_texture_cache_load_gicon (MxStTextureCache    *cache,
-                             MxStThemeNode       *theme_node,
-                             GIcon             *icon,
-                             gint               size)
-{
-  return load_gicon_with_colors (cache, icon, size, theme_node ? mx_st_theme_node_get_icon_colors (theme_node) : NULL);
-}
-
 typedef struct {
   gchar *path;
   gint   grid_width, grid_height;
@@ -1367,128 +982,6 @@ mx_st_texture_cache_load_sliced_image (MxStTextureCache    *cache,
   g_object_unref (result);
 
   return group;
-}
-
-/* generates names like g_themed_icon_new_with_default_fallbacks(),
- * but *only* symbolic names
- */
-static char **
-symbolic_names_for_icon (const char *name)
-{
-  char **parts, **names;
-  int i, numnames;
-
-  parts = g_strsplit (name, "-", -1);
-  numnames = g_strv_length (parts);
-  names = g_new (char *, numnames + 1);
-  for (i = 0; parts[i]; i++)
-    {
-      if (i == 0)
-        {
-          names[i] = g_strdup_printf ("%s-symbolic", parts[i]);
-        }
-      else
-        {
-          names[i] = g_strdup_printf ("%.*s-%s-symbolic",
-                                      (int) (strlen (names[i - 1]) - strlen ("-symbolic")),
-                                      names[i - 1], parts[i]);
-        }
-    }
-  names[i] = NULL;
-
-  g_strfreev (parts);
-
-  /* need to reverse here, because longest (most specific)
-     name has to come first */
-  for (i = 0; i < (numnames / 2); i++) {
-    char *tmp = names[i];
-    names[i] = names[numnames - i - 1];
-    names[numnames - i - 1] = tmp;
-  }
-
-  return names;
-}
-
-/**
- * mx_st_texture_cache_load_icon_name:
- * @cache: The texture cache instance
- * @theme_node: (allow-none): a #MxStThemeNode
- * @name: Name of a themed icon
- * @icon_type: the type of icon to load
- * @size: Size of themed
- *
- * Load a themed icon into a texture. See the #MxStIconType documentation
- * for an explanation of how @icon_type affects the returned icon. The
- * colors used for symbolic icons are derived from @theme_node.
- *
- * Return Value: (transfer none): A new #ClutterTexture for the icon
- */
-ClutterActor *
-mx_st_texture_cache_load_icon_name (MxStTextureCache    *cache,
-                                 MxStThemeNode       *theme_node,
-                                 const char        *name,
-                                 MxStIconType         icon_type,
-                                 gint               size)
-{
-  ClutterActor *texture;
-  GIcon *themed;
-  char **names;
-
-  g_return_val_if_fail (!(icon_type == MX_ICON_SYMBOLIC && theme_node == NULL), NULL);
-
-  switch (icon_type)
-    {
-    case MX_ICON_APPLICATION:
-      themed = g_themed_icon_new (name);
-      texture = load_gicon_with_colors (cache, themed, size, NULL);
-      g_object_unref (themed);
-      if (texture == NULL)
-        {
-          themed = g_themed_icon_new ("application-x-executable");
-          texture = load_gicon_with_colors (cache, themed, size, NULL);
-          g_object_unref (themed);
-        }
-      return CLUTTER_ACTOR (texture);
-      break;
-    case MX_ICON_DOCUMENT:
-      themed = g_themed_icon_new (name);
-      texture = load_gicon_with_colors (cache, themed, size, NULL);
-      g_object_unref (themed);
-      if (texture == NULL)
-        {
-          themed = g_themed_icon_new ("x-office-document");
-          texture = load_gicon_with_colors (cache, themed, size, NULL);
-          g_object_unref (themed);
-        }
-
-      return CLUTTER_ACTOR (texture);
-      break;
-    case MX_ICON_SYMBOLIC:
-      names = symbolic_names_for_icon (name);
-      themed = g_themed_icon_new_from_names (names, -1);
-      g_strfreev (names);
-      texture = load_gicon_with_colors (cache, themed, size,
-                                        mx_st_theme_node_get_icon_colors (theme_node));
-      g_object_unref (themed);
-
-      return CLUTTER_ACTOR (texture);
-      break;
-    case MX_ICON_FULLCOLOR:
-      themed = g_themed_icon_new_with_default_fallbacks (name);
-      texture = load_gicon_with_colors (cache, themed, size, NULL);
-      g_object_unref (themed);
-      if (texture == NULL)
-        {
-          themed = g_themed_icon_new ("image-missing");
-          texture = load_gicon_with_colors (cache, themed, size, NULL);
-          g_object_unref (themed);
-        }
-
-      return CLUTTER_ACTOR (texture);
-      break;
-    default:
-      g_assert_not_reached ();
-    }
 }
 
 /**
@@ -1901,13 +1394,6 @@ mx_st_texture_cache_load_thumbnail (MxStTextureCache    *cache,
   AsyncTextureLoadData *data;
   char *key;
   CoglHandle texdata;
-
-  /* Don't attempt to load thumbnails for non-local URIs */
-  if (!g_str_has_prefix (uri, "file://"))
-    {
-      GIcon *icon = icon_for_mimetype (mimetype);
-      return mx_st_texture_cache_load_gicon (cache, NULL, icon, size);
-    }
 
   texture = create_default_texture (cache);
   clutter_actor_set_size (CLUTTER_ACTOR (texture), size, size);
