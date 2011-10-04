@@ -29,7 +29,7 @@
 #include <mx/mx-types.h>
 #include <mx/st-theme-node.h>
 
-#define MX_TYPE_ST_TEXTURE_CACHE                 (st_texture_cache_get_type ())
+#define MX_TYPE_ST_TEXTURE_CACHE                 (mx_st_texture_cache_get_type ())
 #define MX_ST_TEXTURE_CACHE(obj)                 (G_TYPE_CHECK_INSTANCE_CAST ((obj), MX_TYPE_ST_TEXTURE_CACHE, MxStTextureCache))
 #define MX_ST_TEXTURE_CACHE_CLASS(klass)         (G_TYPE_CHECK_CLASS_CAST ((klass), MX_TYPE_ST_TEXTURE_CACHE, MxStTextureCacheClass))
 #define MX_IS_ST_TEXTURE_CACHE(obj)              (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MX_TYPE_ST_TEXTURE_CACHE))

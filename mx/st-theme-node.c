@@ -220,7 +220,7 @@ mx_st_theme_node_new (MxStThemeContext    *context,
 MxStThemeNode *
 mx_st_theme_node_get_parent (MxStThemeNode *node)
 {
-  g_return_val_if_fail (ST_IS_THEME_NODE (node), NULL);
+  g_return_val_if_fail (MX_IS_ST_THEME_NODE (node), NULL);
 
   return node->parent_node;
 }
@@ -233,10 +233,10 @@ mx_st_theme_node_get_parent (MxStThemeNode *node)
  *
  * Return value: (transfer none): the theme stylesheet set
  */
-StTheme *
+MxStTheme *
 mx_st_theme_node_get_theme (MxStThemeNode *node)
 {
-  g_return_val_if_fail (ST_IS_THEME_NODE (node), NULL);
+  g_return_val_if_fail (MX_IS_ST_THEME_NODE (node), NULL);
 
   return node->theme;
 }
@@ -244,7 +244,7 @@ mx_st_theme_node_get_theme (MxStThemeNode *node)
 GType
 mx_st_theme_node_get_element_type (MxStThemeNode *node)
 {
-  g_return_val_if_fail (ST_IS_THEME_NODE (node), G_TYPE_NONE);
+  g_return_val_if_fail (MX_IS_ST_THEME_NODE (node), G_TYPE_NONE);
 
   return node->element_type;
 }
@@ -252,7 +252,7 @@ mx_st_theme_node_get_element_type (MxStThemeNode *node)
 const char *
 mx_st_theme_node_get_element_id (MxStThemeNode *node)
 {
-  g_return_val_if_fail (ST_IS_THEME_NODE (node), NULL);
+  g_return_val_if_fail (MX_IS_ST_THEME_NODE (node), NULL);
 
   return node->element_id;
 }
@@ -260,7 +260,7 @@ mx_st_theme_node_get_element_id (MxStThemeNode *node)
 const char *
 mx_st_theme_node_get_element_class (MxStThemeNode *node)
 {
-  g_return_val_if_fail (ST_IS_THEME_NODE (node), NULL);
+  g_return_val_if_fail (MX_IS_ST_THEME_NODE (node), NULL);
 
   return node->element_class;
 }
@@ -268,7 +268,7 @@ mx_st_theme_node_get_element_class (MxStThemeNode *node)
 const char *
 mx_st_theme_node_get_pseudo_class (MxStThemeNode *node)
 {
-  g_return_val_if_fail (ST_IS_THEME_NODE (node), NULL);
+  g_return_val_if_fail (MX_IS_ST_THEME_NODE (node), NULL);
 
   return node->pseudo_class;
 }
@@ -303,8 +303,8 @@ mx_st_theme_node_get_pseudo_class (MxStThemeNode *node)
 gboolean
 mx_st_theme_node_equal (MxStThemeNode *node_a, MxStThemeNode *node_b)
 {
-  g_return_val_if_fail (ST_IS_THEME_NODE (node_a), FALSE);
-  g_return_val_if_fail (ST_IS_THEME_NODE (node_b), FALSE);
+  g_return_val_if_fail (MX_IS_ST_THEME_NODE (node_a), FALSE);
+  g_return_val_if_fail (MX_IS_ST_THEME_NODE (node_b), FALSE);
 
   return node_a->parent_node == node_b->parent_node &&
          node_a->context == node_b->context &&
@@ -1441,7 +1441,7 @@ int
 mx_st_theme_node_get_border_width (MxStThemeNode *node,
                                 StSide       side)
 {
-  g_return_val_if_fail (ST_IS_THEME_NODE (node), 0.);
+  g_return_val_if_fail (MX_IS_ST_THEME_NODE (node), 0.);
   g_return_val_if_fail (side >= ST_SIDE_TOP && side <= ST_SIDE_LEFT, 0.);
 
   _mx_st_theme_node_ensure_geometry (node);
@@ -1453,7 +1453,7 @@ int
 mx_st_theme_node_get_border_radius (MxStThemeNode *node,
                                  StCorner     corner)
 {
-  g_return_val_if_fail (ST_IS_THEME_NODE (node), 0.);
+  g_return_val_if_fail (MX_IS_ST_THEME_NODE (node), 0.);
   g_return_val_if_fail (corner >= ST_CORNER_TOPLEFT && corner <= ST_CORNER_BOTTOMLEFT, 0.);
 
   _mx_st_theme_node_ensure_geometry (node);
@@ -1464,7 +1464,7 @@ mx_st_theme_node_get_border_radius (MxStThemeNode *node,
 int
 mx_st_theme_node_get_outline_width (MxStThemeNode  *node)
 {
-  g_return_val_if_fail (ST_IS_THEME_NODE (node), 0);
+  g_return_val_if_fail (MX_IS_ST_THEME_NODE (node), 0);
 
   _mx_st_theme_node_ensure_geometry (node);
 
@@ -1482,7 +1482,7 @@ void
 mx_st_theme_node_get_outline_color (MxStThemeNode  *node,
                                  ClutterColor *color)
 {
-  g_return_if_fail (ST_IS_THEME_NODE (node));
+  g_return_if_fail (MX_IS_ST_THEME_NODE (node));
 
   _mx_st_theme_node_ensure_geometry (node);
 
@@ -1492,7 +1492,7 @@ mx_st_theme_node_get_outline_color (MxStThemeNode  *node,
 int
 mx_st_theme_node_get_width (MxStThemeNode *node)
 {
-  g_return_val_if_fail (ST_IS_THEME_NODE (node), -1);
+  g_return_val_if_fail (MX_IS_ST_THEME_NODE (node), -1);
 
   _mx_st_theme_node_ensure_geometry (node);
   return node->width;
@@ -1501,7 +1501,7 @@ mx_st_theme_node_get_width (MxStThemeNode *node)
 int
 mx_st_theme_node_get_height (MxStThemeNode *node)
 {
-  g_return_val_if_fail (ST_IS_THEME_NODE (node), -1);
+  g_return_val_if_fail (MX_IS_ST_THEME_NODE (node), -1);
 
   _mx_st_theme_node_ensure_geometry (node);
   return node->height;
@@ -1510,7 +1510,7 @@ mx_st_theme_node_get_height (MxStThemeNode *node)
 int
 mx_st_theme_node_get_min_width (MxStThemeNode *node)
 {
-  g_return_val_if_fail (ST_IS_THEME_NODE (node), -1);
+  g_return_val_if_fail (MX_IS_ST_THEME_NODE (node), -1);
 
   _mx_st_theme_node_ensure_geometry (node);
   return node->min_width;
@@ -1519,7 +1519,7 @@ mx_st_theme_node_get_min_width (MxStThemeNode *node)
 int
 mx_st_theme_node_get_min_height (MxStThemeNode *node)
 {
-  g_return_val_if_fail (ST_IS_THEME_NODE (node), -1);
+  g_return_val_if_fail (MX_IS_ST_THEME_NODE (node), -1);
 
   _mx_st_theme_node_ensure_geometry (node);
   return node->min_height;
@@ -1528,7 +1528,7 @@ mx_st_theme_node_get_min_height (MxStThemeNode *node)
 int
 mx_st_theme_node_get_max_width (MxStThemeNode *node)
 {
-  g_return_val_if_fail (ST_IS_THEME_NODE (node), -1);
+  g_return_val_if_fail (MX_IS_ST_THEME_NODE (node), -1);
 
   _mx_st_theme_node_ensure_geometry (node);
   return node->max_width;
@@ -1537,7 +1537,7 @@ mx_st_theme_node_get_max_width (MxStThemeNode *node)
 int
 mx_st_theme_node_get_max_height (MxStThemeNode *node)
 {
-  g_return_val_if_fail (ST_IS_THEME_NODE (node), -1);
+  g_return_val_if_fail (MX_IS_ST_THEME_NODE (node), -1);
 
   _mx_st_theme_node_ensure_geometry (node);
   return node->max_height;
@@ -1751,7 +1751,7 @@ void
 mx_st_theme_node_get_background_color (MxStThemeNode  *node,
                                     ClutterColor *color)
 {
-  g_return_if_fail (ST_IS_THEME_NODE (node));
+  g_return_if_fail (MX_IS_ST_THEME_NODE (node));
 
   _mx_st_theme_node_ensure_background (node);
 
@@ -1761,7 +1761,7 @@ mx_st_theme_node_get_background_color (MxStThemeNode  *node,
 const char *
 mx_st_theme_node_get_background_image (MxStThemeNode *node)
 {
-  g_return_val_if_fail (ST_IS_THEME_NODE (node), NULL);
+  g_return_val_if_fail (MX_IS_ST_THEME_NODE (node), NULL);
 
   _mx_st_theme_node_ensure_background (node);
 
@@ -1779,7 +1779,7 @@ void
 mx_st_theme_node_get_foreground_color (MxStThemeNode  *node,
                                     ClutterColor *color)
 {
-  g_return_if_fail (ST_IS_THEME_NODE (node));
+  g_return_if_fail (MX_IS_ST_THEME_NODE (node));
 
   if (!node->foreground_computed)
     {
@@ -1829,7 +1829,7 @@ mx_st_theme_node_get_background_gradient (MxStThemeNode    *node,
                                        ClutterColor   *start,
                                        ClutterColor   *end)
 {
-  g_return_if_fail (ST_IS_THEME_NODE (node));
+  g_return_if_fail (MX_IS_ST_THEME_NODE (node));
 
   _mx_st_theme_node_ensure_background (node);
 
@@ -1854,7 +1854,7 @@ mx_st_theme_node_get_border_color (MxStThemeNode  *node,
                                 StSide        side,
                                 ClutterColor *color)
 {
-  g_return_if_fail (ST_IS_THEME_NODE (node));
+  g_return_if_fail (MX_IS_ST_THEME_NODE (node));
   g_return_if_fail (side >= ST_SIDE_TOP && side <= ST_SIDE_LEFT);
 
   _mx_st_theme_node_ensure_geometry (node);
@@ -1866,7 +1866,7 @@ double
 mx_st_theme_node_get_padding (MxStThemeNode *node,
                            StSide       side)
 {
-  g_return_val_if_fail (ST_IS_THEME_NODE (node), 0.);
+  g_return_val_if_fail (MX_IS_ST_THEME_NODE (node), 0.);
   g_return_val_if_fail (side >= ST_SIDE_TOP && side <= ST_SIDE_LEFT, 0.);
 
   _mx_st_theme_node_ensure_geometry (node);
@@ -1889,7 +1889,7 @@ mx_st_theme_node_get_transition_duration (MxStThemeNode *node)
 {
   gdouble value = 0.0;
 
-  g_return_val_if_fail (ST_IS_THEME_NODE (node), 0);
+  g_return_val_if_fail (MX_IS_ST_THEME_NODE (node), 0);
 
   if (node->transition_duration > -1)
     return st_slow_down_factor * node->transition_duration;
@@ -3009,7 +3009,7 @@ mx_st_theme_node_get_icon_colors (MxStThemeNode *node)
 
   guint still_need = FOREGROUND | WARNING | ERROR | SUCCESS;
 
-  g_return_val_if_fail (ST_IS_THEME_NODE (node), NULL);
+  g_return_val_if_fail (MX_IS_ST_THEME_NODE (node), NULL);
 
   if (node->icon_colors)
     return node->icon_colors;
@@ -3128,7 +3128,7 @@ void
 mx_st_theme_node_adjust_for_height (MxStThemeNode  *node,
                                  float        *for_height)
 {
-  g_return_if_fail (ST_IS_THEME_NODE (node));
+  g_return_if_fail (MX_IS_ST_THEME_NODE (node));
   g_return_if_fail (for_height != NULL);
 
   if (*for_height >= 0)
@@ -3157,7 +3157,7 @@ mx_st_theme_node_adjust_preferred_width (MxStThemeNode  *node,
 {
   float width_inc;
 
-  g_return_if_fail (ST_IS_THEME_NODE (node));
+  g_return_if_fail (MX_IS_ST_THEME_NODE (node));
 
   _mx_st_theme_node_ensure_geometry (node);
 
@@ -3195,7 +3195,7 @@ void
 mx_st_theme_node_adjust_for_width (MxStThemeNode  *node,
                                 float        *for_width)
 {
-  g_return_if_fail (ST_IS_THEME_NODE (node));
+  g_return_if_fail (MX_IS_ST_THEME_NODE (node));
   g_return_if_fail (for_width != NULL);
 
   if (*for_width >= 0)
@@ -3224,7 +3224,7 @@ mx_st_theme_node_adjust_preferred_height (MxStThemeNode  *node,
 {
   float height_inc;
 
-  g_return_if_fail (ST_IS_THEME_NODE (node));
+  g_return_if_fail (MX_IS_ST_THEME_NODE (node));
 
   _mx_st_theme_node_ensure_geometry (node);
 
@@ -3265,7 +3265,7 @@ mx_st_theme_node_get_content_box (MxStThemeNode           *node,
   double noncontent_left, noncontent_top, noncontent_right, noncontent_bottom;
   double avail_width, avail_height, content_width, content_height;
 
-  g_return_if_fail (ST_IS_THEME_NODE (node));
+  g_return_if_fail (MX_IS_ST_THEME_NODE (node));
 
   _mx_st_theme_node_ensure_geometry (node);
 
@@ -3308,7 +3308,7 @@ mx_st_theme_node_get_background_paint_box (MxStThemeNode           *node,
   StShadow *background_image_shadow;
   ClutterActorBox shadow_box;
 
-  g_return_if_fail (ST_IS_THEME_NODE (node));
+  g_return_if_fail (MX_IS_ST_THEME_NODE (node));
   g_return_if_fail (actor_box != NULL);
   g_return_if_fail (paint_box != NULL);
 
@@ -3347,7 +3347,7 @@ mx_st_theme_node_get_paint_box (MxStThemeNode           *node,
   ClutterActorBox shadow_box;
   int outline_width;
 
-  g_return_if_fail (ST_IS_THEME_NODE (node));
+  g_return_if_fail (MX_IS_ST_THEME_NODE (node));
   g_return_if_fail (actor_box != NULL);
   g_return_if_fail (paint_box != NULL);
 
@@ -3390,8 +3390,8 @@ mx_st_theme_node_geometry_equal (MxStThemeNode *node,
 {
   StSide side;
 
-  g_return_val_if_fail (ST_IS_THEME_NODE (node), FALSE);
-  g_return_val_if_fail (ST_IS_THEME_NODE (other), FALSE);
+  g_return_val_if_fail (MX_IS_ST_THEME_NODE (node), FALSE);
+  g_return_val_if_fail (MX_IS_ST_THEME_NODE (other), FALSE);
 
   _mx_st_theme_node_ensure_geometry (node);
   _mx_st_theme_node_ensure_geometry (other);
@@ -3434,8 +3434,8 @@ mx_st_theme_node_paint_equal (MxStThemeNode *node,
   StShadow *shadow, *other_shadow;
   int i;
 
-  g_return_val_if_fail (ST_IS_THEME_NODE (node), FALSE);
-  g_return_val_if_fail (ST_IS_THEME_NODE (other), FALSE);
+  g_return_val_if_fail (MX_IS_ST_THEME_NODE (node), FALSE);
+  g_return_val_if_fail (MX_IS_ST_THEME_NODE (other), FALSE);
 
   _mx_st_theme_node_ensure_background (node);
   _mx_st_theme_node_ensure_background (other);

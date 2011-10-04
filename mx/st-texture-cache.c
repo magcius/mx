@@ -327,7 +327,7 @@ icon_lookup_data_destroy (gpointer p)
   if (data->mimetype)
     g_free (data->mimetype);
   if (data->colors)
-    mx_st_icon_colors_unref (data->colors);
+    st_icon_colors_unref (data->colors);
 
   g_free (data);
 }
@@ -659,7 +659,7 @@ load_icon_pixbuf_async (MxStTextureCache       *cache,
   data->icon_info = gtk_icon_info_copy (icon_info);
   data->width = data->height = size;
   if (colors)
-    data->colors = mx_st_icon_colors_ref (colors);
+    data->colors = st_icon_colors_ref (colors);
   else
     data->colors = NULL;
   data->user_data = user_data;
@@ -1220,7 +1220,7 @@ load_gicon_with_colors (MxStTextureCache    *cache,
  */
 ClutterActor *
 mx_st_texture_cache_load_gicon (MxStTextureCache    *cache,
-                             StThemeNode       *theme_node,
+                             MxStThemeNode       *theme_node,
                              GIcon             *icon,
                              gint               size)
 {
@@ -1412,7 +1412,7 @@ symbolic_names_for_icon (const char *name)
 /**
  * mx_st_texture_cache_load_icon_name:
  * @cache: The texture cache instance
- * @theme_node: (allow-none): a #StThemeNode
+ * @theme_node: (allow-none): a #MxStThemeNode
  * @name: Name of a themed icon
  * @icon_type: the type of icon to load
  * @size: Size of themed
@@ -1425,7 +1425,7 @@ symbolic_names_for_icon (const char *name)
  */
 ClutterActor *
 mx_st_texture_cache_load_icon_name (MxStTextureCache    *cache,
-                                 StThemeNode       *theme_node,
+                                 MxStThemeNode       *theme_node,
                                  const char        *name,
                                  MxStIconType         icon_type,
                                  gint               size)
@@ -1522,7 +1522,7 @@ mx_st_texture_cache_load_uri_async (MxStTextureCache *cache,
   data->uri = g_strdup (uri);
   data->width = available_width;
   data->height = available_height;
-  data->textures = g_slimx_st_prepend (data->textures, g_object_ref (texture));
+  data->textures = g_slist_prepend (data->textures, g_object_ref (texture));
   load_uri_pixbuf_async (cache, uri, available_width, available_height, NULL, on_pixbuf_loaded, data);
 
   return CLUTTER_ACTOR (texture);
@@ -1926,7 +1926,7 @@ mx_st_texture_cache_load_thumbnail (MxStTextureCache    *cache,
       data->width = size;
       data->height = size;
       data->enforced_square = TRUE;
-      data->textures = g_slimx_st_prepend (data->textures, g_object_ref (texture));
+      data->textures = g_slist_prepend (data->textures, g_object_ref (texture));
       load_thumbnail_async (cache, uri, mimetype, size, NULL, on_pixbuf_loaded, data);
     }
   else
@@ -1978,6 +1978,6 @@ MxStTextureCache*
 mx_st_texture_cache_get_default (void)
 {
   if (instance == NULL)
-    instance = g_object_new (MX_ST_TYPE_TEXTURE_CACHE, NULL);
+    instance = g_object_new (MX_TYPE_ST_TEXTURE_CACHE, NULL);
   return instance;
 }
