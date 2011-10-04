@@ -121,7 +121,7 @@ static GParamSpec *widget_properties[LAST_PROP];
 enum
 {
   LONG_PRESS,
-  STYLE_CHANGED,
+  ST_STYLE_CHANGED,
 
   LAST_SIGNAL
 };
@@ -1250,14 +1250,14 @@ mx_widget_class_init (MxWidgetClass *klass)
 
 
   /**
-   * MxWidget::style-changed:
+   * MxWidget::st-style-changed:
    * @widget: the #MxWidget
    *
    * Emitted when the style information that the widget derives from the
    * theme changes
    */
-  widget_signals[STYLE_CHANGED] =
-    g_signal_new ("style-changed",
+  widget_signals[ST_STYLE_CHANGED] =
+    g_signal_new ("st-style-changed",
                   G_TYPE_FROM_CLASS (klass),
                   G_SIGNAL_RUN_LAST,
                   G_STRUCT_OFFSET (MxWidgetClass, style_changed),
@@ -1925,7 +1925,7 @@ mx_widget_recompute_style (MxWidget    *widget,
   if (paint_equal)
     mx_st_theme_node_copy_cached_paint_state (new_theme_node, old_theme_node);
 
-  g_signal_emit (widget, widget_signals[STYLE_CHANGED], 0);
+  g_signal_emit (widget, widget_signals[ST_STYLE_CHANGED], 0);
   widget->priv->is_style_dirty = FALSE;
 }
 
