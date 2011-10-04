@@ -97,7 +97,6 @@ source_h = \
 	$(top_srcdir)/mx/st-theme.h		\
 	$(top_srcdir)/mx/st-theme-context.h	\
 	$(top_srcdir)/mx/st-theme-node.h	\
-	$(top_srcdir)/mx/st-theme-node.h	\
 	$(top_srcdir)/mx/st-border-image.h	\
 	$(top_srcdir)/mx/st-shadow.h	\
 	$(top_srcdir)/mx/st-texture-cache.h	\

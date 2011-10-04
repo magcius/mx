@@ -22,17 +22,12 @@
 #ifndef __ST_TEXTURE_CACHE_H__
 #define __ST_TEXTURE_CACHE_H__
 
-#if !defined(ST_H_INSIDE) && !defined(ST_COMPILATION)
-#error "Only <st/st.h> can be included directly.h"
-#endif
-
 #include <gio/gio.h>
-#include <gtk/gtk.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <clutter/clutter.h>
 
-#include <st/st-types.h>
-#include <st/st-theme-node.h>
+#include <mx/mx-types.h>
+#include <mx/st-theme-node.h>
 
 #define ST_TYPE_TEXTURE_CACHE                 (st_texture_cache_get_type ())
 #define ST_TEXTURE_CACHE(obj)                 (G_TYPE_CHECK_INSTANCE_CAST ((obj), ST_TYPE_TEXTURE_CACHE, StTextureCache))
@@ -93,16 +88,6 @@ ClutterActor *st_texture_cache_load_thumbnail (StTextureCache *cache,
                                                int             size,
                                                const char     *uri,
                                                const char     *mimetype);
-
-ClutterActor *st_texture_cache_load_recent_thumbnail (StTextureCache    *cache,
-                                                      int                size,
-                                                      GtkRecentInfo     *info);
-
-void st_texture_cache_evict_thumbnail (StTextureCache *cache,
-                                       const char     *uri);
-
-void st_texture_cache_evict_recent_thumbnail (StTextureCache *cache,
-                                              GtkRecentInfo  *info);
 
 ClutterActor *st_texture_cache_load_uri_async (StTextureCache    *cache,
                                                const gchar       *uri,
