@@ -40,8 +40,6 @@ static const ClutterColor DEFAULT_SUCCESS_COLOR = { 0x4e, 0x9a, 0x06, 0xff };
 static const ClutterColor DEFAULT_WARNING_COLOR = { 0xf5, 0x79, 0x3e, 0xff };
 static const ClutterColor DEFAULT_ERROR_COLOR = { 0xcc, 0x00, 0x00, 0xff };
 
-extern gfloat st_slow_down_factor;
-
 G_DEFINE_TYPE (MxStThemeNode, mx_st_theme_node, G_TYPE_OBJECT)
 
 static void
@@ -1892,13 +1890,13 @@ mx_st_theme_node_get_transition_duration (MxStThemeNode *node)
   g_return_val_if_fail (MX_IS_ST_THEME_NODE (node), 0);
 
   if (node->transition_duration > -1)
-    return st_slow_down_factor * node->transition_duration;
+    return node->transition_duration;
 
   mx_st_theme_node_lookup_double (node, "transition-duration", FALSE, &value);
 
   node->transition_duration = (int)value;
 
-  return st_slow_down_factor * node->transition_duration;
+  return node->transition_duration;
 }
 
 StTextDecoration
