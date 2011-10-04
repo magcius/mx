@@ -130,7 +130,7 @@ _st_actor_get_preferred_height (ClutterActor *actor,
  * Clutter methods.
  */
 void
-_st_allocate_fill (StWidget        *parent,
+_st_allocate_fill (MxWidget        *parent,
                    ClutterActor    *child,
                    ClutterActorBox *childbox,
                    StAlign          x_alignment,
@@ -230,7 +230,7 @@ _st_allocate_fill (StWidget        *parent,
  * relative to @x_align.
  */
 void
-_st_get_align_factors (StWidget *widget,
+_st_get_align_factors (MxWidget *widget,
                        StAlign   x_align,
                        StAlign   y_align,
                        gdouble  *x_align_out,
@@ -257,8 +257,8 @@ _st_get_align_factors (StWidget *widget,
           break;
         }
 
-      if (st_widget_get_direction (widget) == ST_TEXT_DIRECTION_RTL)
-        *x_align_out = 1.0 - *x_align_out;
+      /* if (st_widget_get_direction (widget) == ST_TEXT_DIRECTION_RTL) */
+      /*   *x_align_out = 1.0 - *x_align_out; */
     }
 
   if (y_align_out)
