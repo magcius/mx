@@ -23,16 +23,11 @@
  */
 
 
-#if !defined(ST_H_INSIDE) && !defined(ST_COMPILATION)
-#error "Only <st/st.h> can be included directly.h"
-#endif
-
 #ifndef __ST_TYPES_H__
 #define __ST_TYPES_H__
 
 #include <glib-object.h>
 #include <clutter/clutter.h>
-#include <gtk/gtk.h>
 
 G_BEGIN_DECLS
 

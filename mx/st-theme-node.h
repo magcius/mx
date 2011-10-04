@@ -26,6 +26,7 @@
 #include <clutter/clutter.h>
 #include "st-border-image.h"
 #include "st-shadow.h"
+#include "st-types.h"
 
 G_BEGIN_DECLS
 

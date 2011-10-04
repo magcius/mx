@@ -100,6 +100,7 @@ source_h = \
 	$(top_srcdir)/mx/st-border-image.h	\
 	$(top_srcdir)/mx/st-shadow.h	\
 	$(top_srcdir)/mx/st-texture-cache.h	\
+	$(top_srcdir)/mx/st-private.h	\
 	$(NULL)
 
 source_h_priv = \
@@ -184,6 +185,7 @@ source_c = \
 	$(top_srcdir)/mx/st-border-image.c	\
 	$(top_srcdir)/mx/st-shadow.c	\
 	$(top_srcdir)/mx/st-texture-cache.c	\
+	$(top_srcdir)/mx/st-private.c \
 	$(NULL)
 
 EXTRA_DIST = \
