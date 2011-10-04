@@ -171,9 +171,9 @@ mx_st_theme_node_finalize (GObject *object)
  * Return value: (transfer full): the theme node
  */
 MxStThemeNode *
-mx_st_theme_node_new (StThemeContext    *context,
+mx_st_theme_node_new (MxStThemeContext    *context,
                    MxStThemeNode       *parent_node,
-                   StTheme           *theme,
+                   MxStTheme           *theme,
                    GType              element_type,
                    const char        *element_id,
                    const char        *element_class,
@@ -182,10 +182,10 @@ mx_st_theme_node_new (StThemeContext    *context,
 {
   MxStThemeNode *node;
 
-  g_return_val_if_fail (ST_IS_THEME_CONTEXT (context), NULL);
-  g_return_val_if_fail (parent_node == NULL || ST_IS_THEME_NODE (parent_node), NULL);
+  g_return_val_if_fail (MX_IS_ST_THEME_CONTEXT (context), NULL);
+  g_return_val_if_fail (parent_node == NULL || MX_IS_ST_THEME_NODE (parent_node), NULL);
 
-  node = g_object_new (ST_TYPE_THEME_NODE, NULL);
+  node = g_object_new (MX_TYPE_ST_THEME_NODE, NULL);
 
   node->context = g_object_ref (context);
   if (parent_node != NULL)

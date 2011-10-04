@@ -41,8 +41,8 @@ typedef struct _MxStThemeClass MxStThemeClass;
 #define MX_TYPE_ST_THEME              (mx_st_theme_get_type ())
 #define MX_ST_THEME(object)           (G_TYPE_CHECK_INSTANCE_CAST ((object), MX_TYPE_ST_THEME, MxStTheme))
 #define MX_ST_THEME_CLASS(klass)      (G_TYPE_CHECK_CLASS_CAST ((klass), MX_TYPE_ST_THEME, MxStThemeClass))
-#define ST_IS_THEME(object)        (G_TYPE_CHECK_INSTANCE_TYPE ((object), MX_TYPE_ST_THEME))
-#define ST_IS_THEME_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), MX_TYPE_ST_THEME))
+#define MX_IS_ST_THEME(object)        (G_TYPE_CHECK_INSTANCE_TYPE ((object), MX_TYPE_ST_THEME))
+#define MX_IS_ST_THEME_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), MX_TYPE_ST_THEME))
 #define MX_ST_THEME_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), MX_TYPE_ST_THEME, MxStThemeClass))
 
 GType  mx_st_theme_get_type (void) G_GNUC_CONST;

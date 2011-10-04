@@ -432,7 +432,7 @@ mx_st_theme_new (const char       *application_stylesheet,
               const char       *theme_stylesheet,
               const char       *default_stylesheet)
 {
-  MxStTheme *theme = g_object_new (ST_TYPE_THEME,
+  MxStTheme *theme = g_object_new (MX_TYPE_ST_THEME,
                                     "application-stylesheet", application_stylesheet,
                                     "theme-stylesheet", theme_stylesheet,
                                     "default-stylesheet", default_stylesheet,
@@ -978,8 +978,8 @@ _mx_st_theme_get_matched_properties (MxStTheme        *theme,
   GPtrArray *props = g_ptr_array_new ();
   GSList *iter;
 
-  g_return_val_if_fail (ST_IS_THEME (theme), NULL);
-  g_return_val_if_fail (ST_IS_THEME_NODE (node), NULL);
+  g_return_val_if_fail (MX_IS_ST_THEME (theme), NULL);
+  g_return_val_if_fail (MX_IS_ST_THEME_NODE (node), NULL);
 
   for (origin = ORIGIN_UA; origin < NB_ORIGINS; origin++)
     {

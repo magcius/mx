@@ -35,6 +35,7 @@
 #include "st-theme-context.h"
 #include "st-texture-cache.h"
 #include "st-theme-node-private.h"
+#include "st-icon-colors.h"
 
 /****
  * Rounded corners
@@ -195,7 +196,7 @@ typedef struct {
 } LoadCornerData;
 
 static CoglHandle
-load_corner (StTextureCache  *cache,
+load_corner (MxStTextureCache  *cache,
              const char      *key,
              void            *datap,
              GError         **error)
@@ -345,7 +346,7 @@ mx_st_theme_node_lookup_corner (MxStThemeNode    *node,
 {
   CoglHandle texture, material;
   char *key;
-  StTextureCache *cache;
+  MxStTextureCache *cache;
   StCornerSpec corner;
   LoadCornerData data;
   guint radius[4];
@@ -353,7 +354,7 @@ mx_st_theme_node_lookup_corner (MxStThemeNode    *node,
   if (node->border_radius[corner_id] == 0)
     return COGL_INVALID_HANDLE;
 
-  cache = st_texture_cache_get_default ();
+  cache = mx_st_texture_cache_get_default ();
 
   mx_st_theme_node_reduce_border_radius (node, radius);
   corner.radius = radius[corner_id];
@@ -391,7 +392,7 @@ mx_st_theme_node_lookup_corner (MxStThemeNode    *node,
 
   data.node = node;
   data.corner = &corner;
-  texture = st_texture_cache_load (cache, key, ST_TEXTURE_CACHE_POLICY_NONE, load_corner, &data, NULL);
+  texture = mx_st_texture_cache_load (cache, key, MX_ST_TEXTURE_CACHE_POLICY_NONE, load_corner, &data, NULL);
   material = _st_create_texture_material (texture);
   cogl_handle_unref (texture);
 
@@ -547,13 +548,13 @@ create_cairo_pattern_of_background_image (MxStThemeNode *node,
   int file_width;
   int file_height;
 
-  StTextureCache *texture_cache;
+  MxStTextureCache *texture_cache;
 
   file = mx_st_theme_node_get_background_image (node);
 
-  texture_cache = st_texture_cache_get_default ();
+  texture_cache = mx_st_texture_cache_get_default ();
 
-  surface = st_texture_cache_load_file_to_cairo_surface (texture_cache, file);
+  surface = mx_st_texture_cache_load_file_to_cairo_surface (texture_cache, file);
 
   if (surface == NULL)
     return NULL;
@@ -1314,7 +1315,7 @@ mx_st_theme_node_render_resources (MxStThemeNode   *node,
                                 float          width,
                                 float          height)
 {
-  StTextureCache *texture_cache;
+  MxStTextureCache *texture_cache;
   StBorderImage *border_image;
   gboolean has_border;
   gboolean has_border_radius;
@@ -1324,7 +1325,7 @@ mx_st_theme_node_render_resources (MxStThemeNode   *node,
   StShadow *background_image_shadow_spec;
   const char *background_image;
 
-  texture_cache = st_texture_cache_get_default ();
+  texture_cache = mx_st_texture_cache_get_default ();
 
   /* FIXME - need to separate this into things that need to be recomputed on
    * geometry change versus things that can be cached regardless, such as
@@ -1388,7 +1389,7 @@ mx_st_theme_node_render_resources (MxStThemeNode   *node,
 
       filename = st_border_image_get_filename (border_image);
 
-      node->border_slices_texture = st_texture_cache_load_file_to_cogl_texture (texture_cache, filename);
+      node->border_slices_texture = mx_st_texture_cache_load_file_to_cogl_texture (texture_cache, filename);
     }
 
   if (node->border_slices_texture)
@@ -1456,7 +1457,7 @@ mx_st_theme_node_render_resources (MxStThemeNode   *node,
     {
       CoglHandle texture;
 
-      texture = st_texture_cache_load_file_to_cogl_texture (texture_cache, background_image);
+      texture = mx_st_texture_cache_load_file_to_cogl_texture (texture_cache, background_image);
 
       /* If no background position is specified, then we will automatically scale
        * the background to fit within the node allocation. But, if a background
@@ -2057,8 +2058,8 @@ mx_st_theme_node_copy_cached_paint_state (MxStThemeNode *node,
 {
   int corner_id;
 
-  g_return_if_fail (ST_IS_THEME_NODE (node));
-  g_return_if_fail (ST_IS_THEME_NODE (other));
+  g_return_if_fail (MX_IS_ST_THEME_NODE (node));
+  g_return_if_fail (MX_IS_ST_THEME_NODE (other));
 
   /* Check omitted for speed: */
   /* g_return_if_fail (mx_st_theme_node_paint_equal (node, other)); */
