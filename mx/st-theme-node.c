@@ -29,10 +29,10 @@
 #include "st-theme-context.h"
 #include "st-theme-node-private.h"
 
-static void st_theme_node_init               (StThemeNode          *node);
-static void st_theme_node_class_init         (StThemeNodeClass     *klass);
-static void st_theme_node_dispose           (GObject                 *object);
-static void st_theme_node_finalize           (GObject                 *object);
+static void mx_st_theme_node_init               (MxStThemeNode          *node);
+static void mx_st_theme_node_class_init         (MxStThemeNodeClass     *klass);
+static void mx_st_theme_node_dispose           (GObject                 *object);
+static void mx_st_theme_node_finalize           (GObject                 *object);
 
 static const ClutterColor BLACK_COLOR = { 0, 0, 0, 0xff };
 static const ClutterColor TRANSPARENT_COLOR = { 0, 0, 0, 0 };
@@ -42,29 +42,29 @@ static const ClutterColor DEFAULT_ERROR_COLOR = { 0xcc, 0x00, 0x00, 0xff };
 
 extern gfloat st_slow_down_factor;
 
-G_DEFINE_TYPE (StThemeNode, st_theme_node, G_TYPE_OBJECT)
+G_DEFINE_TYPE (MxStThemeNode, mx_st_theme_node, G_TYPE_OBJECT)
 
 static void
-st_theme_node_init (StThemeNode *node)
+mx_st_theme_node_init (MxStThemeNode *node)
 {
   node->transition_duration = -1;
-  _st_theme_node_init_drawing_state (node);
+  _mx_st_theme_node_init_drawing_state (node);
 }
 
 static void
-st_theme_node_class_init (StThemeNodeClass *klass)
+mx_st_theme_node_class_init (MxStThemeNodeClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-  object_class->dispose = st_theme_node_dispose;
-  object_class->finalize = st_theme_node_finalize;
+  object_class->dispose = mx_st_theme_node_dispose;
+  object_class->finalize = mx_st_theme_node_finalize;
 }
 
 
 static void
-st_theme_node_dispose (GObject *gobject)
+mx_st_theme_node_dispose (GObject *gobject)
 {
-  StThemeNode *node = ST_THEME_NODE (gobject);
+  MxStThemeNode *node = MX_ST_THEME_NODE (gobject);
 
   if (node->context)
     {
@@ -90,13 +90,13 @@ st_theme_node_dispose (GObject *gobject)
       node->border_image = NULL;
     }
 
-  G_OBJECT_CLASS (st_theme_node_parent_class)->dispose (gobject);
+  G_OBJECT_CLASS (mx_st_theme_node_parent_class)->dispose (gobject);
 }
 
 static void
-st_theme_node_finalize (GObject *object)
+mx_st_theme_node_finalize (GObject *object)
 {
-  StThemeNode *node = ST_THEME_NODE (object);
+  MxStThemeNode *node = MX_ST_THEME_NODE (object);
 
   g_free (node->element_id);
   g_free (node->element_class);
@@ -143,13 +143,13 @@ st_theme_node_finalize (GObject *object)
   if (node->background_image)
     g_free (node->background_image);
 
-  _st_theme_node_free_drawing_state (node);
+  _mx_st_theme_node_free_drawing_state (node);
 
-  G_OBJECT_CLASS (st_theme_node_parent_class)->finalize (object);
+  G_OBJECT_CLASS (mx_st_theme_node_parent_class)->finalize (object);
 }
 
 /**
- * st_theme_node_new:
+ * mx_st_theme_node_new:
  * @context: the context representing global state for this themed tree
  * @parent_node: (allow-none): the parent node of this node
  * @theme: (allow-none): a theme (stylesheet set) that overrides the
@@ -164,15 +164,15 @@ st_theme_node_finalize (GObject *object)
  * @pseudo_class: (allow-none): a whitespace-separated list of pseudo-classes
  *   (like 'hover' or 'visited') to match CSS rules against
  *
- * Creates a new #StThemeNode. Once created, a node is immutable. Of any
+ * Creates a new #MxStThemeNode. Once created, a node is immutable. Of any
  * of the attributes of the node (like the @element_class) change the node
  * and its child nodes must be destroyed and recreated.
  *
  * Return value: (transfer full): the theme node
  */
-StThemeNode *
-st_theme_node_new (StThemeContext    *context,
-                   StThemeNode       *parent_node,
+MxStThemeNode *
+mx_st_theme_node_new (StThemeContext    *context,
+                   MxStThemeNode       *parent_node,
                    StTheme           *theme,
                    GType              element_type,
                    const char        *element_id,
@@ -180,7 +180,7 @@ st_theme_node_new (StThemeContext    *context,
                    const char        *pseudo_class,
                    const char        *inline_style)
 {
-  StThemeNode *node;
+  MxStThemeNode *node;
 
   g_return_val_if_fail (ST_IS_THEME_CONTEXT (context), NULL);
   g_return_val_if_fail (parent_node == NULL || ST_IS_THEME_NODE (parent_node), NULL);
@@ -209,16 +209,16 @@ st_theme_node_new (StThemeContext    *context,
 }
 
 /**
- * st_theme_node_get_parent:
- * @node: a #StThemeNode
+ * mx_st_theme_node_get_parent:
+ * @node: a #MxStThemeNode
  *
  * Gets the parent themed element node.
  *
- * Return value: (transfer none): the parent #StThemeNode, or %NULL if this
+ * Return value: (transfer none): the parent #MxStThemeNode, or %NULL if this
  *  is the root node of the tree of theme elements.
  */
-StThemeNode *
-st_theme_node_get_parent (StThemeNode *node)
+MxStThemeNode *
+mx_st_theme_node_get_parent (MxStThemeNode *node)
 {
   g_return_val_if_fail (ST_IS_THEME_NODE (node), NULL);
 
@@ -226,15 +226,15 @@ st_theme_node_get_parent (StThemeNode *node)
 }
 
 /**
- * st_theme_node_get_theme:
- * @node: a #StThemeNode
+ * mx_st_theme_node_get_theme:
+ * @node: a #MxStThemeNode
  *
  * Gets the theme stylesheet set that styles this node
  *
  * Return value: (transfer none): the theme stylesheet set
  */
 StTheme *
-st_theme_node_get_theme (StThemeNode *node)
+mx_st_theme_node_get_theme (MxStThemeNode *node)
 {
   g_return_val_if_fail (ST_IS_THEME_NODE (node), NULL);
 
@@ -242,7 +242,7 @@ st_theme_node_get_theme (StThemeNode *node)
 }
 
 GType
-st_theme_node_get_element_type (StThemeNode *node)
+mx_st_theme_node_get_element_type (MxStThemeNode *node)
 {
   g_return_val_if_fail (ST_IS_THEME_NODE (node), G_TYPE_NONE);
 
@@ -250,7 +250,7 @@ st_theme_node_get_element_type (StThemeNode *node)
 }
 
 const char *
-st_theme_node_get_element_id (StThemeNode *node)
+mx_st_theme_node_get_element_id (MxStThemeNode *node)
 {
   g_return_val_if_fail (ST_IS_THEME_NODE (node), NULL);
 
@@ -258,7 +258,7 @@ st_theme_node_get_element_id (StThemeNode *node)
 }
 
 const char *
-st_theme_node_get_element_class (StThemeNode *node)
+mx_st_theme_node_get_element_class (MxStThemeNode *node)
 {
   g_return_val_if_fail (ST_IS_THEME_NODE (node), NULL);
 
@@ -266,7 +266,7 @@ st_theme_node_get_element_class (StThemeNode *node)
 }
 
 const char *
-st_theme_node_get_pseudo_class (StThemeNode *node)
+mx_st_theme_node_get_pseudo_class (MxStThemeNode *node)
 {
   g_return_val_if_fail (ST_IS_THEME_NODE (node), NULL);
 
@@ -274,11 +274,11 @@ st_theme_node_get_pseudo_class (StThemeNode *node)
 }
 
 /**
- * st_theme_node_equal:
- * @node_a: first #StThemeNode
- * @node_b: second #StThemeNode
+ * mx_st_theme_node_equal:
+ * @node_a: first #MxStThemeNode
+ * @node_b: second #MxStThemeNode
  *
- * Compare two #StThemeNodes. Two nodes which compare equal will match
+ * Compare two #MxStThemeNodes. Two nodes which compare equal will match
  * the same CSS rules and have the same style properties. However, two
  * nodes that have ended up with identical style properties do not
  * necessarily compare equal.
@@ -301,7 +301,7 @@ st_theme_node_get_pseudo_class (StThemeNode *node)
  * Returns: %TRUE if @node_a equals @node_b
  */
 gboolean
-st_theme_node_equal (StThemeNode *node_a, StThemeNode *node_b)
+mx_st_theme_node_equal (MxStThemeNode *node_a, MxStThemeNode *node_b)
 {
   g_return_val_if_fail (ST_IS_THEME_NODE (node_a), FALSE);
   g_return_val_if_fail (ST_IS_THEME_NODE (node_b), FALSE);
@@ -317,7 +317,7 @@ st_theme_node_equal (StThemeNode *node_a, StThemeNode *node_b)
 }
 
 static void
-ensure_properties (StThemeNode *node)
+ensure_properties (MxStThemeNode *node)
 {
   if (!node->properties_computed)
     {
@@ -465,7 +465,7 @@ get_color_from_rgba_term (CRTerm       *term,
 }
 
 static GetFromTermResult
-get_color_from_term (StThemeNode  *node,
+get_color_from_term (MxStThemeNode  *node,
                      CRTerm       *term,
                      ClutterColor *color)
 {
@@ -512,8 +512,8 @@ get_color_from_term (StThemeNode  *node,
 }
 
 /**
- * st_theme_node_lookup_color:
- * @node: a #StThemeNode
+ * mx_st_theme_node_lookup_color:
+ * @node: a #MxStThemeNode
  * @property_name: The name of the color property
  * @inherit: if %TRUE, if a value is not found for the property on the
  *   node, then it will be looked up on the parent node, and then on the
@@ -525,17 +525,17 @@ get_color_from_term (StThemeNode  *node,
  *   will not be changed.
  *
  * Generically looks up a property containing a single color value. When
- * specific getters (like st_theme_node_get_background_color()) exist, they
+ * specific getters (like mx_st_theme_node_get_background_color()) exist, they
  * should be used instead. They are cached, so more efficient, and have
  * handling for shortcut properties and other details of CSS.
  *
- * See also st_theme_node_get_color(), which provides a simpler API.
+ * See also mx_st_theme_node_get_color(), which provides a simpler API.
  *
  * Return value: %TRUE if the property was found in the properties for this
  *  theme node (or in the properties of parent nodes when inheriting.)
  */
 gboolean
-st_theme_node_lookup_color (StThemeNode  *node,
+mx_st_theme_node_lookup_color (MxStThemeNode  *node,
                             const char   *property_name,
                             gboolean      inherit,
                             ClutterColor *color)
@@ -559,7 +559,7 @@ st_theme_node_lookup_color (StThemeNode  *node,
           else if (result == VALUE_INHERIT)
             {
               if (node->parent_node)
-                return st_theme_node_lookup_color (node->parent_node, property_name, inherit, color);
+                return mx_st_theme_node_lookup_color (node->parent_node, property_name, inherit, color);
               else
                 break;
             }
@@ -567,36 +567,36 @@ st_theme_node_lookup_color (StThemeNode  *node,
     }
 
   if (inherit && node->parent_node)
-    return st_theme_node_lookup_color (node->parent_node, property_name, inherit, color);
+    return mx_st_theme_node_lookup_color (node->parent_node, property_name, inherit, color);
 
   return FALSE;
 }
 
 /**
- * st_theme_node_get_color:
- * @node: a #StThemeNode
+ * mx_st_theme_node_get_color:
+ * @node: a #MxStThemeNode
  * @property_name: The name of the color property
  * @color: (out caller-allocates): location to store the color that
  *   was determined.
  *
  * Generically looks up a property containing a single color value. When
- * specific getters (like st_theme_node_get_background_color()) exist, they
+ * specific getters (like mx_st_theme_node_get_background_color()) exist, they
  * should be used instead. They are cached, so more efficient, and have
  * handling for shortcut properties and other details of CSS.
  *
  * If @property_name is not found, a warning will be logged and a
  * default color returned.
  *
- * See also st_theme_node_lookup_color(), which provides more options,
+ * See also mx_st_theme_node_lookup_color(), which provides more options,
  * and lets you handle the case where the theme does not specify the
  * indicated color.
  */
 void
-st_theme_node_get_color (StThemeNode  *node,
+mx_st_theme_node_get_color (MxStThemeNode  *node,
                          const char   *property_name,
                          ClutterColor *color)
 {
-  if (!st_theme_node_lookup_color (node, property_name, FALSE, color))
+  if (!mx_st_theme_node_lookup_color (node, property_name, FALSE, color))
     {
       g_warning ("Did not find color property '%s'", property_name);
       memset (color, 0, sizeof (ClutterColor));
@@ -604,8 +604,8 @@ st_theme_node_get_color (StThemeNode  *node,
 }
 
 /**
- * st_theme_node_lookup_double:
- * @node: a #StThemeNode
+ * mx_st_theme_node_lookup_double:
+ * @node: a #MxStThemeNode
  * @property_name: The name of the numeric property
  * @inherit: if %TRUE, if a value is not found for the property on the
  *   node, then it will be looked up on the parent node, and then on the
@@ -619,13 +619,13 @@ st_theme_node_get_color (StThemeNode  *node,
  * Generically looks up a property containing a single numeric value
  *  without units.
  *
- * See also st_theme_node_get_double(), which provides a simpler API.
+ * See also mx_st_theme_node_get_double(), which provides a simpler API.
  *
  * Return value: %TRUE if the property was found in the properties for this
  *  theme node (or in the properties of parent nodes when inheriting.)
  */
 gboolean
-st_theme_node_lookup_double (StThemeNode *node,
+mx_st_theme_node_lookup_double (MxStThemeNode *node,
                              const char  *property_name,
                              gboolean     inherit,
                              double      *value)
@@ -653,20 +653,20 @@ st_theme_node_lookup_double (StThemeNode *node,
     }
 
   if (!result && inherit && node->parent_node)
-    result = st_theme_node_lookup_double (node->parent_node, property_name, inherit, value);
+    result = mx_st_theme_node_lookup_double (node->parent_node, property_name, inherit, value);
 
   return result;
 }
 
 /**
- * st_theme_node_get_double:
- * @node: a #StThemeNode
+ * mx_st_theme_node_get_double:
+ * @node: a #MxStThemeNode
  * @property_name: The name of the numeric property
  *
  * Generically looks up a property containing a single numeric value
  *  without units.
  *
- * See also st_theme_node_lookup_double(), which provides more options,
+ * See also mx_st_theme_node_lookup_double(), which provides more options,
  * and lets you handle the case where the theme does not specify the
  * indicated value.
  *
@@ -674,12 +674,12 @@ st_theme_node_lookup_double (StThemeNode *node,
  *  found, a warning will be logged and 0 will be returned.
  */
 gdouble
-st_theme_node_get_double (StThemeNode *node,
+mx_st_theme_node_get_double (MxStThemeNode *node,
                           const char  *property_name)
 {
   gdouble value;
 
-  if (st_theme_node_lookup_double (node, property_name, FALSE, &value))
+  if (mx_st_theme_node_lookup_double (node, property_name, FALSE, &value))
     return value;
   else
     {
@@ -689,16 +689,16 @@ st_theme_node_get_double (StThemeNode *node,
 }
 
 static const PangoFontDescription *
-get_parent_font (StThemeNode *node)
+get_parent_font (MxStThemeNode *node)
 {
   if (node->parent_node)
-    return st_theme_node_get_font (node->parent_node);
+    return mx_st_theme_node_get_font (node->parent_node);
   else
     return st_theme_context_get_font (node->context);
 }
 
 static GetFromTermResult
-get_length_from_term (StThemeNode *node,
+get_length_from_term (MxStThemeNode *node,
                       CRTerm      *term,
                       gboolean     use_parent_font,
                       gdouble     *length)
@@ -825,7 +825,7 @@ get_length_from_term (StThemeNode *node,
         if (use_parent_font)
           desc = get_parent_font (node);
         else
-          desc = st_theme_node_get_font (node);
+          desc = mx_st_theme_node_get_font (node);
 
         font_size = (double)pango_font_description_get_size (desc) / PANGO_SCALE;
 
@@ -848,7 +848,7 @@ get_length_from_term (StThemeNode *node,
 }
 
 static GetFromTermResult
-get_length_from_term_int (StThemeNode *node,
+get_length_from_term_int (MxStThemeNode *node,
                           CRTerm      *term,
                           gboolean     use_parent_font,
                           gint        *length)
@@ -863,7 +863,7 @@ get_length_from_term_int (StThemeNode *node,
 }
 
 static GetFromTermResult
-get_length_internal (StThemeNode *node,
+get_length_internal (MxStThemeNode *node,
                      const char  *property_name,
                      const char  *suffixed,
                      gdouble     *length)
@@ -889,8 +889,8 @@ get_length_internal (StThemeNode *node,
 }
 
 /**
- * st_theme_node_lookup_length:
- * @node: a #StThemeNode
+ * mx_st_theme_node_lookup_length:
+ * @node: a #MxStThemeNode
  * @property_name: The name of the length property
  * @inherit: if %TRUE, if a value is not found for the property on the
  *   node, then it will be looked up on the parent node, and then on the
@@ -903,17 +903,17 @@ get_length_internal (StThemeNode *node,
  *   to pixels.
  *
  * Generically looks up a property containing a single length value. When
- * specific getters (like st_theme_node_get_border_width()) exist, they
+ * specific getters (like mx_st_theme_node_get_border_width()) exist, they
  * should be used instead. They are cached, so more efficient, and have
  * handling for shortcut properties and other details of CSS.
  *
- * See also st_theme_node_get_length(), which provides a simpler API.
+ * See also mx_st_theme_node_get_length(), which provides a simpler API.
  *
  * Return value: %TRUE if the property was found in the properties for this
  *  theme node (or in the properties of parent nodes when inheriting.)
  */
 gboolean
-st_theme_node_lookup_length (StThemeNode *node,
+mx_st_theme_node_lookup_length (MxStThemeNode *node,
                              const char  *property_name,
                              gboolean     inherit,
                              gdouble     *length)
@@ -925,44 +925,44 @@ st_theme_node_lookup_length (StThemeNode *node,
     inherit = TRUE;
 
   if (inherit && node->parent_node &&
-      st_theme_node_lookup_length (node->parent_node, property_name, inherit, length))
+      mx_st_theme_node_lookup_length (node->parent_node, property_name, inherit, length))
     return TRUE;
   else
     return FALSE;
 }
 
 /**
- * st_theme_node_get_length:
- * @node: a #StThemeNode
+ * mx_st_theme_node_get_length:
+ * @node: a #MxStThemeNode
  * @property_name: The name of the length property
  *
  * Generically looks up a property containing a single length value. When
- * specific getters (like st_theme_node_get_border_width()) exist, they
+ * specific getters (like mx_st_theme_node_get_border_width()) exist, they
  * should be used instead. They are cached, so more efficient, and have
  * handling for shortcut properties and other details of CSS.
  *
- * Unlike st_theme_node_get_color() and st_theme_node_get_double(),
+ * Unlike mx_st_theme_node_get_color() and mx_st_theme_node_get_double(),
  * this does not print a warning if the property is not found; it just
  * returns 0.
  *
- * See also st_theme_node_lookup_length(), which provides more options.
+ * See also mx_st_theme_node_lookup_length(), which provides more options.
  *
  * Return value: the length, in pixels, or 0 if the property was not found.
  */
 gdouble
-st_theme_node_get_length (StThemeNode *node,
+mx_st_theme_node_get_length (MxStThemeNode *node,
                           const char  *property_name)
 {
   gdouble length;
 
-  if (st_theme_node_lookup_length (node, property_name, FALSE, &length))
+  if (mx_st_theme_node_lookup_length (node, property_name, FALSE, &length))
     return length;
   else
     return 0.0;
 }
 
 static void
-do_border_radius_term (StThemeNode *node,
+do_border_radius_term (MxStThemeNode *node,
                        CRTerm      *term,
                        gboolean     topleft,
                        gboolean     topright,
@@ -985,7 +985,7 @@ do_border_radius_term (StThemeNode *node,
 }
 
 static void
-do_border_radius (StThemeNode   *node,
+do_border_radius (MxStThemeNode   *node,
                   CRDeclaration *decl)
 {
   const char *property_name = decl->property->stryng->str + 13; /* Skip 'border-radius' */
@@ -1044,7 +1044,7 @@ do_border_radius (StThemeNode   *node,
 }
 
 static void
-do_border_property (StThemeNode   *node,
+do_border_property (MxStThemeNode   *node,
                     CRDeclaration *decl)
 {
   const char *property_name = decl->property->stryng->str + 6; /* Skip 'border' */
@@ -1178,7 +1178,7 @@ do_border_property (StThemeNode   *node,
 }
 
 static void
-do_outline_property (StThemeNode   *node,
+do_outline_property (MxStThemeNode   *node,
                      CRDeclaration *decl)
 {
   const char *property_name = decl->property->stryng->str + 7; /* Skip 'outline' */
@@ -1270,7 +1270,7 @@ do_outline_property (StThemeNode   *node,
 }
 
 static void
-do_padding_property_term (StThemeNode *node,
+do_padding_property_term (MxStThemeNode *node,
                           CRTerm      *term,
                           gboolean     left,
                           gboolean     right,
@@ -1293,7 +1293,7 @@ do_padding_property_term (StThemeNode *node,
 }
 
 static void
-do_padding_property (StThemeNode   *node,
+do_padding_property (MxStThemeNode   *node,
                      CRDeclaration *decl)
 {
   const char *property_name = decl->property->stryng->str + 7; /* Skip 'padding' */
@@ -1352,7 +1352,7 @@ do_padding_property (StThemeNode   *node,
 }
 
 static void
-do_size_property (StThemeNode   *node,
+do_size_property (MxStThemeNode   *node,
                   CRDeclaration *decl,
                   int           *node_value)
 {
@@ -1360,7 +1360,7 @@ do_size_property (StThemeNode   *node,
 }
 
 void
-_st_theme_node_ensure_geometry (StThemeNode *node)
+_mx_st_theme_node_ensure_geometry (MxStThemeNode *node)
 {
   int i, j;
 
@@ -1438,113 +1438,113 @@ _st_theme_node_ensure_geometry (StThemeNode *node)
 }
 
 int
-st_theme_node_get_border_width (StThemeNode *node,
+mx_st_theme_node_get_border_width (MxStThemeNode *node,
                                 StSide       side)
 {
   g_return_val_if_fail (ST_IS_THEME_NODE (node), 0.);
   g_return_val_if_fail (side >= ST_SIDE_TOP && side <= ST_SIDE_LEFT, 0.);
 
-  _st_theme_node_ensure_geometry (node);
+  _mx_st_theme_node_ensure_geometry (node);
 
   return node->border_width[side];
 }
 
 int
-st_theme_node_get_border_radius (StThemeNode *node,
+mx_st_theme_node_get_border_radius (MxStThemeNode *node,
                                  StCorner     corner)
 {
   g_return_val_if_fail (ST_IS_THEME_NODE (node), 0.);
   g_return_val_if_fail (corner >= ST_CORNER_TOPLEFT && corner <= ST_CORNER_BOTTOMLEFT, 0.);
 
-  _st_theme_node_ensure_geometry (node);
+  _mx_st_theme_node_ensure_geometry (node);
 
   return node->border_radius[corner];
 }
 
 int
-st_theme_node_get_outline_width (StThemeNode  *node)
+mx_st_theme_node_get_outline_width (MxStThemeNode  *node)
 {
   g_return_val_if_fail (ST_IS_THEME_NODE (node), 0);
 
-  _st_theme_node_ensure_geometry (node);
+  _mx_st_theme_node_ensure_geometry (node);
 
   return node->outline_width;
 }
 
 /**
- * st_theme_node_get_outline_color:
- * @node: a #StThemeNode
+ * mx_st_theme_node_get_outline_color:
+ * @node: a #MxStThemeNode
  * @color: (out caller-allocates): location to store the color
  *
  * Returns the color of @node's outline.
  */
 void
-st_theme_node_get_outline_color (StThemeNode  *node,
+mx_st_theme_node_get_outline_color (MxStThemeNode  *node,
                                  ClutterColor *color)
 {
   g_return_if_fail (ST_IS_THEME_NODE (node));
 
-  _st_theme_node_ensure_geometry (node);
+  _mx_st_theme_node_ensure_geometry (node);
 
   *color = node->outline_color;
 }
 
 int
-st_theme_node_get_width (StThemeNode *node)
+mx_st_theme_node_get_width (MxStThemeNode *node)
 {
   g_return_val_if_fail (ST_IS_THEME_NODE (node), -1);
 
-  _st_theme_node_ensure_geometry (node);
+  _mx_st_theme_node_ensure_geometry (node);
   return node->width;
 }
 
 int
-st_theme_node_get_height (StThemeNode *node)
+mx_st_theme_node_get_height (MxStThemeNode *node)
 {
   g_return_val_if_fail (ST_IS_THEME_NODE (node), -1);
 
-  _st_theme_node_ensure_geometry (node);
+  _mx_st_theme_node_ensure_geometry (node);
   return node->height;
 }
 
 int
-st_theme_node_get_min_width (StThemeNode *node)
+mx_st_theme_node_get_min_width (MxStThemeNode *node)
 {
   g_return_val_if_fail (ST_IS_THEME_NODE (node), -1);
 
-  _st_theme_node_ensure_geometry (node);
+  _mx_st_theme_node_ensure_geometry (node);
   return node->min_width;
 }
 
 int
-st_theme_node_get_min_height (StThemeNode *node)
+mx_st_theme_node_get_min_height (MxStThemeNode *node)
 {
   g_return_val_if_fail (ST_IS_THEME_NODE (node), -1);
 
-  _st_theme_node_ensure_geometry (node);
+  _mx_st_theme_node_ensure_geometry (node);
   return node->min_height;
 }
 
 int
-st_theme_node_get_max_width (StThemeNode *node)
+mx_st_theme_node_get_max_width (MxStThemeNode *node)
 {
   g_return_val_if_fail (ST_IS_THEME_NODE (node), -1);
 
-  _st_theme_node_ensure_geometry (node);
+  _mx_st_theme_node_ensure_geometry (node);
   return node->max_width;
 }
 
 int
-st_theme_node_get_max_height (StThemeNode *node)
+mx_st_theme_node_get_max_height (MxStThemeNode *node)
 {
   g_return_val_if_fail (ST_IS_THEME_NODE (node), -1);
 
-  _st_theme_node_ensure_geometry (node);
+  _mx_st_theme_node_ensure_geometry (node);
   return node->max_height;
 }
 
 static GetFromTermResult
-get_background_color_from_term (StThemeNode  *node,
+get_background_color_from_term (MxStThemeNode  *node,
                                 CRTerm       *term,
                                 ClutterColor *color)
 {
@@ -1562,7 +1562,7 @@ get_background_color_from_term (StThemeNode  *node,
 }
 
 void
-_st_theme_node_ensure_background (StThemeNode *node)
+_mx_st_theme_node_ensure_background (MxStThemeNode *node)
 {
   int i;
 
@@ -1612,8 +1612,8 @@ _st_theme_node_ensure_background (StThemeNode *node)
                 {
                   if (node->parent_node)
                     {
-                      st_theme_node_get_background_color (node->parent_node, &node->background_color);
-                      node->background_image = g_strdup (st_theme_node_get_background_image (node->parent_node));
+                      mx_st_theme_node_get_background_color (node->parent_node, &node->background_color);
+                      node->background_image = g_strdup (mx_st_theme_node_get_background_image (node->parent_node));
                     }
                 }
               else if (term_is_none (term))
@@ -1671,7 +1671,7 @@ _st_theme_node_ensure_background (StThemeNode *node)
           else if (result == VALUE_INHERIT)
             {
               if (node->parent_node)
-                st_theme_node_get_background_color (node->parent_node, &node->background_color);
+                mx_st_theme_node_get_background_color (node->parent_node, &node->background_color);
             }
         }
       else if (strcmp (property_name, "-image") == 0)
@@ -1696,7 +1696,7 @@ _st_theme_node_ensure_background (StThemeNode *node)
           else if (term_is_inherit (decl->value))
             {
               g_free (node->background_image);
-              node->background_image = g_strdup (st_theme_node_get_background_image (node->parent_node));
+              node->background_image = g_strdup (mx_st_theme_node_get_background_image (node->parent_node));
             }
           else if (term_is_none (decl->value))
             {
@@ -1741,42 +1741,42 @@ _st_theme_node_ensure_background (StThemeNode *node)
 }
 
 /**
- * st_theme_node_get_background_color:
- * @node: a #StThemeNode
+ * mx_st_theme_node_get_background_color:
+ * @node: a #MxStThemeNode
  * @color: (out caller-allocates): location to store the color
  *
  * Returns @node's background color.
  */
 void
-st_theme_node_get_background_color (StThemeNode  *node,
+mx_st_theme_node_get_background_color (MxStThemeNode  *node,
                                     ClutterColor *color)
 {
   g_return_if_fail (ST_IS_THEME_NODE (node));
 
-  _st_theme_node_ensure_background (node);
+  _mx_st_theme_node_ensure_background (node);
 
   *color = node->background_color;
 }
 
 const char *
-st_theme_node_get_background_image (StThemeNode *node)
+mx_st_theme_node_get_background_image (MxStThemeNode *node)
 {
   g_return_val_if_fail (ST_IS_THEME_NODE (node), NULL);
 
-  _st_theme_node_ensure_background (node);
+  _mx_st_theme_node_ensure_background (node);
 
   return node->background_image;
 }
 
 /**
- * st_theme_node_get_foreground_color:
- * @node: a #StThemeNode
+ * mx_st_theme_node_get_foreground_color:
+ * @node: a #MxStThemeNode
  * @color: (out caller-allocates): location to store the color
  *
  * Returns @node's foreground color.
  */
 void
-st_theme_node_get_foreground_color (StThemeNode  *node,
+mx_st_theme_node_get_foreground_color (MxStThemeNode  *node,
                                     ClutterColor *color)
 {
   g_return_if_fail (ST_IS_THEME_NODE (node));
@@ -1804,7 +1804,7 @@ st_theme_node_get_foreground_color (StThemeNode  *node,
         }
 
       if (node->parent_node)
-        st_theme_node_get_foreground_color (node->parent_node, &node->foreground_color);
+        mx_st_theme_node_get_foreground_color (node->parent_node, &node->foreground_color);
       else
         node->foreground_color = BLACK_COLOR; /* default to black */
     }
@@ -1815,8 +1815,8 @@ st_theme_node_get_foreground_color (StThemeNode  *node,
 
 
 /**
- * st_theme_node_get_background_gradient:
- * @node: A #StThemeNode
+ * mx_st_theme_node_get_background_gradient:
+ * @node: A #MxStThemeNode
  * @type: (out): Type of gradient
  * @start: (out caller-allocates): Color at start of gradient
  * @end: (out caller-allocates): Color at end of gradient
@@ -1824,14 +1824,14 @@ st_theme_node_get_foreground_color (StThemeNode  *node,
  * The @start and @end arguments will only be set if @type is not #ST_GRADIENT_NONE.
  */
 void
-st_theme_node_get_background_gradient (StThemeNode    *node,
+mx_st_theme_node_get_background_gradient (MxStThemeNode    *node,
                                        StGradientType *type,
                                        ClutterColor   *start,
                                        ClutterColor   *end)
 {
   g_return_if_fail (ST_IS_THEME_NODE (node));
 
-  _st_theme_node_ensure_background (node);
+  _mx_st_theme_node_ensure_background (node);
 
   *type = node->background_gradient_type;
   if (*type != ST_GRADIENT_NONE)
@@ -1842,50 +1842,50 @@ st_theme_node_get_background_gradient (StThemeNode    *node,
 }
 
 /**
- * st_theme_node_get_border_color:
- * @node: a #StThemeNode
+ * mx_st_theme_node_get_border_color:
+ * @node: a #MxStThemeNode
  * @side: a #StSide
  * @color: (out caller-allocates): location to store the color
  *
  * Returns the color of @node's border on @side
  */
 void
-st_theme_node_get_border_color (StThemeNode  *node,
+mx_st_theme_node_get_border_color (MxStThemeNode  *node,
                                 StSide        side,
                                 ClutterColor *color)
 {
   g_return_if_fail (ST_IS_THEME_NODE (node));
   g_return_if_fail (side >= ST_SIDE_TOP && side <= ST_SIDE_LEFT);
 
-  _st_theme_node_ensure_geometry (node);
+  _mx_st_theme_node_ensure_geometry (node);
 
   *color = node->border_color[side];
 }
 
 double
-st_theme_node_get_padding (StThemeNode *node,
+mx_st_theme_node_get_padding (MxStThemeNode *node,
                            StSide       side)
 {
   g_return_val_if_fail (ST_IS_THEME_NODE (node), 0.);
   g_return_val_if_fail (side >= ST_SIDE_TOP && side <= ST_SIDE_LEFT, 0.);
 
-  _st_theme_node_ensure_geometry (node);
+  _mx_st_theme_node_ensure_geometry (node);
 
   return node->padding[side];
 }
 
 /**
- * st_theme_node_get_transition_duration:
- * @node: an #StThemeNode
+ * mx_st_theme_node_get_transition_duration:
+ * @node: an #MxStThemeNode
  *
  * Get the value of the transition-duration property, which
- * specifies the transition time between the previous #StThemeNode
+ * specifies the transition time between the previous #MxStThemeNode
  * and @node.
  *
  * Returns: the node's transition duration in milliseconds
  */
 int
-st_theme_node_get_transition_duration (StThemeNode *node)
+mx_st_theme_node_get_transition_duration (MxStThemeNode *node)
 {
   gdouble value = 0.0;
 
@@ -1894,7 +1894,7 @@ st_theme_node_get_transition_duration (StThemeNode *node)
   if (node->transition_duration > -1)
     return st_slow_down_factor * node->transition_duration;
 
-  st_theme_node_lookup_double (node, "transition-duration", FALSE, &value);
+  mx_st_theme_node_lookup_double (node, "transition-duration", FALSE, &value);
 
   node->transition_duration = (int)value;
 
@@ -1902,7 +1902,7 @@ st_theme_node_get_transition_duration (StThemeNode *node)
 }
 
 StTextDecoration
-st_theme_node_get_text_decoration (StThemeNode *node)
+mx_st_theme_node_get_text_decoration (MxStThemeNode *node)
 {
   int i;
 
@@ -1934,7 +1934,7 @@ st_theme_node_get_text_decoration (StThemeNode *node)
               else if (strcmp (term->content.str->stryng->str, "inherit") == 0)
                 {
                   if (node->parent_node)
-                    return st_theme_node_get_text_decoration (node->parent_node);
+                    return mx_st_theme_node_get_text_decoration (node->parent_node);
                 }
               else if (strcmp (term->content.str->stryng->str, "underline") == 0)
                 {
@@ -1969,7 +1969,7 @@ st_theme_node_get_text_decoration (StThemeNode *node)
 }
 
 StTextAlign
-st_theme_node_get_text_align(StThemeNode *node)
+mx_st_theme_node_get_text_align(MxStThemeNode *node)
 {
   int i;
 
@@ -1989,7 +1989,7 @@ st_theme_node_get_text_align(StThemeNode *node)
           if (strcmp(term->content.str->stryng->str, "inherit") == 0)
             {
               if (node->parent_node)
-                return st_theme_node_get_text_align(node->parent_node);
+                return mx_st_theme_node_get_text_align(node->parent_node);
               return ST_TEXT_ALIGN_LEFT;
             }
           else if (strcmp(term->content.str->stryng->str, "left") == 0)
@@ -2011,7 +2011,7 @@ st_theme_node_get_text_align(StThemeNode *node)
         }
     }
   if(node->parent_node)
-    return st_theme_node_get_text_align(node->parent_node);
+    return mx_st_theme_node_get_text_align(node->parent_node);
   return ST_TEXT_ALIGN_LEFT;
 }
 
@@ -2086,7 +2086,7 @@ static int font_sizes[] = {
 };
 
 static gboolean
-font_size_from_term (StThemeNode *node,
+font_size_from_term (MxStThemeNode *node,
                      CRTerm      *term,
                      double      *size)
 {
@@ -2275,7 +2275,7 @@ font_variant_from_term (CRTerm       *term,
 }
 
 const PangoFontDescription *
-st_theme_node_get_font (StThemeNode *node)
+mx_st_theme_node_get_font (MxStThemeNode *node)
 {
   /* Initialized despite _set flags to suppress compiler warnings */
   PangoStyle font_style = PANGO_STYLE_NORMAL;
@@ -2468,8 +2468,8 @@ st_theme_node_get_font (StThemeNode *node)
 }
 
 /**
- * st_theme_node_get_border_image:
- * @node: a #StThemeNode
+ * mx_st_theme_node_get_border_image:
+ * @node: a #MxStThemeNode
  *
  * Gets the value for the border-image style property
  *
@@ -2477,7 +2477,7 @@ st_theme_node_get_font (StThemeNode *node)
  *   if there is no border image.
  */
 StBorderImage *
-st_theme_node_get_border_image (StThemeNode *node)
+mx_st_theme_node_get_border_image (MxStThemeNode *node)
 {
   int i;
 
@@ -2605,8 +2605,8 @@ st_theme_node_get_border_image (StThemeNode *node)
 }
 
 /**
- * st_theme_node_get_horizontal_padding:
- * @node: a #StThemeNode
+ * mx_st_theme_node_get_horizontal_padding:
+ * @node: a #MxStThemeNode
  *
  * Gets the total horizonal padding (left + right padding)
  *
@@ -2614,18 +2614,18 @@ st_theme_node_get_border_image (StThemeNode *node)
  *   in pixels
  */
 double
-st_theme_node_get_horizontal_padding (StThemeNode *node)
+mx_st_theme_node_get_horizontal_padding (MxStThemeNode *node)
 {
   double padding = 0.0;
-  padding += st_theme_node_get_padding (node, ST_SIDE_LEFT);
-  padding += st_theme_node_get_padding (node, ST_SIDE_RIGHT);
+  padding += mx_st_theme_node_get_padding (node, ST_SIDE_LEFT);
+  padding += mx_st_theme_node_get_padding (node, ST_SIDE_RIGHT);
 
   return padding;
 }
 
 /**
- * st_theme_node_get_vertical_padding:
- * @node: a #StThemeNode
+ * mx_st_theme_node_get_vertical_padding:
+ * @node: a #MxStThemeNode
  *
  * Gets the total vertical padding (top + bottom padding)
  *
@@ -2633,17 +2633,17 @@ st_theme_node_get_horizontal_padding (StThemeNode *node)
  *   in pixels
  */
 double
-st_theme_node_get_vertical_padding (StThemeNode *node)
+mx_st_theme_node_get_vertical_padding (MxStThemeNode *node)
 {
   double padding = 0.0;
-  padding += st_theme_node_get_padding (node, ST_SIDE_TOP);
-  padding += st_theme_node_get_padding (node, ST_SIDE_BOTTOM);
+  padding += mx_st_theme_node_get_padding (node, ST_SIDE_TOP);
+  padding += mx_st_theme_node_get_padding (node, ST_SIDE_BOTTOM);
 
   return padding;
 }
 
 static GetFromTermResult
-parse_shadow_property (StThemeNode       *node,
+parse_shadow_property (MxStThemeNode       *node,
                        CRDeclaration     *decl,
                        ClutterColor      *color,
                        gdouble           *xoffset,
@@ -2748,8 +2748,8 @@ parse_shadow_property (StThemeNode       *node,
 }
 
 /**
- * st_theme_node_lookup_shadow:
- * @node: a #StThemeNode
+ * mx_st_theme_node_lookup_shadow:
+ * @node: a #MxStThemeNode
  * @property_name: The name of the shadow property
  * @inherit: if %TRUE, if a value is not found for the property on the
  *   node, then it will be looked up on the parent node, and then on the
@@ -2762,17 +2762,17 @@ parse_shadow_property (StThemeNode       *node,
  * be changed.
  *
  * Generically looks up a property containing a set of shadow values. When
- * specific getters (like st_theme_node_get_box_shadow ()) exist, they
+ * specific getters (like mx_st_theme_node_get_box_shadow ()) exist, they
  * should be used instead. They are cached, so more efficient, and have
  * handling for shortcut properties and other details of CSS.
  *
- * See also st_theme_node_get_shadow(), which provides a simpler API.
+ * See also mx_st_theme_node_get_shadow(), which provides a simpler API.
  *
  * Return value: %TRUE if the property was found in the properties for this
  *  theme node (or in the properties of parent nodes when inheriting.)
  */
 gboolean
-st_theme_node_lookup_shadow (StThemeNode  *node,
+mx_st_theme_node_lookup_shadow (MxStThemeNode  *node,
                              const char   *property_name,
                              gboolean      inherit,
                              StShadow    **shadow)
@@ -2813,7 +2813,7 @@ st_theme_node_lookup_shadow (StThemeNode  *node,
           else if (result == VALUE_INHERIT)
             {
               if (node->parent_node)
-                return st_theme_node_lookup_shadow (node->parent_node,
+                return mx_st_theme_node_lookup_shadow (node->parent_node,
                                                     property_name,
                                                     inherit,
                                                     shadow);
@@ -2824,7 +2824,7 @@ st_theme_node_lookup_shadow (StThemeNode  *node,
     }
 
     if (inherit && node->parent_node)
-      return st_theme_node_lookup_shadow (node->parent_node,
+      return mx_st_theme_node_lookup_shadow (node->parent_node,
                                           property_name,
                                           inherit,
                                           shadow);
@@ -2833,37 +2833,37 @@ st_theme_node_lookup_shadow (StThemeNode  *node,
 }
 
 /**
- * st_theme_node_get_shadow:
- * @node: a #StThemeNode
+ * mx_st_theme_node_get_shadow:
+ * @node: a #MxStThemeNode
  * @property_name: The name of the shadow property
  *
  * Generically looks up a property containing a set of shadow values. When
- * specific getters (like st_theme_node_get_box_shadow()) exist, they
+ * specific getters (like mx_st_theme_node_get_box_shadow()) exist, they
  * should be used instead. They are cached, so more efficient, and have
  * handling for shortcut properties and other details of CSS.
  *
  * Like st_theme_get_length(), this does not print a warning if the property is
  * not found; it just returns %NULL
  *
- * See also st_theme_node_lookup_shadow (), which provides more options.
+ * See also mx_st_theme_node_lookup_shadow (), which provides more options.
  *
  * Return value: (transfer full): the shadow, or %NULL if the property was not found.
  */
 StShadow *
-st_theme_node_get_shadow (StThemeNode  *node,
+mx_st_theme_node_get_shadow (MxStThemeNode  *node,
                           const char   *property_name)
 {
   StShadow *shadow;
 
-  if (st_theme_node_lookup_shadow (node, property_name, FALSE, &shadow))
+  if (mx_st_theme_node_lookup_shadow (node, property_name, FALSE, &shadow))
     return shadow;
   else
     return NULL;
 }
 
 /**
- * st_theme_node_get_box_shadow:
- * @node: a #StThemeNode
+ * mx_st_theme_node_get_box_shadow:
+ * @node: a #MxStThemeNode
  *
  * Gets the value for the box-shadow style property
  *
@@ -2871,7 +2871,7 @@ st_theme_node_get_shadow (StThemeNode  *node,
  *   if node has no shadow
  */
 StShadow *
-st_theme_node_get_box_shadow (StThemeNode *node)
+mx_st_theme_node_get_box_shadow (MxStThemeNode *node)
 {
   StShadow *shadow;
 
@@ -2881,7 +2881,7 @@ st_theme_node_get_box_shadow (StThemeNode *node)
   node->box_shadow = NULL;
   node->box_shadow_computed = TRUE;
 
-  if (st_theme_node_lookup_shadow (node,
+  if (mx_st_theme_node_lookup_shadow (node,
                                    "box-shadow",
                                    FALSE,
                                    &shadow))
@@ -2895,8 +2895,8 @@ st_theme_node_get_box_shadow (StThemeNode *node)
 }
 
 /**
- * st_theme_node_get_background_image_shadow:
- * @node: a #StThemeNode
+ * mx_st_theme_node_get_background_image_shadow:
+ * @node: a #MxStThemeNode
  *
  * Gets the value for the -st-background-image-shadow style property
  *
@@ -2904,7 +2904,7 @@ st_theme_node_get_box_shadow (StThemeNode *node)
  *   if node has no such shadow
  */
 StShadow *
-st_theme_node_get_background_image_shadow (StThemeNode *node)
+mx_st_theme_node_get_background_image_shadow (MxStThemeNode *node)
 {
   StShadow *shadow;
 
@@ -2914,7 +2914,7 @@ st_theme_node_get_background_image_shadow (StThemeNode *node)
   node->background_image_shadow = NULL;
   node->background_image_shadow_computed = TRUE;
 
-  if (st_theme_node_lookup_shadow (node,
+  if (mx_st_theme_node_lookup_shadow (node,
                                    "-st-background-image-shadow",
                                    FALSE,
                                    &shadow))
@@ -2936,8 +2936,8 @@ st_theme_node_get_background_image_shadow (StThemeNode *node)
 }
 
 /**
- * st_theme_node_get_text_shadow:
- * @node: a #StThemeNode
+ * mx_st_theme_node_get_text_shadow:
+ * @node: a #MxStThemeNode
  *
  * Gets the value for the text-shadow style property
  *
@@ -2945,7 +2945,7 @@ st_theme_node_get_background_image_shadow (StThemeNode *node)
  *   if node has no text-shadow
  */
 StShadow *
-st_theme_node_get_text_shadow (StThemeNode *node)
+mx_st_theme_node_get_text_shadow (MxStThemeNode *node)
 {
   StShadow *result = NULL;
 
@@ -2954,14 +2954,14 @@ st_theme_node_get_text_shadow (StThemeNode *node)
 
   ensure_properties (node);
 
-  if (!st_theme_node_lookup_shadow (node,
+  if (!mx_st_theme_node_lookup_shadow (node,
                                     "text-shadow",
                                     FALSE,
                                     &result))
     {
       if (node->parent_node)
         {
-          result = st_theme_node_get_text_shadow (node->parent_node);
+          result = mx_st_theme_node_get_text_shadow (node->parent_node);
           if (result)
             st_shadow_ref (result);
         }
@@ -2981,8 +2981,8 @@ st_theme_node_get_text_shadow (StThemeNode *node)
 }
 
 /**
- * st_theme_node_get_icon_colors:
- * @node: a #StThemeNode
+ * mx_st_theme_node_get_icon_colors:
+ * @node: a #MxStThemeNode
  *
  * Gets the colors that should be used for colorizing symbolic icons according
  * the style of this node.
@@ -2990,9 +2990,9 @@ st_theme_node_get_text_shadow (StThemeNode *node)
  * Return value: (transfer none): the icon colors to use for this theme node
  */
 StIconColors *
-st_theme_node_get_icon_colors (StThemeNode *node)
+mx_st_theme_node_get_icon_colors (MxStThemeNode *node)
 {
-  /* Foreground here will always be the same as st_theme_node_get_foreground_color(),
+  /* Foreground here will always be the same as mx_st_theme_node_get_foreground_color(),
    * but there's a loss of symmetry and little efficiency win if we try to exploit
    * that. */
 
@@ -3016,7 +3016,7 @@ st_theme_node_get_icon_colors (StThemeNode *node)
 
   if (node->parent_node)
     {
-      node->icon_colors = st_theme_node_get_icon_colors (node->parent_node);
+      node->icon_colors = mx_st_theme_node_get_icon_colors (node->parent_node);
       shared_with_parent = TRUE;
     }
   else
@@ -3100,22 +3100,22 @@ st_theme_node_get_icon_colors (StThemeNode *node)
 }
 
 static float
-get_width_inc (StThemeNode *node)
+get_width_inc (MxStThemeNode *node)
 {
   return ((int)(0.5 + node->border_width[ST_SIDE_LEFT]) + node->padding[ST_SIDE_LEFT] +
           (int)(0.5 + node->border_width[ST_SIDE_RIGHT]) + node->padding[ST_SIDE_RIGHT]);
 }
 
 static float
-get_height_inc (StThemeNode *node)
+get_height_inc (MxStThemeNode *node)
 {
   return ((int)(0.5 + node->border_width[ST_SIDE_TOP]) + node->padding[ST_SIDE_TOP] +
           (int)(0.5 + node->border_width[ST_SIDE_BOTTOM]) + node->padding[ST_SIDE_BOTTOM]);
 }
 
 /**
- * st_theme_node_adjust_for_height:
- * @node: a #StThemeNode
+ * mx_st_theme_node_adjust_for_height:
+ * @node: a #MxStThemeNode
  * @for_height: (inout): the "for height" to adjust
  *
  * Adjusts a "for height" passed to clutter_actor_get_preferred_width() to
@@ -3125,7 +3125,7 @@ get_height_inc (StThemeNode *node)
  * content.
  */
 void
-st_theme_node_adjust_for_height (StThemeNode  *node,
+mx_st_theme_node_adjust_for_height (MxStThemeNode  *node,
                                  float        *for_height)
 {
   g_return_if_fail (ST_IS_THEME_NODE (node));
@@ -3139,8 +3139,8 @@ st_theme_node_adjust_for_height (StThemeNode  *node,
 }
 
 /**
- * st_theme_node_adjust_preferred_width:
- * @node: a #StThemeNode
+ * mx_st_theme_node_adjust_preferred_width:
+ * @node: a #MxStThemeNode
  * @min_width_p: (inout) (allow-none): the minimum width to adjust
  * @natural_width_p: (inout): the natural width to adjust
  *
@@ -3151,7 +3151,7 @@ st_theme_node_adjust_for_height (StThemeNode  *node,
  * of a #ClutterActor subclass
  */
 void
-st_theme_node_adjust_preferred_width (StThemeNode  *node,
+mx_st_theme_node_adjust_preferred_width (MxStThemeNode  *node,
                                       float        *min_width_p,
                                       float        *natural_width_p)
 {
@@ -3159,7 +3159,7 @@ st_theme_node_adjust_preferred_width (StThemeNode  *node,
 
   g_return_if_fail (ST_IS_THEME_NODE (node));
 
-  _st_theme_node_ensure_geometry (node);
+  _mx_st_theme_node_ensure_geometry (node);
 
   width_inc = get_width_inc (node);
 
@@ -3181,8 +3181,8 @@ st_theme_node_adjust_preferred_width (StThemeNode  *node,
 }
 
 /**
- * st_theme_node_adjust_for_width:
- * @node: a #StThemeNode
+ * mx_st_theme_node_adjust_for_width:
+ * @node: a #MxStThemeNode
  * @for_width: (inout): the "for width" to adjust
  *
  * Adjusts a "for width" passed to clutter_actor_get_preferred_height() to
@@ -3192,7 +3192,7 @@ st_theme_node_adjust_preferred_width (StThemeNode  *node,
  * content.
  */
 void
-st_theme_node_adjust_for_width (StThemeNode  *node,
+mx_st_theme_node_adjust_for_width (MxStThemeNode  *node,
                                 float        *for_width)
 {
   g_return_if_fail (ST_IS_THEME_NODE (node));
@@ -3206,8 +3206,8 @@ st_theme_node_adjust_for_width (StThemeNode  *node,
 }
 
 /**
- * st_theme_node_adjust_preferred_height:
- * @node: a #StThemeNode
+ * mx_st_theme_node_adjust_preferred_height:
+ * @node: a #MxStThemeNode
  * @min_height_p: (inout) (allow-none): the minimum height to adjust
  * @natural_height_p: (inout): the natural height to adjust
  *
@@ -3218,7 +3218,7 @@ st_theme_node_adjust_for_width (StThemeNode  *node,
  * of a #ClutterActor subclass
  */
 void
-st_theme_node_adjust_preferred_height (StThemeNode  *node,
+mx_st_theme_node_adjust_preferred_height (MxStThemeNode  *node,
                                        float           *min_height_p,
                                        float           *natural_height_p)
 {
@@ -3226,7 +3226,7 @@ st_theme_node_adjust_preferred_height (StThemeNode  *node,
 
   g_return_if_fail (ST_IS_THEME_NODE (node));
 
-  _st_theme_node_ensure_geometry (node);
+  _mx_st_theme_node_ensure_geometry (node);
 
   height_inc = get_height_inc (node);
 
@@ -3247,8 +3247,8 @@ st_theme_node_adjust_preferred_height (StThemeNode  *node,
 }
 
 /**
- * st_theme_node_get_content_box:
- * @node: a #StThemeNode
+ * mx_st_theme_node_get_content_box:
+ * @node: a #MxStThemeNode
  * @allocation: the box allocated to a #ClutterAlctor
  * @content_box: (out caller-allocates): computed box occupied by the actor's content
  *
@@ -3258,7 +3258,7 @@ st_theme_node_adjust_preferred_height (StThemeNode  *node,
  * subclass.
  */
 void
-st_theme_node_get_content_box (StThemeNode           *node,
+mx_st_theme_node_get_content_box (MxStThemeNode           *node,
                                const ClutterActorBox *allocation,
                                ClutterActorBox       *content_box)
 {
@@ -3267,7 +3267,7 @@ st_theme_node_get_content_box (StThemeNode           *node,
 
   g_return_if_fail (ST_IS_THEME_NODE (node));
 
-  _st_theme_node_ensure_geometry (node);
+  _mx_st_theme_node_ensure_geometry (node);
 
   avail_width = allocation->x2 - allocation->x1;
   avail_height = allocation->y2 - allocation->y1;
@@ -3292,8 +3292,8 @@ st_theme_node_get_content_box (StThemeNode           *node,
 }
 
 /**
- * st_theme_node_get_background_paint_box:
- * @node: a #StThemeNode
+ * mx_st_theme_node_get_background_paint_box:
+ * @node: a #MxStThemeNode
  * @allocation: the box allocated to a #ClutterActor
  * @paint_box: (out caller-allocates): computed box occupied when painting the actor's background
  *
@@ -3301,7 +3301,7 @@ st_theme_node_get_content_box (StThemeNode           *node,
  * occupied by properties which paint outside the actor's assigned allocation.
  */
 void
-st_theme_node_get_background_paint_box (StThemeNode           *node,
+mx_st_theme_node_get_background_paint_box (MxStThemeNode           *node,
                                         const ClutterActorBox *actor_box,
                                         ClutterActorBox       *paint_box)
 {
@@ -3312,7 +3312,7 @@ st_theme_node_get_background_paint_box (StThemeNode           *node,
   g_return_if_fail (actor_box != NULL);
   g_return_if_fail (paint_box != NULL);
 
-  background_image_shadow = st_theme_node_get_background_image_shadow (node);
+  background_image_shadow = mx_st_theme_node_get_background_image_shadow (node);
 
   *paint_box = *actor_box;
 
@@ -3328,8 +3328,8 @@ st_theme_node_get_background_paint_box (StThemeNode           *node,
 }
 
 /**
- * st_theme_node_get_paint_box:
- * @node: a #StThemeNode
+ * mx_st_theme_node_get_paint_box:
+ * @node: a #MxStThemeNode
  * @allocation: the box allocated to a #ClutterActor
  * @paint_box: (out caller-allocates): computed box occupied when painting the actor
  *
@@ -3339,7 +3339,7 @@ st_theme_node_get_background_paint_box (StThemeNode           *node,
  * used to determine the necessary size of the buffer.
  */
 void
-st_theme_node_get_paint_box (StThemeNode           *node,
+mx_st_theme_node_get_paint_box (MxStThemeNode           *node,
                              const ClutterActorBox *actor_box,
                              ClutterActorBox       *paint_box)
 {
@@ -3351,10 +3351,10 @@ st_theme_node_get_paint_box (StThemeNode           *node,
   g_return_if_fail (actor_box != NULL);
   g_return_if_fail (paint_box != NULL);
 
-  box_shadow = st_theme_node_get_box_shadow (node);
-  outline_width = st_theme_node_get_outline_width (node);
+  box_shadow = mx_st_theme_node_get_box_shadow (node);
+  outline_width = mx_st_theme_node_get_outline_width (node);
 
-  st_theme_node_get_background_paint_box (node, actor_box, paint_box);
+  mx_st_theme_node_get_background_paint_box (node, actor_box, paint_box);
 
   if (!box_shadow && !outline_width)
     return;
@@ -3376,25 +3376,25 @@ st_theme_node_get_paint_box (StThemeNode           *node,
 }
 
 /**
- * st_theme_node_geometry_equal:
- * @node: a #StThemeNode
- * @other: a different #StThemeNode
+ * mx_st_theme_node_geometry_equal:
+ * @node: a #MxStThemeNode
+ * @other: a different #MxStThemeNode
  *
  * Tests if two theme nodes have the same borders and padding; this can be
  * used to optimize having to relayout when the style applied to a Clutter
  * actor changes colors without changing the geometry.
  */
 gboolean
-st_theme_node_geometry_equal (StThemeNode *node,
-                              StThemeNode *other)
+mx_st_theme_node_geometry_equal (MxStThemeNode *node,
+                              MxStThemeNode *other)
 {
   StSide side;
 
   g_return_val_if_fail (ST_IS_THEME_NODE (node), FALSE);
   g_return_val_if_fail (ST_IS_THEME_NODE (other), FALSE);
 
-  _st_theme_node_ensure_geometry (node);
-  _st_theme_node_ensure_geometry (other);
+  _mx_st_theme_node_ensure_geometry (node);
+  _mx_st_theme_node_ensure_geometry (other);
 
   for (side = ST_SIDE_TOP; side <= ST_SIDE_LEFT; side++)
     {
@@ -3415,11 +3415,11 @@ st_theme_node_geometry_equal (StThemeNode *node,
 }
 
 /**
- * st_theme_node_paint_equal:
- * @node: a #StThemeNode
- * @other: a different #StThemeNode
+ * mx_st_theme_node_paint_equal:
+ * @node: a #MxStThemeNode
+ * @other: a different #MxStThemeNode
  *
- * Check if st_theme_node_paint() will paint identically for @node as it does
+ * Check if mx_st_theme_node_paint() will paint identically for @node as it does
  * for @other. Note that in some cases this function may return %TRUE even
  * if there is no visible difference in the painting.
  *
@@ -3427,8 +3427,8 @@ st_theme_node_geometry_equal (StThemeNode *node,
  *   two nodes potentially paint differently.
  */
 gboolean
-st_theme_node_paint_equal (StThemeNode *node,
-                           StThemeNode *other)
+mx_st_theme_node_paint_equal (MxStThemeNode *node,
+                           MxStThemeNode *other)
 {
   StBorderImage *border_image, *other_border_image;
   StShadow *shadow, *other_shadow;
@@ -3437,8 +3437,8 @@ st_theme_node_paint_equal (StThemeNode *node,
   g_return_val_if_fail (ST_IS_THEME_NODE (node), FALSE);
   g_return_val_if_fail (ST_IS_THEME_NODE (other), FALSE);
 
-  _st_theme_node_ensure_background (node);
-  _st_theme_node_ensure_background (other);
+  _mx_st_theme_node_ensure_background (node);
+  _mx_st_theme_node_ensure_background (other);
 
   if (!clutter_color_equal (&node->background_color, &other->background_color))
     return FALSE;
@@ -3453,8 +3453,8 @@ st_theme_node_paint_equal (StThemeNode *node,
   if (g_strcmp0 (node->background_image, other->background_image) != 0)
     return FALSE;
 
-  _st_theme_node_ensure_geometry (node);
-  _st_theme_node_ensure_geometry (other);
+  _mx_st_theme_node_ensure_geometry (node);
+  _mx_st_theme_node_ensure_geometry (other);
 
   for (i = 0; i < 4; i++)
     {
@@ -3476,8 +3476,8 @@ st_theme_node_paint_equal (StThemeNode *node,
       !clutter_color_equal (&node->outline_color, &other->outline_color))
     return FALSE;
 
-  border_image = st_theme_node_get_border_image (node);
-  other_border_image = st_theme_node_get_border_image (other);
+  border_image = mx_st_theme_node_get_border_image (node);
+  other_border_image = mx_st_theme_node_get_border_image (other);
 
   if ((border_image == NULL) != (other_border_image == NULL))
     return FALSE;
@@ -3485,8 +3485,8 @@ st_theme_node_paint_equal (StThemeNode *node,
   if (border_image != NULL && !st_border_image_equal (border_image, other_border_image))
     return FALSE;
 
-  shadow = st_theme_node_get_box_shadow (node);
-  other_shadow = st_theme_node_get_box_shadow (other);
+  shadow = mx_st_theme_node_get_box_shadow (node);
+  other_shadow = mx_st_theme_node_get_box_shadow (other);
 
   if ((shadow == NULL) != (other_shadow == NULL))
     return FALSE;
@@ -3494,8 +3494,8 @@ st_theme_node_paint_equal (StThemeNode *node,
   if (shadow != NULL && !st_shadow_equal (shadow, other_shadow))
     return FALSE;
 
-  shadow = st_theme_node_get_background_image_shadow (node);
-  other_shadow = st_theme_node_get_background_image_shadow (other);
+  shadow = mx_st_theme_node_get_background_image_shadow (node);
+  other_shadow = mx_st_theme_node_get_background_image_shadow (other);
 
   if ((shadow == NULL) != (other_shadow == NULL))
     return FALSE;

@@ -76,7 +76,7 @@ ClutterActor *mx_st_texture_cache_bind_pixbuf_property (MxStTextureCache    *cac
 ClutterActor *mx_st_texture_cache_load_icon_name (MxStTextureCache *cache,
                                                StThemeNode    *theme_node,
                                                const char     *name,
-                                               MxIconType      icon_type,
+                                               MxStIconType      icon_type,
                                                gint            size);
 
 ClutterActor *mx_st_texture_cache_load_gicon (MxStTextureCache *cache,

@@ -1417,7 +1417,7 @@ symbolic_names_for_icon (const char *name)
  * @icon_type: the type of icon to load
  * @size: Size of themed
  *
- * Load a themed icon into a texture. See the #MxIconType documentation
+ * Load a themed icon into a texture. See the #MxStIconType documentation
  * for an explanation of how @icon_type affects the returned icon. The
  * colors used for symbolic icons are derived from @theme_node.
  *
@@ -1427,7 +1427,7 @@ ClutterActor *
 mx_st_texture_cache_load_icon_name (MxStTextureCache    *cache,
                                  StThemeNode       *theme_node,
                                  const char        *name,
-                                 MxIconType         icon_type,
+                                 MxStIconType         icon_type,
                                  gint               size)
 {
   ClutterActor *texture;

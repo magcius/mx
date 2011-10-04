@@ -190,7 +190,7 @@ corner_to_string (StCornerSpec *corner)
 }
 
 typedef struct {
-  StThemeNode *node;
+  MxStThemeNode *node;
   StCornerSpec *corner;
 } LoadCornerData;
 
@@ -254,15 +254,15 @@ over (const ClutterColor *source,
 }
 
 /*
- * st_theme_node_reduce_border_radius:
- * @node: a #StThemeNode
+ * mx_st_theme_node_reduce_border_radius:
+ * @node: a #MxStThemeNode
  * @corners: (array length=4) (out): reduced corners
  *
  * Implements the corner overlap algorithm mentioned at
  * http://www.w3.org/TR/css3-background/#corner-overlap
  */
 static void
-st_theme_node_reduce_border_radius (StThemeNode  *node,
+mx_st_theme_node_reduce_border_radius (MxStThemeNode  *node,
                                     guint        *corners)
 {
   gfloat scale;
@@ -305,7 +305,7 @@ st_theme_node_reduce_border_radius (StThemeNode  *node,
 }
 
 static void
-st_theme_node_get_corner_border_widths (StThemeNode *node,
+mx_st_theme_node_get_corner_border_widths (MxStThemeNode *node,
                                         StCorner     corner_id,
                                         guint       *border_width_1,
                                         guint       *border_width_2)
@@ -340,7 +340,7 @@ st_theme_node_get_corner_border_widths (StThemeNode *node,
 }
 
 static CoglHandle
-st_theme_node_lookup_corner (StThemeNode    *node,
+mx_st_theme_node_lookup_corner (MxStThemeNode    *node,
                              StCorner        corner_id)
 {
   CoglHandle texture, material;
@@ -355,10 +355,10 @@ st_theme_node_lookup_corner (StThemeNode    *node,
 
   cache = st_texture_cache_get_default ();
 
-  st_theme_node_reduce_border_radius (node, radius);
+  mx_st_theme_node_reduce_border_radius (node, radius);
   corner.radius = radius[corner_id];
   corner.color = node->background_color;
-  st_theme_node_get_corner_border_widths (node, corner_id,
+  mx_st_theme_node_get_corner_border_widths (node, corner_id,
                                           &corner.border_width_1,
                                           &corner.border_width_2);
 
@@ -401,7 +401,7 @@ st_theme_node_lookup_corner (StThemeNode    *node,
 }
 
 static void
-get_background_position (StThemeNode             *self,
+get_background_position (MxStThemeNode             *self,
                          const ClutterActorBox   *allocation,
                          ClutterActorBox         *result)
 {
@@ -469,15 +469,15 @@ get_background_position (StThemeNode             *self,
  * non-uniform colors.
  */
 static void
-get_arbitrary_border_color (StThemeNode   *node,
+get_arbitrary_border_color (MxStThemeNode   *node,
                             ClutterColor  *color)
 {
   if (color)
-    st_theme_node_get_border_color (node, ST_SIDE_TOP, color);
+    mx_st_theme_node_get_border_color (node, ST_SIDE_TOP, color);
 }
 
 static gboolean
-st_theme_node_has_visible_outline (StThemeNode *node)
+mx_st_theme_node_has_visible_outline (MxStThemeNode *node)
 {
   if (node->background_color.alpha > 0)
     return TRUE;
@@ -501,7 +501,7 @@ st_theme_node_has_visible_outline (StThemeNode *node)
 }
 
 static cairo_pattern_t *
-create_cairo_pattern_of_background_gradient (StThemeNode *node)
+create_cairo_pattern_of_background_gradient (MxStThemeNode *node)
 {
   cairo_pattern_t *pattern;
 
@@ -535,7 +535,7 @@ create_cairo_pattern_of_background_gradient (StThemeNode *node)
 }
 
 static cairo_pattern_t *
-create_cairo_pattern_of_background_image (StThemeNode *node,
+create_cairo_pattern_of_background_image (MxStThemeNode *node,
                                           gboolean    *needs_background_fill)
 {
   cairo_surface_t *surface;
@@ -549,7 +549,7 @@ create_cairo_pattern_of_background_image (StThemeNode *node,
 
   StTextureCache *texture_cache;
 
-  file = st_theme_node_get_background_image (node);
+  file = mx_st_theme_node_get_background_image (node);
 
   texture_cache = st_texture_cache_get_default ();
 
@@ -735,7 +735,7 @@ paint_shadow_pattern_to_cairo_context (StShadow *shadow_spec,
 }
 
 static void
-paint_background_image_shadow_to_cairo_context (StThemeNode     *node,
+paint_background_image_shadow_to_cairo_context (MxStThemeNode     *node,
                                                 StShadow        *shadow_spec,
                                                 cairo_pattern_t *pattern,
                                                 cairo_t         *cr,
@@ -822,7 +822,7 @@ path_extents (cairo_path_t *path,
 }
 
 static void
-paint_inset_box_shadow_to_cairo_context (StThemeNode     *node,
+paint_inset_box_shadow_to_cairo_context (MxStThemeNode     *node,
                                          StShadow        *shadow_spec,
                                          cairo_t         *cr,
                                          cairo_path_t    *shadow_outline)
@@ -922,7 +922,7 @@ paint_inset_box_shadow_to_cairo_context (StThemeNode     *node,
  * cases (gradients, background images, etc).
  */
 static CoglHandle
-st_theme_node_prerender_background (StThemeNode *node)
+mx_st_theme_node_prerender_background (MxStThemeNode *node)
 {
   StBorderImage *border_image;
   CoglHandle texture;
@@ -947,10 +947,10 @@ st_theme_node_prerender_background (StThemeNode *node)
   ClutterActorBox paint_box;
   cairo_path_t *interior_path = NULL;
 
-  border_image = st_theme_node_get_border_image (node);
+  border_image = mx_st_theme_node_get_border_image (node);
 
-  shadow_spec = st_theme_node_get_background_image_shadow (node);
-  box_shadow_spec = st_theme_node_get_box_shadow (node);
+  shadow_spec = mx_st_theme_node_get_background_image_shadow (node);
+  box_shadow_spec = mx_st_theme_node_get_box_shadow (node);
 
   actor_box.x1 = 0;
   actor_box.x2 = node->alloc_width;
@@ -961,7 +961,7 @@ st_theme_node_prerender_background (StThemeNode *node)
    * may need to create an image bigger than the nodes
    * allocation
    */
-  st_theme_node_get_background_paint_box (node, &actor_box, &paint_box);
+  mx_st_theme_node_get_background_paint_box (node, &actor_box, &paint_box);
 
   /* translate the boxes so the paint box is at 0,0
   */
@@ -994,10 +994,10 @@ st_theme_node_prerender_background (StThemeNode *node)
   /* TODO - support non-uniform border colors */
   get_arbitrary_border_color (node, &border_color);
 
-  st_theme_node_reduce_border_radius (node, radius);
+  mx_st_theme_node_reduce_border_radius (node, radius);
 
   for (i = 0; i < 4; i++)
-    border_width[i] = st_theme_node_get_border_width (node, i);
+    border_width[i] = mx_st_theme_node_get_border_width (node, i);
 
   /* Note we don't support translucent background images on top
    * of gradients. It's strictly either/or.
@@ -1022,7 +1022,7 @@ st_theme_node_prerender_background (StThemeNode *node)
     {
       const char *background_image;
 
-      background_image = st_theme_node_get_background_image (node);
+      background_image = mx_st_theme_node_get_background_image (node);
 
       if (background_image != NULL)
         {
@@ -1050,7 +1050,7 @@ st_theme_node_prerender_background (StThemeNode *node)
   if (draw_solid_background)
     background_is_translucent = FALSE;
 
-  has_visible_outline = st_theme_node_has_visible_outline (node);
+  has_visible_outline = mx_st_theme_node_has_visible_outline (node);
 
   /* Create a path for the background's outline first */
   if (radius[ST_CORNER_TOPLEFT] > 0)
@@ -1259,7 +1259,7 @@ st_theme_node_prerender_background (StThemeNode *node)
 }
 
 void
-_st_theme_node_free_drawing_state (StThemeNode  *node)
+_mx_st_theme_node_free_drawing_state (MxStThemeNode  *node)
 {
   int corner_id;
 
@@ -1284,11 +1284,11 @@ _st_theme_node_free_drawing_state (StThemeNode  *node)
     if (node->corner_material[corner_id] != COGL_INVALID_HANDLE)
       cogl_handle_unref (node->corner_material[corner_id]);
 
-  _st_theme_node_init_drawing_state (node);
+  _mx_st_theme_node_init_drawing_state (node);
 }
 
 void
-_st_theme_node_init_drawing_state (StThemeNode *node)
+_mx_st_theme_node_init_drawing_state (MxStThemeNode *node)
 {
   int corner_id;
 
@@ -1305,12 +1305,12 @@ _st_theme_node_init_drawing_state (StThemeNode *node)
     node->corner_material[corner_id] = COGL_INVALID_HANDLE;
 }
 
-static void st_theme_node_paint_borders (StThemeNode           *node,
+static void mx_st_theme_node_paint_borders (MxStThemeNode           *node,
                                          const ClutterActorBox *box,
                                          guint8                 paint_opacity);
 
 static void
-st_theme_node_render_resources (StThemeNode   *node,
+mx_st_theme_node_render_resources (MxStThemeNode   *node,
                                 float          width,
                                 float          height)
 {
@@ -1330,15 +1330,15 @@ st_theme_node_render_resources (StThemeNode   *node,
    * geometry change versus things that can be cached regardless, such as
    * a background image.
    */
-  _st_theme_node_free_drawing_state (node);
+  _mx_st_theme_node_free_drawing_state (node);
 
   node->alloc_width = width;
   node->alloc_height = height;
 
-  _st_theme_node_ensure_background (node);
-  _st_theme_node_ensure_geometry (node);
+  _mx_st_theme_node_ensure_background (node);
+  _mx_st_theme_node_ensure_geometry (node);
 
-  box_shadow_spec = st_theme_node_get_box_shadow (node);
+  box_shadow_spec = mx_st_theme_node_get_box_shadow (node);
   has_inset_box_shadow = box_shadow_spec && box_shadow_spec->inset;
 
   if (node->border_width[ST_SIDE_TOP] > 0 ||
@@ -1367,7 +1367,7 @@ st_theme_node_render_resources (StThemeNode   *node,
     guint border_radius[4];
     int corner;
 
-    st_theme_node_reduce_border_radius (node, border_radius);
+    mx_st_theme_node_reduce_border_radius (node, border_radius);
 
     for (corner = 0; corner < 4; corner ++) {
       if (border_radius[corner] * 2 > height ||
@@ -1379,8 +1379,8 @@ st_theme_node_render_resources (StThemeNode   *node,
   }
 
   /* Load referenced images from disk and draw anything we need with cairo now */
-  background_image = st_theme_node_get_background_image (node);
-  border_image = st_theme_node_get_border_image (node);
+  background_image = mx_st_theme_node_get_background_image (node);
+  border_image = mx_st_theme_node_get_border_image (node);
 
   if (border_image)
     {
@@ -1409,7 +1409,7 @@ st_theme_node_render_resources (StThemeNode   *node,
       || (has_inset_box_shadow && (has_border || node->background_color.alpha > 0))
       || (background_image && (has_border || has_border_radius))
       || has_large_corners)
-    node->prerendered_texture = st_theme_node_prerender_background (node);
+    node->prerendered_texture = mx_st_theme_node_prerender_background (node);
 
   if (node->prerendered_texture)
     node->prerendered_material = _st_create_texture_material (node->prerendered_texture);
@@ -1440,7 +1440,7 @@ st_theme_node_render_resources (StThemeNode   *node,
 
               cogl_push_framebuffer (offscreen);
               cogl_ortho (0, width, height, 0, 0, 1.0);
-              st_theme_node_paint_borders (node, &box, 0xFF);
+              mx_st_theme_node_paint_borders (node, &box, 0xFF);
               cogl_pop_framebuffer ();
               cogl_handle_unref (offscreen);
 
@@ -1451,7 +1451,7 @@ st_theme_node_render_resources (StThemeNode   *node,
         }
     }
 
-  background_image_shadow_spec = st_theme_node_get_background_image_shadow (node);
+  background_image_shadow_spec = mx_st_theme_node_get_background_image_shadow (node);
   if (background_image != NULL && !has_border && !has_border_radius)
     {
       CoglHandle texture;
@@ -1493,13 +1493,13 @@ st_theme_node_render_resources (StThemeNode   *node,
     }
 
   node->corner_material[ST_CORNER_TOPLEFT] =
-    st_theme_node_lookup_corner (node, ST_CORNER_TOPLEFT);
+    mx_st_theme_node_lookup_corner (node, ST_CORNER_TOPLEFT);
   node->corner_material[ST_CORNER_TOPRIGHT] =
-    st_theme_node_lookup_corner (node, ST_CORNER_TOPRIGHT);
+    mx_st_theme_node_lookup_corner (node, ST_CORNER_TOPRIGHT);
   node->corner_material[ST_CORNER_BOTTOMRIGHT] =
-    st_theme_node_lookup_corner (node, ST_CORNER_BOTTOMRIGHT);
+    mx_st_theme_node_lookup_corner (node, ST_CORNER_BOTTOMRIGHT);
   node->corner_material[ST_CORNER_BOTTOMLEFT] =
-    st_theme_node_lookup_corner (node, ST_CORNER_BOTTOMLEFT);
+    mx_st_theme_node_lookup_corner (node, ST_CORNER_BOTTOMLEFT);
 }
 
 static void
@@ -1515,7 +1515,7 @@ paint_material_with_opacity (CoglHandle       material,
 }
 
 static void
-st_theme_node_paint_borders (StThemeNode           *node,
+mx_st_theme_node_paint_borders (MxStThemeNode           *node,
                              const ClutterActorBox *box,
                              guint8                 paint_opacity)
 
@@ -1536,15 +1536,15 @@ st_theme_node_paint_borders (StThemeNode           *node,
   get_arbitrary_border_color (node, &border_color);
 
   for (side_id = 0; side_id < 4; side_id++)
-    border_width[side_id] = st_theme_node_get_border_width(node, side_id);
+    border_width[side_id] = mx_st_theme_node_get_border_width(node, side_id);
 
-  st_theme_node_reduce_border_radius (node, border_radius);
+  mx_st_theme_node_reduce_border_radius (node, border_radius);
 
   for (corner_id = 0; corner_id < 4; corner_id++)
     {
       guint border_width_1, border_width_2;
 
-      st_theme_node_get_corner_border_widths (node, corner_id,
+      mx_st_theme_node_get_corner_border_widths (node, corner_id,
                                               &border_width_1, &border_width_2);
 
       if (border_radius[corner_id] > max_border_radius)
@@ -1783,7 +1783,7 @@ st_theme_node_paint_borders (StThemeNode           *node,
 }
 
 static void
-st_theme_node_paint_sliced_border_image (StThemeNode           *node,
+mx_st_theme_node_paint_sliced_border_image (MxStThemeNode           *node,
                                          const ClutterActorBox *box,
                                          guint8                 paint_opacity)
 {
@@ -1794,7 +1794,7 @@ st_theme_node_paint_sliced_border_image (StThemeNode           *node,
   StBorderImage *border_image;
   CoglHandle material;
 
-  border_image = st_theme_node_get_border_image (node);
+  border_image = mx_st_theme_node_get_border_image (node);
   g_assert (border_image != NULL);
 
   st_border_image_get_borders (border_image,
@@ -1876,7 +1876,7 @@ st_theme_node_paint_sliced_border_image (StThemeNode           *node,
 }
 
 static void
-st_theme_node_paint_outline (StThemeNode           *node,
+mx_st_theme_node_paint_outline (MxStThemeNode           *node,
                              const ClutterActorBox *box,
                              guint8                 paint_opacity)
 
@@ -1888,11 +1888,11 @@ st_theme_node_paint_outline (StThemeNode           *node,
   width = box->x2 - box->x1;
   height = box->y2 - box->y1;
 
-  outline_width = st_theme_node_get_outline_width (node);
+  outline_width = mx_st_theme_node_get_outline_width (node);
   if (outline_width == 0)
     return;
 
-  st_theme_node_get_outline_color (node, &outline_color);
+  mx_st_theme_node_get_outline_color (node, &outline_color);
   over (&outline_color, &node->background_color, &effective_outline);
 
   cogl_set_source_color4ub (effective_outline.red,
@@ -1924,7 +1924,7 @@ st_theme_node_paint_outline (StThemeNode           *node,
 }
 
 void
-st_theme_node_paint (StThemeNode           *node,
+mx_st_theme_node_paint (MxStThemeNode           *node,
                      const ClutterActorBox *box,
                      guint8                 paint_opacity)
 {
@@ -1939,7 +1939,7 @@ st_theme_node_paint (StThemeNode           *node,
   allocation.y2 = height;
 
   if (node->alloc_width != width || node->alloc_height != height)
-    st_theme_node_render_resources (node, width, height);
+    mx_st_theme_node_render_resources (node, width, height);
 
   /* Rough notes about the relationship of borders and backgrounds in CSS3;
    * see http://www.w3.org/TR/css3-background/ for more accurate details.
@@ -1980,7 +1980,7 @@ st_theme_node_paint (StThemeNode           *node,
         {
           ClutterActorBox paint_box;
 
-          st_theme_node_get_background_paint_box (node,
+          mx_st_theme_node_get_background_paint_box (node,
                                                   &allocation,
                                                   &paint_box);
 
@@ -1990,14 +1990,14 @@ st_theme_node_paint (StThemeNode           *node,
         }
 
       if (node->border_slices_material != COGL_INVALID_HANDLE)
-        st_theme_node_paint_sliced_border_image (node, &allocation, paint_opacity);
+        mx_st_theme_node_paint_sliced_border_image (node, &allocation, paint_opacity);
     }
   else
     {
-      st_theme_node_paint_borders (node, box, paint_opacity);
+      mx_st_theme_node_paint_borders (node, box, paint_opacity);
     }
 
-  st_theme_node_paint_outline (node, box, paint_opacity);
+  mx_st_theme_node_paint_outline (node, box, paint_opacity);
 
   if (node->background_texture != COGL_INVALID_HANDLE)
     {
@@ -2008,7 +2008,7 @@ st_theme_node_paint (StThemeNode           *node,
        * then we let its background image shadows leak out, but other
        * wise we clip it.
        */
-      has_visible_outline = st_theme_node_has_visible_outline (node);
+      has_visible_outline = mx_st_theme_node_has_visible_outline (node);
 
       get_background_position (node, &allocation, &background_box);
 
@@ -2042,18 +2042,18 @@ st_theme_node_paint (StThemeNode           *node,
 }
 
 /**
- * st_theme_node_copy_cached_paint_state:
- * @node: a #StThemeNode
- * @other: a different #StThemeNode
+ * mx_st_theme_node_copy_cached_paint_state:
+ * @node: a #MxStThemeNode
+ * @other: a different #MxStThemeNode
  *
  * Copy cached painting state from @other to @node. This function can be used to
  * optimize redrawing cached background images when the style on an element changess
  * in a way that doesn't affect background drawing. This function must only be called
- * if st_theme_node_paint_equal (node, other) returns %TRUE.
+ * if mx_st_theme_node_paint_equal (node, other) returns %TRUE.
  */
 void
-st_theme_node_copy_cached_paint_state (StThemeNode *node,
-                                       StThemeNode *other)
+mx_st_theme_node_copy_cached_paint_state (MxStThemeNode *node,
+                                       MxStThemeNode *other)
 {
   int corner_id;
 
@@ -2061,9 +2061,9 @@ st_theme_node_copy_cached_paint_state (StThemeNode *node,
   g_return_if_fail (ST_IS_THEME_NODE (other));
 
   /* Check omitted for speed: */
-  /* g_return_if_fail (st_theme_node_paint_equal (node, other)); */
+  /* g_return_if_fail (mx_st_theme_node_paint_equal (node, other)); */
 
-  _st_theme_node_free_drawing_state (node);
+  _mx_st_theme_node_free_drawing_state (node);
 
   node->alloc_width = other->alloc_width;
   node->alloc_height = other->alloc_height;

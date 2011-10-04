@@ -227,7 +227,7 @@ typedef enum /*< prefix=MX_TOOLTIP_ANIMATION >*/
 } MxTooltipAnimation;
 
 /**
- * MxIconType:
+ * MxStIconType:
  * @MX_ICON_SYMBOLIC: a symbolic (ie, mostly monochrome) icon
  * @MX_ICON_FULLCOLOR: a full-color icon
  * @MX_ICON_APPLICATION: a full-color icon, which is expected
@@ -252,7 +252,7 @@ typedef enum {
   MX_ICON_FULLCOLOR,
   MX_ICON_APPLICATION,
   MX_ICON_DOCUMENT
-} MxIconType;
+} MxStIconType;
 
 G_END_DECLS
 

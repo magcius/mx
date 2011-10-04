@@ -25,7 +25,7 @@
 #include "st-theme.h"
 #include "st-theme-context.h"
 
-struct _StThemeContext {
+struct _MxStThemeContext {
   GObject parent;
 
   double resolution;
@@ -34,7 +34,7 @@ struct _StThemeContext {
   StTheme *theme;
 };
 
-struct _StThemeContextClass {
+struct _MxStThemeContextClass {
   GObjectClass parent_class;
 };
 
@@ -50,17 +50,17 @@ enum
 
 static guint signals[LAST_SIGNAL] = { 0, };
 
-G_DEFINE_TYPE (StThemeContext, st_theme_context, G_TYPE_OBJECT)
+G_DEFINE_TYPE (MxStThemeContext, mx_st_theme_context, G_TYPE_OBJECT)
 
 static void on_icon_theme_changed (StTextureCache *cache,
-                                   StThemeContext *context);
+                                   MxStThemeContext *context);
 
 static void
-st_theme_context_finalize (GObject *object)
+mx_st_theme_context_finalize (GObject *object)
 {
-  StThemeContext *context = ST_THEME_CONTEXT (object);
+  MxStThemeContext *context = MX_ST_THEME_CONTEXT (object);
 
-  g_signal_handlers_disconnect_by_func (st_texture_cache_get_default (),
+  g_signal_handlers_disconnect_by_func (mx_st_texture_cache_get_default (),
                                        (gpointer) on_icon_theme_changed,
                                        context);
 
@@ -71,15 +71,15 @@ st_theme_context_finalize (GObject *object)
 
   pango_font_description_free (context->font);
 
-  G_OBJECT_CLASS (st_theme_context_parent_class)->finalize (object);
+  G_OBJECT_CLASS (mx_st_theme_context_parent_class)->finalize (object);
 }
 
 static void
-st_theme_context_class_init (StThemeContextClass *klass)
+mx_st_theme_context_class_init (MxStThemeContextClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-  object_class->finalize = st_theme_context_finalize;
+  object_class->finalize = mx_st_theme_context_finalize;
 
   signals[CHANGED] =
     g_signal_new ("changed",
@@ -92,29 +92,29 @@ st_theme_context_class_init (StThemeContextClass *klass)
 }
 
 static void
-st_theme_context_init (StThemeContext *context)
+mx_st_theme_context_init (MxStThemeContext *context)
 {
   context->resolution = DEFAULT_RESOLUTION;
   context->font = pango_font_description_from_string (DEFAULT_FONT);
 
-  g_signal_connect (st_texture_cache_get_default (),
+  g_signal_connect (mx_st_texture_cache_get_default (),
                     "icon-theme-changed",
                     G_CALLBACK (on_icon_theme_changed),
                     context);
 }
 
 /**
- * st_theme_context_new:
+ * mx_st_theme_context_new:
  *
  * Create a new theme context not associated with any #ClutterStage.
- * This can be useful in testing scenarios, or if using StThemeContext
+ * This can be useful in testing scenarios, or if using MxStThemeContext
  * with something other than #ClutterActor objects, but you generally
- * should use st_theme_context_get_for_stage() instead.
+ * should use mx_st_theme_context_get_for_stage() instead.
  */
-StThemeContext *
-st_theme_context_new (void)
+MxStThemeContext *
+mx_st_theme_context_new (void)
 {
-  StThemeContext *context;
+  MxStThemeContext *context;
 
   context = g_object_new (ST_TYPE_THEME_CONTEXT, NULL);
 
@@ -124,14 +124,14 @@ st_theme_context_new (void)
 static void
 on_stage_destroy (ClutterStage *stage)
 {
-  StThemeContext *context = st_theme_context_get_for_stage (stage);
+  MxStThemeContext *context = mx_st_theme_context_get_for_stage (stage);
 
   g_object_set_data (G_OBJECT (stage), "st-theme-context", NULL);
   g_object_unref (context);
 }
 
 static void
-st_theme_context_changed (StThemeContext *context)
+mx_st_theme_context_changed (MxStThemeContext *context)
 {
   StThemeNode *old_root = context->root_node;
   context->root_node = NULL;
@@ -144,27 +144,27 @@ st_theme_context_changed (StThemeContext *context)
 
 static void
 on_icon_theme_changed (StTextureCache *cache,
-                       StThemeContext *context)
+                       MxStThemeContext *context)
 {
-  /* Note that an icon theme change isn't really a change of the StThemeContext;
+  /* Note that an icon theme change isn't really a change of the MxStThemeContext;
    * the style information has changed. But since the style factors into the
    * icon_name => icon lookup, faking a theme context change is a good way
    * to force users such as StIcon to look up icons again */
-  st_theme_context_changed (context);
+  mx_st_theme_context_changed (context);
 }
 
 /**
- * st_theme_context_get_for_stage:
+ * mx_st_theme_context_get_for_stage:
  * @stage: a #ClutterStage
  *
  * Gets a singleton theme context associated with the stage.
  *
  * Return value: (transfer none): the singleton theme context for the stage
  */
-StThemeContext *
-st_theme_context_get_for_stage (ClutterStage *stage)
+MxStThemeContext *
+mx_st_theme_context_get_for_stage (ClutterStage *stage)
 {
-  StThemeContext *context;
+  MxStThemeContext *context;
 
   g_return_val_if_fail (CLUTTER_IS_STAGE (stage), NULL);
 
@@ -172,7 +172,7 @@ st_theme_context_get_for_stage (ClutterStage *stage)
   if (context)
     return context;
 
-  context = st_theme_context_new ();
+  context = mx_st_theme_context_new ();
   g_object_set_data (G_OBJECT (stage), "st-theme-context", context);
   g_signal_connect (stage, "destroy",
                     G_CALLBACK (on_stage_destroy), NULL);
@@ -181,15 +181,15 @@ st_theme_context_get_for_stage (ClutterStage *stage)
 }
 
 /**
- * st_theme_context_set_theme:
- * @context: a #StThemeContext
+ * mx_st_theme_context_set_theme:
+ * @context: a #MxStThemeContext
  *
  * Sets the default set of theme stylesheets for the context. This theme will
  * be used for the root node and for nodes descending from it, unless some other
  * style is explicitely specified.
  */
 void
-st_theme_context_set_theme (StThemeContext          *context,
+mx_st_theme_context_set_theme (MxStThemeContext          *context,
                             StTheme                 *theme)
 {
   g_return_if_fail (ST_IS_THEME_CONTEXT (context));
@@ -205,20 +205,20 @@ st_theme_context_set_theme (StThemeContext          *context,
       if (context->theme)
         g_object_ref (context->theme);
 
-      st_theme_context_changed (context);
+      mx_st_theme_context_changed (context);
     }
 }
 
 /**
- * st_theme_context_get_theme:
- * @context: a #StThemeContext
+ * mx_st_theme_context_get_theme:
+ * @context: a #MxStThemeContext
  *
- * Gets the default theme for the context. See st_theme_context_set_theme()
+ * Gets the default theme for the context. See mx_st_theme_context_set_theme()
  *
  * Return value: (transfer none): the default theme for the context
  */
 StTheme *
-st_theme_context_get_theme (StThemeContext *context)
+mx_st_theme_context_get_theme (MxStThemeContext *context)
 {
   g_return_val_if_fail (ST_IS_THEME_CONTEXT (context), NULL);
 
@@ -226,8 +226,8 @@ st_theme_context_get_theme (StThemeContext *context)
 }
 
 /**
- * st_theme_context_set_resolution:
- * @context: a #StThemeContext
+ * mx_st_theme_context_set_resolution:
+ * @context: a #MxStThemeContext
  * @resolution: resolution of the context (number of pixels in an "inch")
  *
  * Sets the resolution of the theme context. This is the scale factor
@@ -237,7 +237,7 @@ st_theme_context_get_theme (StThemeContext *context)
  * pixels are identical. The default value is 96.
  */
 void
-st_theme_context_set_resolution (StThemeContext *context,
+mx_st_theme_context_set_resolution (MxStThemeContext *context,
                                  double          resolution)
 {
   g_return_if_fail (ST_IS_THEME_CONTEXT (context));
@@ -246,18 +246,18 @@ st_theme_context_set_resolution (StThemeContext *context,
     return;
 
   context->resolution = resolution;
-  st_theme_context_changed (context);
+  mx_st_theme_context_changed (context);
 }
 
 /**
- * st_theme_context_set_default_resolution:
- * @context: a #StThemeContext
+ * mx_st_theme_context_set_default_resolution:
+ * @context: a #MxStThemeContext
  *
  * Sets the resolution of the theme context to the default value of 96.
- * See st_theme_context_set_resolution().
+ * See mx_st_theme_context_set_resolution().
  */
 void
-st_theme_context_set_default_resolution (StThemeContext *context)
+mx_st_theme_context_set_default_resolution (MxStThemeContext *context)
 {
   g_return_if_fail (ST_IS_THEME_CONTEXT (context));
 
@@ -265,20 +265,20 @@ st_theme_context_set_default_resolution (StThemeContext *context)
     return;
 
   context->resolution = DEFAULT_RESOLUTION;
-  st_theme_context_changed (context);
+  mx_st_theme_context_changed (context);
 }
 
 /**
- * st_theme_context_get_resolution:
- * @context: a #StThemeContext
+ * mx_st_theme_context_get_resolution:
+ * @context: a #MxStThemeContext
  *
  * Gets the current resolution of the theme context.
- * See st_theme_context_set_resolution().
+ * See mx_st_theme_context_set_resolution().
  *
  * Return value: the resolution (in dots-per-"inch")
  */
 double
-st_theme_context_get_resolution (StThemeContext *context)
+mx_st_theme_context_get_resolution (MxStThemeContext *context)
 {
   g_return_val_if_fail (ST_IS_THEME_CONTEXT (context), DEFAULT_RESOLUTION);
 
@@ -286,8 +286,8 @@ st_theme_context_get_resolution (StThemeContext *context)
 }
 
 /**
- * st_theme_context_set_font:
- * @context: a #StThemeContext
+ * mx_st_theme_context_set_font:
+ * @context: a #MxStThemeContext
  * @font: the default font for theme context
  *
  * Sets the default font for the theme context. This is the font that
@@ -297,7 +297,7 @@ st_theme_context_get_resolution (StThemeContext *context)
  * modification is based on this font.
  */
 void
-st_theme_context_set_font (StThemeContext             *context,
+mx_st_theme_context_set_font (MxStThemeContext             *context,
                            const PangoFontDescription *font)
 {
   g_return_if_fail (ST_IS_THEME_CONTEXT (context));
@@ -309,19 +309,19 @@ st_theme_context_set_font (StThemeContext             *context,
 
   pango_font_description_free (context->font);
   context->font = pango_font_description_copy (font);
-  st_theme_context_changed (context);
+  mx_st_theme_context_changed (context);
 }
 
 /**
- * st_theme_context_get_font:
- * @context: a #StThemeContext
+ * mx_st_theme_context_get_font:
+ * @context: a #MxStThemeContext
  *
- * Gets the default font for the theme context. See st_theme_context_set_font().
+ * Gets the default font for the theme context. See mx_st_theme_context_set_font().
  *
  * Return value: the default font for the theme context.
  */
 const PangoFontDescription *
-st_theme_context_get_font (StThemeContext *context)
+mx_st_theme_context_get_font (MxStThemeContext *context)
 {
   g_return_val_if_fail (ST_IS_THEME_CONTEXT (context), NULL);
 
@@ -329,8 +329,8 @@ st_theme_context_get_font (StThemeContext *context)
 }
 
 /**
- * st_theme_context_get_root_node:
- * @context: a #StThemeContext
+ * mx_st_theme_context_get_root_node:
+ * @context: a #MxStThemeContext
  *
  * Gets the root node of the tree of theme style nodes that associated with this
  * context. For the node tree associated with a stage, this node represents
@@ -339,7 +339,7 @@ st_theme_context_get_font (StThemeContext *context)
  * Return value: (transfer none): the root node of the context's style tree
  */
 StThemeNode *
-st_theme_context_get_root_node (StThemeContext *context)
+mx_st_theme_context_get_root_node (MxStThemeContext *context)
 {
   if (context->root_node == NULL)
     context->root_node = st_theme_node_new (context, NULL, context->theme,

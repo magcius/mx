@@ -19,8 +19,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __ST_THEME_CONTEXT_H__
-#define __ST_THEME_CONTEXT_H__
+#ifndef __MX_ST_THEME_CONTEXT_H__
+#define __MX_ST_THEME_CONTEXT_H__
 
 #include <clutter/clutter.h>
 #include <pango/pango.h>
@@ -29,43 +29,43 @@
 G_BEGIN_DECLS
 
 /**
- * SECTION:StThemeContext
+ * SECTION:MxStThemeContext
  * @short_description: holds global information about a tree of styled objects
  *
- * #StThemeContext is responsible for managing information global to a tree of styled objects,
- * such as the set of stylesheets or the default font. In normal usage, a #StThemeContext
- * is bound to a #ClutterStage; a singleton #StThemeContext can be obtained for a #ClutterStage
- * by using st_theme_context_get_for_stage().
+ * #MxStThemeContext is responsible for managing information global to a tree of styled objects,
+ * such as the set of stylesheets or the default font. In normal usage, a #MxStThemeContext
+ * is bound to a #ClutterStage; a singleton #MxStThemeContext can be obtained for a #ClutterStage
+ * by using mx_st_theme_context_get_for_stage().
  */
 
-typedef struct _StThemeContextClass StThemeContextClass;
+typedef struct _MxStThemeContextClass MxStThemeContextClass;
 
-#define ST_TYPE_THEME_CONTEXT             (st_theme_context_get_type ())
-#define ST_THEME_CONTEXT(object)          (G_TYPE_CHECK_INSTANCE_CAST ((object), ST_TYPE_THEME_CONTEXT, StThemeContext))
-#define ST_THEME_CONTEXT_CLASS(klass)     (G_TYPE_CHECK_CLASS_CAST ((klass), ST_TYPE_THEME_CONTEXT, StThemeContextClass))
+#define ST_TYPE_THEME_CONTEXT             (mx_st_theme_context_get_type ())
+#define MX_ST_THEME_CONTEXT(object)          (G_TYPE_CHECK_INSTANCE_CAST ((object), ST_TYPE_THEME_CONTEXT, MxStThemeContext))
+#define MX_ST_THEME_CONTEXT_CLASS(klass)     (G_TYPE_CHECK_CLASS_CAST ((klass), ST_TYPE_THEME_CONTEXT, MxStThemeContextClass))
 #define ST_IS_THEME_CONTEXT(object)       (G_TYPE_CHECK_INSTANCE_TYPE ((object), ST_TYPE_THEME_CONTEXT))
 #define ST_IS_THEME_CONTEXT_CLASS(klass)  (G_TYPE_CHECK_CLASS_TYPE ((klass), ST_TYPE_THEME_CONTEXT))
-#define ST_THEME_CONTEXT_GET_CLASS(obj)   (G_TYPE_INSTANCE_GET_CLASS ((obj), ST_TYPE_THEME_CONTEXT, StThemeContextClass))
+#define MX_ST_THEME_CONTEXT_GET_CLASS(obj)   (G_TYPE_INSTANCE_GET_CLASS ((obj), ST_TYPE_THEME_CONTEXT, MxStThemeContextClass))
 
-GType st_theme_context_get_type (void) G_GNUC_CONST;
+GType mx_st_theme_context_get_type (void) G_GNUC_CONST;
 
-StThemeContext *st_theme_context_new           (void);
-StThemeContext *st_theme_context_get_for_stage (ClutterStage *stage);
+MxStThemeContext *mx_st_theme_context_new           (void);
+MxStThemeContext *mx_st_theme_context_get_for_stage (ClutterStage *stage);
 
-void                        st_theme_context_set_theme      (StThemeContext             *context,
+void                        mx_st_theme_context_set_theme      (MxStThemeContext             *context,
                                                              StTheme                    *theme);
-StTheme *                   st_theme_context_get_theme      (StThemeContext             *context);
+StTheme *                   mx_st_theme_context_get_theme      (MxStThemeContext             *context);
 
-void                        st_theme_context_set_resolution (StThemeContext             *context,
+void                        mx_st_theme_context_set_resolution (MxStThemeContext             *context,
                                                              gdouble                     resolution);
-void                        st_theme_context_set_default_resolution (StThemeContext *context);
-double                      st_theme_context_get_resolution (StThemeContext             *context);
-void                        st_theme_context_set_font       (StThemeContext             *context,
+void                        mx_st_theme_context_set_default_resolution (MxStThemeContext *context);
+double                      mx_st_theme_context_get_resolution (MxStThemeContext             *context);
+void                        mx_st_theme_context_set_font       (MxStThemeContext             *context,
                                                              const PangoFontDescription *font);
-const PangoFontDescription *st_theme_context_get_font       (StThemeContext             *context);
+const PangoFontDescription *mx_st_theme_context_get_font       (MxStThemeContext             *context);
 
-StThemeNode *               st_theme_context_get_root_node  (StThemeContext             *context);
+StThemeNode *               mx_st_theme_context_get_root_node  (MxStThemeContext             *context);
 
 G_END_DECLS
 
-#endif /* __ST_THEME_CONTEXT_H__ */
+#endif /* __MX_ST_THEME_CONTEXT_H__ */

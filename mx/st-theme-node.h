@@ -20,8 +20,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __ST_THEME_NODE_H__
-#define __ST_THEME_NODE_H__
+#ifndef __MX_ST_THEME_NODE_H__
+#define __MX_ST_THEME_NODE_H__
 
 #include <clutter/clutter.h>
 #include "st-border-image.h"
@@ -31,32 +31,32 @@
 G_BEGIN_DECLS
 
 /**
- * SECTION:StThemeNode
+ * SECTION:MxStThemeNode
  * @short_description: style information for one node in a tree of themed objects
  *
- * A #StThemeNode represents the CSS style information (the set of CSS properties) for one
+ * A #MxStThemeNode represents the CSS style information (the set of CSS properties) for one
  * node in a tree of themed objects. In typical usage, it represents the style information
- * for a single #ClutterActor. A #StThemeNode is immutable: attributes such as the
+ * for a single #ClutterActor. A #MxStThemeNode is immutable: attributes such as the
  * CSS classes for the node are passed in at construction. If the attributes of the node
  * or any parent node change, the node should be discarded and a new node created.
- * #StThemeNode has generic accessors to look up properties by name and specific
+ * #MxStThemeNode has generic accessors to look up properties by name and specific
  * accessors for standard CSS properties that add caching and handling of various
- * details of the CSS specification. #StThemeNode also has convenience functions to help
+ * details of the CSS specification. #MxStThemeNode also has convenience functions to help
  * in implementing a #ClutterActor with borders and padding.
  */
 
 typedef struct _StTheme          StTheme;
 typedef struct _StThemeContext   StThemeContext;
 
-typedef struct _StThemeNode      StThemeNode;
-typedef struct _StThemeNodeClass StThemeNodeClass;
+typedef struct _MxStThemeNode      MxStThemeNode;
+typedef struct _MxStThemeNodeClass MxStThemeNodeClass;
 
-#define ST_TYPE_THEME_NODE              (st_theme_node_get_type ())
-#define ST_THEME_NODE(object)           (G_TYPE_CHECK_INSTANCE_CAST ((object), ST_TYPE_THEME_NODE, StThemeNode))
-#define ST_THEME_NODE_CLASS(klass)      (G_TYPE_CHECK_CLASS_CAST ((klass),     ST_TYPE_THEME_NODE, StThemeNodeClass))
+#define ST_TYPE_THEME_NODE              (mx_st_theme_node_get_type ())
+#define MX_ST_THEME_NODE(object)           (G_TYPE_CHECK_INSTANCE_CAST ((object), ST_TYPE_THEME_NODE, MxStThemeNode))
+#define MX_ST_THEME_NODE_CLASS(klass)      (G_TYPE_CHECK_CLASS_CAST ((klass),     ST_TYPE_THEME_NODE, MxStThemeNodeClass))
 #define ST_IS_THEME_NODE(object)        (G_TYPE_CHECK_INSTANCE_TYPE ((object), ST_TYPE_THEME_NODE))
 #define ST_IS_THEME_NODE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass),     ST_TYPE_THEME_NODE))
-#define ST_THEME_NODE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj),     ST_TYPE_THEME_NODE, StThemeNodeClass))
+#define MX_ST_THEME_NODE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj),     ST_TYPE_THEME_NODE, MxStThemeNodeClass))
 
 typedef enum {
     ST_SIDE_TOP,
@@ -94,10 +94,10 @@ typedef enum {
   ST_GRADIENT_RADIAL
 } StGradientType;
 
-GType st_theme_node_get_type (void) G_GNUC_CONST;
+GType mx_st_theme_node_get_type (void) G_GNUC_CONST;
 
-StThemeNode *st_theme_node_new (StThemeContext *context,
-                                StThemeNode    *parent_node,   /* can be null */
+MxStThemeNode *mx_st_theme_node_new (StThemeContext *context,
+                                MxStThemeNode    *parent_node,   /* can be null */
                                 StTheme        *theme,         /* can be null */
                                 GType           element_type,
                                 const char     *element_id,
@@ -105,146 +105,146 @@ StThemeNode *st_theme_node_new (StThemeContext *context,
                                 const char     *pseudo_class,
                                 const char     *inline_style);
 
-StThemeNode *st_theme_node_get_parent (StThemeNode *node);
+MxStThemeNode *mx_st_theme_node_get_parent (MxStThemeNode *node);
 
-StTheme *st_theme_node_get_theme (StThemeNode *node);
+StTheme *mx_st_theme_node_get_theme (MxStThemeNode *node);
 
-gboolean    st_theme_node_equal (StThemeNode *node_a, StThemeNode *node_b);
+gboolean    mx_st_theme_node_equal (MxStThemeNode *node_a, MxStThemeNode *node_b);
 
-GType       st_theme_node_get_element_type  (StThemeNode *node);
-const char *st_theme_node_get_element_id    (StThemeNode *node);
-const char *st_theme_node_get_element_class (StThemeNode *node);
-const char *st_theme_node_get_pseudo_class  (StThemeNode *node);
+GType       mx_st_theme_node_get_element_type  (MxStThemeNode *node);
+const char *mx_st_theme_node_get_element_id    (MxStThemeNode *node);
+const char *mx_st_theme_node_get_element_class (MxStThemeNode *node);
+const char *mx_st_theme_node_get_pseudo_class  (MxStThemeNode *node);
 
 /* Generic getters ... these are not cached so are less efficient. The other
  * reason for adding the more specific version is that we can handle the
  * details of the actual CSS rules, which can be complicated, especially
  * for fonts
  */
-gboolean st_theme_node_lookup_color  (StThemeNode  *node,
+gboolean mx_st_theme_node_lookup_color  (MxStThemeNode  *node,
                                       const char   *property_name,
                                       gboolean      inherit,
                                       ClutterColor *color);
-gboolean st_theme_node_lookup_double (StThemeNode  *node,
+gboolean mx_st_theme_node_lookup_double (MxStThemeNode  *node,
                                       const char   *property_name,
                                       gboolean      inherit,
                                       double       *value);
-gboolean st_theme_node_lookup_length (StThemeNode *node,
+gboolean mx_st_theme_node_lookup_length (MxStThemeNode *node,
                                       const char  *property_name,
                                       gboolean     inherit,
                                       gdouble     *length);
-gboolean st_theme_node_lookup_shadow (StThemeNode  *node,
+gboolean mx_st_theme_node_lookup_shadow (MxStThemeNode  *node,
                                       const char   *property_name,
                                       gboolean      inherit,
                                       StShadow    **shadow);
 
 /* Easier-to-use variants of the above, for application-level use */
-void          st_theme_node_get_color  (StThemeNode  *node,
+void          mx_st_theme_node_get_color  (MxStThemeNode  *node,
                                         const char   *property_name,
                                         ClutterColor *color);
-gdouble       st_theme_node_get_double (StThemeNode  *node,
+gdouble       mx_st_theme_node_get_double (MxStThemeNode  *node,
                                         const char   *property_name);
-gdouble       st_theme_node_get_length (StThemeNode  *node,
+gdouble       mx_st_theme_node_get_length (MxStThemeNode  *node,
                                         const char   *property_name);
-StShadow     *st_theme_node_get_shadow (StThemeNode  *node,
+StShadow     *mx_st_theme_node_get_shadow (MxStThemeNode  *node,
                                         const char   *property_name);
 
 /* Specific getters for particular properties: cached
  */
-void st_theme_node_get_background_color (StThemeNode  *node,
+void mx_st_theme_node_get_background_color (MxStThemeNode  *node,
                                          ClutterColor *color);
-void st_theme_node_get_foreground_color (StThemeNode  *node,
+void mx_st_theme_node_get_foreground_color (MxStThemeNode  *node,
                                          ClutterColor *color);
-void st_theme_node_get_background_gradient (StThemeNode   *node,
+void mx_st_theme_node_get_background_gradient (MxStThemeNode   *node,
                                             StGradientType *type,
                                             ClutterColor   *start,
                                             ClutterColor   *end);
 
-const char *st_theme_node_get_background_image (StThemeNode *node);
+const char *mx_st_theme_node_get_background_image (MxStThemeNode *node);
 
-int    st_theme_node_get_border_width  (StThemeNode  *node,
+int    mx_st_theme_node_get_border_width  (MxStThemeNode  *node,
                                         StSide        side);
-int    st_theme_node_get_border_radius (StThemeNode  *node,
+int    mx_st_theme_node_get_border_radius (MxStThemeNode  *node,
                                         StCorner      corner);
-void   st_theme_node_get_border_color  (StThemeNode  *node,
+void   mx_st_theme_node_get_border_color  (MxStThemeNode  *node,
                                         StSide        side,
                                         ClutterColor *color);
 
-int    st_theme_node_get_outline_width (StThemeNode  *node);
-void   st_theme_node_get_outline_color (StThemeNode  *node,
+int    mx_st_theme_node_get_outline_width (MxStThemeNode  *node);
+void   mx_st_theme_node_get_outline_color (MxStThemeNode  *node,
                                         ClutterColor *color);
 
-double st_theme_node_get_padding       (StThemeNode  *node,
+double mx_st_theme_node_get_padding       (MxStThemeNode  *node,
                                         StSide        side);
 
-double st_theme_node_get_horizontal_padding (StThemeNode *node);
-double st_theme_node_get_vertical_padding   (StThemeNode *node);
+double mx_st_theme_node_get_horizontal_padding (MxStThemeNode *node);
+double mx_st_theme_node_get_vertical_padding   (MxStThemeNode *node);
 
-int    st_theme_node_get_width         (StThemeNode  *node);
-int    st_theme_node_get_height        (StThemeNode  *node);
-int    st_theme_node_get_min_width     (StThemeNode  *node);
-int    st_theme_node_get_min_height    (StThemeNode  *node);
-int    st_theme_node_get_max_width     (StThemeNode  *node);
-int    st_theme_node_get_max_height    (StThemeNode  *node);
+int    mx_st_theme_node_get_width         (MxStThemeNode  *node);
+int    mx_st_theme_node_get_height        (MxStThemeNode  *node);
+int    mx_st_theme_node_get_min_width     (MxStThemeNode  *node);
+int    mx_st_theme_node_get_min_height    (MxStThemeNode  *node);
+int    mx_st_theme_node_get_max_width     (MxStThemeNode  *node);
+int    mx_st_theme_node_get_max_height    (MxStThemeNode  *node);
 
-int    st_theme_node_get_transition_duration (StThemeNode *node);
+int    mx_st_theme_node_get_transition_duration (MxStThemeNode *node);
 
-StTextDecoration st_theme_node_get_text_decoration (StThemeNode *node);
+StTextDecoration mx_st_theme_node_get_text_decoration (MxStThemeNode *node);
 
-StTextAlign st_theme_node_get_text_align (StThemeNode *node);
+StTextAlign mx_st_theme_node_get_text_align (MxStThemeNode *node);
 
 /* Font rule processing is pretty complicated, so we just hardcode it
  * under the standard font/font-family/font-size/etc names. This means
  * you can't have multiple separate styled fonts for a single item,
  * but that should be OK.
  */
-const PangoFontDescription *st_theme_node_get_font (StThemeNode *node);
+const PangoFontDescription *mx_st_theme_node_get_font (MxStThemeNode *node);
 
-StBorderImage *st_theme_node_get_border_image (StThemeNode *node);
-StShadow      *st_theme_node_get_box_shadow   (StThemeNode *node);
-StShadow      *st_theme_node_get_text_shadow  (StThemeNode *node);
+StBorderImage *mx_st_theme_node_get_border_image (MxStThemeNode *node);
+StShadow      *mx_st_theme_node_get_box_shadow   (MxStThemeNode *node);
+StShadow      *mx_st_theme_node_get_text_shadow  (MxStThemeNode *node);
 
-StShadow      *st_theme_node_get_background_image_shadow (StThemeNode *node);
+StShadow      *mx_st_theme_node_get_background_image_shadow (MxStThemeNode *node);
 
-StIconColors  *st_theme_node_get_icon_colors  (StThemeNode *node);
+StIconColors  *mx_st_theme_node_get_icon_colors  (MxStThemeNode *node);
 
 /* Helpers for get_preferred_width()/get_preferred_height() ClutterActor vfuncs */
-void st_theme_node_adjust_for_height       (StThemeNode  *node,
+void mx_st_theme_node_adjust_for_height       (MxStThemeNode  *node,
                                             float        *for_height);
-void st_theme_node_adjust_preferred_width  (StThemeNode  *node,
+void mx_st_theme_node_adjust_preferred_width  (MxStThemeNode  *node,
                                             float        *min_width_p,
                                             float        *natural_width_p);
-void st_theme_node_adjust_for_width        (StThemeNode  *node,
+void mx_st_theme_node_adjust_for_width        (MxStThemeNode  *node,
                                             float        *for_width);
-void st_theme_node_adjust_preferred_height (StThemeNode  *node,
+void mx_st_theme_node_adjust_preferred_height (MxStThemeNode  *node,
                                             float        *min_height_p,
                                             float        *natural_height_p);
 
 /* Helper for allocate() ClutterActor vfunc */
-void st_theme_node_get_content_box         (StThemeNode        *node,
+void mx_st_theme_node_get_content_box         (MxStThemeNode        *node,
                                             const ClutterActorBox *allocation,
                                             ClutterActorBox       *content_box);
-/* Helper for StThemeNodeTransition */
-void st_theme_node_get_paint_box           (StThemeNode           *node,
+/* Helper for MxStThemeNodeTransition */
+void mx_st_theme_node_get_paint_box           (MxStThemeNode           *node,
                                             const ClutterActorBox *allocation,
                                             ClutterActorBox       *paint_box);
 /* Helper for background prerendering */
-void st_theme_node_get_background_paint_box (StThemeNode           *node,
+void mx_st_theme_node_get_background_paint_box (MxStThemeNode           *node,
                                              const ClutterActorBox *allocation,
                                              ClutterActorBox       *paint_box);
 
-gboolean st_theme_node_geometry_equal (StThemeNode *node,
-                                       StThemeNode *other);
-gboolean st_theme_node_paint_equal    (StThemeNode *node,
-                                       StThemeNode *other);
+gboolean mx_st_theme_node_geometry_equal (MxStThemeNode *node,
+                                       MxStThemeNode *other);
+gboolean mx_st_theme_node_paint_equal    (MxStThemeNode *node,
+                                       MxStThemeNode *other);
 
-void st_theme_node_paint (StThemeNode            *node,
+void mx_st_theme_node_paint (MxStThemeNode            *node,
                           const ClutterActorBox  *box,
                           guint8                  paint_opacity);
 
-void st_theme_node_copy_cached_paint_state (StThemeNode *node,
-                                            StThemeNode *other);
+void mx_st_theme_node_copy_cached_paint_state (MxStThemeNode *node,
+                                            MxStThemeNode *other);
 
 G_END_DECLS
 
-#endif /* __ST_THEME_NODE_H__ */
+#endif /* __MX_ST_THEME_NODE_H__ */
