@@ -19,104 +19,103 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __ST_TEXTURE_CACHE_H__
-#define __ST_TEXTURE_CACHE_H__
+#ifndef __MX_ST_TEXTURE_CACHE_H__
+#define __MX_ST_TEXTURE_CACHE_H__
 
 #include <gio/gio.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <clutter/clutter.h>
 
 #include <mx/mx-types.h>
-#include <mx/st-types.h>
 #include <mx/st-theme-node.h>
 
-#define ST_TYPE_TEXTURE_CACHE                 (st_texture_cache_get_type ())
-#define ST_TEXTURE_CACHE(obj)                 (G_TYPE_CHECK_INSTANCE_CAST ((obj), ST_TYPE_TEXTURE_CACHE, StTextureCache))
-#define ST_TEXTURE_CACHE_CLASS(klass)         (G_TYPE_CHECK_CLASS_CAST ((klass), ST_TYPE_TEXTURE_CACHE, StTextureCacheClass))
-#define ST_IS_TEXTURE_CACHE(obj)              (G_TYPE_CHECK_INSTANCE_TYPE ((obj), ST_TYPE_TEXTURE_CACHE))
-#define ST_IS_TEXTURE_CACHE_CLASS(klass)      (G_TYPE_CHECK_CLASS_TYPE ((klass), ST_TYPE_TEXTURE_CACHE))
-#define ST_TEXTURE_CACHE_GET_CLASS(obj)       (G_TYPE_INSTANCE_GET_CLASS ((obj), ST_TYPE_TEXTURE_CACHE, StTextureCacheClass))
+#define MX_ST_TYPE_TEXTURE_CACHE                 (st_texture_cache_get_type ())
+#define MX_ST_TEXTURE_CACHE(obj)                 (G_TYPE_CHECK_INSTANCE_CAST ((obj), MX_ST_TYPE_TEXTURE_CACHE, MxStTextureCache))
+#define MX_ST_TEXTURE_CACHE_CLASS(klass)         (G_TYPE_CHECK_CLASS_CAST ((klass), MX_ST_TYPE_TEXTURE_CACHE, MxStTextureCacheClass))
+#define MX_ST_IS_TEXTURE_CACHE(obj)              (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MX_ST_TYPE_TEXTURE_CACHE))
+#define MX_ST_IS_TEXTURE_CACHE_CLASS(klass)      (G_TYPE_CHECK_CLASS_TYPE ((klass), MX_ST_TYPE_TEXTURE_CACHE))
+#define MX_ST_TEXTURE_CACHE_GET_CLASS(obj)       (G_TYPE_INSTANCE_GET_CLASS ((obj), MX_ST_TYPE_TEXTURE_CACHE, MxStTextureCacheClass))
 
-typedef struct _StTextureCache StTextureCache;
-typedef struct _StTextureCacheClass StTextureCacheClass;
+typedef struct _MxStTextureCache MxStTextureCache;
+typedef struct _MxStTextureCacheClass MxStTextureCacheClass;
 
-typedef struct _StTextureCachePrivate StTextureCachePrivate;
+typedef struct _MxStTextureCachePrivate MxStTextureCachePrivate;
 
-struct _StTextureCache
+struct _MxStTextureCache
 {
   GObject parent;
 
-  StTextureCachePrivate *priv;
+  MxStTextureCachePrivate *priv;
 };
 
-struct _StTextureCacheClass
+struct _MxStTextureCacheClass
 {
   GObjectClass parent_class;
 
 };
 
 typedef enum {
-  ST_TEXTURE_CACHE_POLICY_NONE,
-  ST_TEXTURE_CACHE_POLICY_FOREVER
-} StTextureCachePolicy;
+  MX_ST_TEXTURE_CACHE_POLICY_NONE,
+  MX_ST_TEXTURE_CACHE_POLICY_FOREVER
+} MxStTextureCachePolicy;
 
-GType st_texture_cache_get_type (void) G_GNUC_CONST;
+GType mx_st_texture_cache_get_type (void) G_GNUC_CONST;
 
-StTextureCache* st_texture_cache_get_default (void);
+MxStTextureCache* st_texture_cache_get_default (void);
 
 ClutterGroup *
-st_texture_cache_load_sliced_image (StTextureCache    *cache,
+mx_st_texture_cache_load_sliced_image (MxStTextureCache    *cache,
                                     const gchar       *path,
                                     gint               grid_width,
                                     gint               grid_height);
 
-ClutterActor *st_texture_cache_bind_pixbuf_property (StTextureCache    *cache,
+ClutterActor *mx_st_texture_cache_bind_pixbuf_property (MxStTextureCache    *cache,
                                                      GObject           *object,
                                                      const char        *property_name);
 
-ClutterActor *st_texture_cache_load_icon_name (StTextureCache *cache,
+ClutterActor *mx_st_texture_cache_load_icon_name (MxStTextureCache *cache,
                                                StThemeNode    *theme_node,
                                                const char     *name,
-                                               StIconType      icon_type,
+                                               MxIconType      icon_type,
                                                gint            size);
 
-ClutterActor *st_texture_cache_load_gicon (StTextureCache *cache,
+ClutterActor *mx_st_texture_cache_load_gicon (MxStTextureCache *cache,
                                            StThemeNode    *theme_node,
                                            GIcon          *icon,
                                            gint            size);
 
-ClutterActor *st_texture_cache_load_thumbnail (StTextureCache *cache,
+ClutterActor *mx_st_texture_cache_load_thumbnail (MxStTextureCache *cache,
                                                int             size,
                                                const char     *uri,
                                                const char     *mimetype);
 
-ClutterActor *st_texture_cache_load_uri_async (StTextureCache    *cache,
+ClutterActor *mx_st_texture_cache_load_uri_async (MxStTextureCache    *cache,
                                                const gchar       *uri,
                                                int                available_width,
                                                int                available_height);
 
-ClutterActor *st_texture_cache_load_uri_sync (StTextureCache       *cache,
-                                              StTextureCachePolicy  policy,
+ClutterActor *mx_st_texture_cache_load_uri_sync (MxStTextureCache       *cache,
+                                              MxStTextureCachePolicy  policy,
                                               const gchar          *uri,
                                               int                   available_width,
                                               int                   available_height,
                                               GError              **error);
 
-CoglHandle    st_texture_cache_load_file_to_cogl_texture (StTextureCache *cache,
+CoglHandle    mx_st_texture_cache_load_file_to_cogl_texture (MxStTextureCache *cache,
                                                           const gchar    *file_path);
 
-cairo_surface_t *st_texture_cache_load_file_to_cairo_surface (StTextureCache *cache,
+cairo_surface_t *mx_st_texture_cache_load_file_to_cairo_surface (MxStTextureCache *cache,
                                                               const gchar    *file_path);
 
-ClutterActor *st_texture_cache_load_file_simple (StTextureCache *cache,
+ClutterActor *mx_st_texture_cache_load_file_simple (MxStTextureCache *cache,
                                                  const gchar    *file_path);
 
-ClutterActor *st_texture_cache_load_from_data (StTextureCache    *cache,
+ClutterActor *mx_st_texture_cache_load_from_data (MxStTextureCache    *cache,
                                                const guchar      *data,
                                                gsize              len,
                                                int                size,
                                                GError           **error);
-ClutterActor *st_texture_cache_load_from_raw  (StTextureCache    *cache,
+ClutterActor *mx_st_texture_cache_load_from_raw  (MxStTextureCache    *cache,
                                                const guchar      *data,
                                                gsize              len,
                                                gboolean           has_alpha,
@@ -127,25 +126,25 @@ ClutterActor *st_texture_cache_load_from_raw  (StTextureCache    *cache,
                                                GError           **error);
 
 /**
- * StTextureCacheLoader: (skip)
- * @cache: a #StTextureCache
+ * MxStTextureCacheLoader: (skip)
+ * @cache: a #MxStTextureCache
  * @key: Unique identifier for this texture
  * @data: Callback user data
  * @error: A #GError
  *
- * See st_texture_cache_load().  Implementations should return a
+ * See mx_st_texture_cache_load().  Implementations should return a
  * texture handle for the given key, or set @error.
  *
  */
-typedef CoglHandle (*StTextureCacheLoader) (StTextureCache *cache, const char *key, void *data, GError **error);
+typedef CoglHandle (*MxStTextureCacheLoader) (MxStTextureCache *cache, const char *key, void *data, GError **error);
 
-CoglHandle st_texture_cache_load (StTextureCache       *cache,
+CoglHandle mx_st_texture_cache_load (MxStTextureCache       *cache,
                                   const char           *key,
-                                  StTextureCachePolicy  policy,
-                                  StTextureCacheLoader  load,
+                                  MxStTextureCachePolicy  policy,
+                                  MxStTextureCacheLoader  load,
                                   void                 *data,
                                   GError              **error);
 
-gboolean st_texture_cache_pixbuf_equal (StTextureCache *cache, GdkPixbuf *a, GdkPixbuf *b);
+gboolean mx_st_texture_cache_pixbuf_equal (MxStTextureCache *cache, GdkPixbuf *a, GdkPixbuf *b);
 
-#endif /* __ST_TEXTURE_CACHE_H__ */
+#endif /* __MX_ST_TEXTURE_CACHE_H__ */

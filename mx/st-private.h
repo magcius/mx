@@ -27,7 +27,6 @@
 #include <cairo.h>
 #include "mx-widget.h"
 #include "st-shadow.h"
-#include "st-types.h"
 
 void _st_set_text_from_style (ClutterText *text,
                               StThemeNode *theme_node);

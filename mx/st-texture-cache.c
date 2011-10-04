@@ -36,7 +36,7 @@
 #define CACHE_PREFIX_RAW_CHECKSUM "raw-checksum:"
 #define CACHE_PREFIX_COMPRESSED_CHECKSUM "compressed-checksum:"
 
-struct _StTextureCachePrivate
+struct _MxStTextureCachePrivate
 {
   GtkIconTheme *icon_theme;
 
@@ -50,8 +50,8 @@ struct _StTextureCachePrivate
   GnomeDesktopThumbnailFactory *thumbnails;
 };
 
-static void st_texture_cache_dispose (GObject *object);
-static void st_texture_cache_finalize (GObject *object);
+static void mx_st_texture_cache_dispose (GObject *object);
+static void mx_st_texture_cache_finalize (GObject *object);
 
 enum
 {
@@ -61,14 +61,14 @@ enum
 };
 
 static guint signals[LAST_SIGNAL] = { 0, };
-G_DEFINE_TYPE(StTextureCache, st_texture_cache, G_TYPE_OBJECT);
+G_DEFINE_TYPE(MxStTextureCache, mx_st_texture_cache, G_TYPE_OBJECT);
 
 /* We want to preserve the aspect ratio by default, also the default
  * material for an empty texture is full opacity white, which we
  * definitely don't want.  Skip that by setting 0 opacity.
  */
 static ClutterTexture *
-create_default_texture (StTextureCache *self)
+create_default_texture (MxStTextureCache *self)
 {
   ClutterTexture * texture = CLUTTER_TEXTURE (clutter_texture_new ());
   g_object_set (texture, "keep-aspect-ratio", TRUE, "opacity", 0, NULL);
@@ -84,12 +84,12 @@ set_texture_cogl_texture (ClutterTexture *clutter_texture, CoglHandle cogl_textu
 }
 
 static void
-st_texture_cache_class_init (StTextureCacheClass *klass)
+mx_st_texture_cache_class_init (MxStTextureCacheClass *klass)
 {
   GObjectClass *gobject_class = (GObjectClass *)klass;
 
-  gobject_class->dispose = st_texture_cache_dispose;
-  gobject_class->finalize = st_texture_cache_finalize;
+  gobject_class->dispose = mx_st_texture_cache_dispose;
+  gobject_class->finalize = mx_st_texture_cache_finalize;
 
   signals[ICON_THEME_CHANGED] =
     g_signal_new ("icon-theme-changed",
@@ -103,7 +103,7 @@ st_texture_cache_class_init (StTextureCacheClass *klass)
 
 /* Evicts all cached textures for named icons */
 static void
-st_texture_cache_evict_icons (StTextureCache *cache)
+mx_st_texture_cache_evict_icons (MxStTextureCache *cache)
 {
   GHashTableIter iter;
   gpointer key;
@@ -125,16 +125,16 @@ st_texture_cache_evict_icons (StTextureCache *cache)
 
 static void
 on_icon_theme_changed (GtkIconTheme   *icon_theme,
-                       StTextureCache *cache)
+                       MxStTextureCache *cache)
 {
-  st_texture_cache_evict_icons (cache);
+  mx_st_texture_cache_evict_icons (cache);
   g_signal_emit (cache, signals[ICON_THEME_CHANGED], 0);
 }
 
 static void
-st_texture_cache_init (StTextureCache *self)
+mx_st_texture_cache_init (MxStTextureCache *self)
 {
-  self->priv = g_new0 (StTextureCachePrivate, 1);
+  self->priv = g_new0 (MxStTextureCachePrivate, 1);
 
   self->priv->icon_theme = gtk_icon_theme_get_default ();
   g_signal_connect (self->priv->icon_theme, "changed",
@@ -148,9 +148,9 @@ st_texture_cache_init (StTextureCache *self)
 }
 
 static void
-st_texture_cache_dispose (GObject *object)
+mx_st_texture_cache_dispose (GObject *object)
 {
-  StTextureCache *self = (StTextureCache*)object;
+  MxStTextureCache *self = (MxStTextureCache*)object;
 
   if (self->priv->icon_theme)
     {
@@ -172,17 +172,17 @@ st_texture_cache_dispose (GObject *object)
     g_object_unref (self->priv->thumbnails);
   self->priv->thumbnails = NULL;
 
-  G_OBJECT_CLASS (st_texture_cache_parent_class)->dispose (object);
+  G_OBJECT_CLASS (mx_st_texture_cache_parent_class)->dispose (object);
 }
 
 static void
-st_texture_cache_finalize (GObject *object)
+mx_st_texture_cache_finalize (GObject *object)
 {
-  G_OBJECT_CLASS (st_texture_cache_parent_class)->finalize (object);
+  G_OBJECT_CLASS (mx_st_texture_cache_parent_class)->finalize (object);
 }
 
 typedef struct {
-  StTextureCache *cache;
+  MxStTextureCache *cache;
   char *uri;
   char *mimetype;
   gboolean thumbnail;
@@ -327,7 +327,7 @@ icon_lookup_data_destroy (gpointer p)
   if (data->mimetype)
     g_free (data->mimetype);
   if (data->colors)
-    st_icon_colors_unref (data->colors);
+    mx_st_icon_colors_unref (data->colors);
 
   g_free (data);
 }
@@ -526,7 +526,7 @@ impl_load_pixbuf_file (const char     *uri,
 }
 
 static GdkPixbuf *
-impl_load_thumbnail (StTextureCache    *cache,
+impl_load_thumbnail (MxStTextureCache    *cache,
                      const char        *uri,
                      const char        *mime_type,
                      guint              size,
@@ -641,7 +641,7 @@ load_pixbuf_thread (GSimpleAsyncResult *result,
  * the #GtkIconInfo must have already been provided.
  */
 static void
-load_icon_pixbuf_async (StTextureCache       *cache,
+load_icon_pixbuf_async (MxStTextureCache       *cache,
                         GIcon                *icon,
                         GtkIconInfo          *icon_info,
                         gint                  size,
@@ -659,7 +659,7 @@ load_icon_pixbuf_async (StTextureCache       *cache,
   data->icon_info = gtk_icon_info_copy (icon_info);
   data->width = data->height = size;
   if (colors)
-    data->colors = st_icon_colors_ref (colors);
+    data->colors = mx_st_icon_colors_ref (colors);
   else
     data->colors = NULL;
   data->user_data = user_data;
@@ -673,7 +673,7 @@ load_icon_pixbuf_async (StTextureCache       *cache,
 }
 
 static void
-load_uri_pixbuf_async (StTextureCache     *cache,
+load_uri_pixbuf_async (MxStTextureCache     *cache,
                        const char         *uri,
                        guint               width,
                        guint               height,
@@ -700,7 +700,7 @@ load_uri_pixbuf_async (StTextureCache     *cache,
 }
 
 static void
-load_thumbnail_async (StTextureCache     *cache,
+load_thumbnail_async (MxStTextureCache     *cache,
                       const char         *uri,
                       const char         *mimetype,
                       guint               size,
@@ -729,7 +729,7 @@ load_thumbnail_async (StTextureCache     *cache,
 }
 
 static GdkPixbuf *
-load_pixbuf_async_finish (StTextureCache *cache, GAsyncResult *result, GError **error)
+load_pixbuf_async_finish (MxStTextureCache *cache, GAsyncResult *result, GError **error)
 {
   GSimpleAsyncResult *simple = G_SIMPLE_ASYNC_RESULT (result);
   if (g_simple_async_result_propagate_error (simple, error))
@@ -738,7 +738,7 @@ load_pixbuf_async_finish (StTextureCache *cache, GAsyncResult *result, GError **
 }
 
 typedef struct {
-  StTextureCachePolicy policy;
+  MxStTextureCachePolicy policy;
   char *key;
   char *uri;
   gboolean thumbnail;
@@ -859,14 +859,14 @@ on_pixbuf_loaded (GObject      *source,
                   gpointer      user_data)
 {
   GSList *iter;
-  StTextureCache *cache;
+  MxStTextureCache *cache;
   AsyncTextureLoadData *data;
   GdkPixbuf *pixbuf;
   GError *error = NULL;
   CoglHandle texdata = NULL;
 
   data = user_data;
-  cache = ST_TEXTURE_CACHE (source);
+  cache = MX_ST_TEXTURE_CACHE (source);
 
   g_hash_table_remove (cache->priv->outstanding_requests, data->key);
 
@@ -880,7 +880,7 @@ on_pixbuf_loaded (GObject      *source,
 
   g_object_unref (pixbuf);
 
-  if (data->policy != ST_TEXTURE_CACHE_POLICY_NONE)
+  if (data->policy != MX_ST_TEXTURE_CACHE_POLICY_NONE)
     {
       gpointer orig_key, value;
 
@@ -928,15 +928,15 @@ out:
 }
 
 typedef struct {
-  StTextureCache *cache;
+  MxStTextureCache *cache;
   ClutterTexture *texture;
   GObject *source;
   guint notify_signal_id;
   gboolean weakref_active;
-} StTextureCachePropertyBind;
+} MxStTextureCachePropertyBind;
 
 static void
-st_texture_cache_reset_texture (StTextureCachePropertyBind *bind,
+mx_st_texture_cache_reset_texture (MxStTextureCachePropertyBind *bind,
                                 const char                 *propname)
 {
   GdkPixbuf *pixbuf;
@@ -961,40 +961,40 @@ st_texture_cache_reset_texture (StTextureCachePropertyBind *bind,
 }
 
 static void
-st_texture_cache_on_pixbuf_notify (GObject           *object,
+mx_st_texture_cache_on_pixbuf_notify (GObject           *object,
                                    GParamSpec        *paramspec,
                                    gpointer           data)
 {
-  StTextureCachePropertyBind *bind = data;
-  st_texture_cache_reset_texture (bind, paramspec->name);
+  MxStTextureCachePropertyBind *bind = data;
+  mx_st_texture_cache_reset_texture (bind, paramspec->name);
 }
 
 static void
-st_texture_cache_bind_weak_notify (gpointer     data,
+mx_st_texture_cache_bind_weak_notify (gpointer     data,
                                    GObject     *source_location)
 {
-  StTextureCachePropertyBind *bind = data;
+  MxStTextureCachePropertyBind *bind = data;
   bind->weakref_active = FALSE;
   g_signal_handler_disconnect (bind->source, bind->notify_signal_id);
 }
 
 static void
-st_texture_cache_free_bind (gpointer data)
+mx_st_texture_cache_free_bind (gpointer data)
 {
-  StTextureCachePropertyBind *bind = data;
+  MxStTextureCachePropertyBind *bind = data;
   if (bind->weakref_active)
-    g_object_weak_unref (G_OBJECT(bind->texture), st_texture_cache_bind_weak_notify, bind);
+    g_object_weak_unref (G_OBJECT(bind->texture), mx_st_texture_cache_bind_weak_notify, bind);
   g_free (bind);
 }
 
 /**
- * st_texture_cache_bind_pixbuf_property:
+ * mx_st_texture_cache_bind_pixbuf_property:
  * @cache:
  * @object: A #GObject with a property @property_name of type #GdkPixbuf
  * @property_name: Name of a property
  *
  * Create a #ClutterTexture which tracks the #GdkPixbuf value of a GObject property
- * named by @property_name.  Unlike other methods in StTextureCache, the underlying
+ * named by @property_name.  Unlike other methods in MxStTextureCache, the underlying
  * CoglHandle is not shared by default with other invocations to this method.
  *
  * If the source object is destroyed, the texture will continue to show the last
@@ -1003,36 +1003,36 @@ st_texture_cache_free_bind (gpointer data)
  * Return value: (transfer none): A new #ClutterActor
  */
 ClutterActor *
-st_texture_cache_bind_pixbuf_property (StTextureCache    *cache,
+mx_st_texture_cache_bind_pixbuf_property (MxStTextureCache    *cache,
                                        GObject           *object,
                                        const char        *property_name)
 {
   ClutterTexture *texture;
   gchar *notify_key;
-  StTextureCachePropertyBind *bind;
+  MxStTextureCachePropertyBind *bind;
 
   texture = CLUTTER_TEXTURE (clutter_texture_new ());
 
-  bind = g_new0 (StTextureCachePropertyBind, 1);
+  bind = g_new0 (MxStTextureCachePropertyBind, 1);
   bind->cache = cache;
   bind->texture = texture;
   bind->source = object;
-  g_object_weak_ref (G_OBJECT (texture), st_texture_cache_bind_weak_notify, bind);
+  g_object_weak_ref (G_OBJECT (texture), mx_st_texture_cache_bind_weak_notify, bind);
   bind->weakref_active = TRUE;
 
-  st_texture_cache_reset_texture (bind, property_name);
+  mx_st_texture_cache_reset_texture (bind, property_name);
 
   notify_key = g_strdup_printf ("notify::%s", property_name);
-  bind->notify_signal_id = g_signal_connect_data (object, notify_key, G_CALLBACK(st_texture_cache_on_pixbuf_notify),
-                                                  bind, (GClosureNotify)st_texture_cache_free_bind, 0);
+  bind->notify_signal_id = g_signal_connect_data (object, notify_key, G_CALLBACK(mx_st_texture_cache_on_pixbuf_notify),
+                                                  bind, (GClosureNotify)mx_st_texture_cache_free_bind, 0);
   g_free (notify_key);
 
   return CLUTTER_ACTOR(texture);
 }
 
 /**
- * st_texture_cache_load: (skip)
- * @cache: A #StTextureCache
+ * mx_st_texture_cache_load: (skip)
+ * @cache: A #MxStTextureCache
  * @key: Arbitrary string used to refer to item
  * @policy: Caching policy
  * @load: Function to create the texture, if not already cached
@@ -1047,10 +1047,10 @@ st_texture_cache_bind_pixbuf_property (StTextureCache    *cache,
  * Returns: (transfer full): A newly-referenced handle to the texture
  */
 CoglHandle
-st_texture_cache_load (StTextureCache       *cache,
+mx_st_texture_cache_load (MxStTextureCache       *cache,
                        const char           *key,
-                       StTextureCachePolicy  policy,
-                       StTextureCacheLoader  load,
+                       MxStTextureCachePolicy  policy,
+                       MxStTextureCacheLoader  load,
                        void                 *data,
                        GError              **error)
 {
@@ -1084,7 +1084,7 @@ st_texture_cache_load (StTextureCache       *cache,
  * Returns: %TRUE iff there is already a request pending
  */
 static gboolean
-create_texture_and_ensure_request (StTextureCache        *cache,
+create_texture_and_ensure_request (MxStTextureCache        *cache,
                                    const char            *key,
                                    guint                  size,
                                    AsyncTextureLoadData **request,
@@ -1125,7 +1125,7 @@ create_texture_and_ensure_request (StTextureCache        *cache,
 }
 
 static ClutterActor *
-load_gicon_with_colors (StTextureCache    *cache,
+load_gicon_with_colors (MxStTextureCache    *cache,
                         GIcon             *icon,
                         gint               size,
                         StIconColors      *colors)
@@ -1136,15 +1136,15 @@ load_gicon_with_colors (StTextureCache    *cache,
   char *key;
   GtkIconTheme *theme;
   GtkIconInfo *info;
-  StTextureCachePolicy policy;
+  MxStTextureCachePolicy policy;
 
   gicon_string = g_icon_to_string (icon);
   /* A return value of NULL indicates that the icon can not be serialized,
    * so don't have a unique identifier for it as a cache key, and thus can't
    * be cached. If it is cachable, we hardcode a policy of FOREVER here for
    * now; we should actually blow this away on icon theme changes probably */
-  policy = gicon_string != NULL ? ST_TEXTURE_CACHE_POLICY_FOREVER
-                                : ST_TEXTURE_CACHE_POLICY_NONE;
+  policy = gicon_string != NULL ? MX_ST_TEXTURE_CACHE_POLICY_FOREVER
+                                : MX_ST_TEXTURE_CACHE_POLICY_NONE;
   if (colors)
     {
       /* This raises some doubts about the practice of using string keys */
@@ -1202,7 +1202,7 @@ load_gicon_with_colors (StTextureCache    *cache,
 }
 
 /**
- * st_texture_cache_load_gicon:
+ * mx_st_texture_cache_load_gicon:
  * @cache: The texture cache instance
  * @theme_node: (allow-none): The #StThemeNode to use for colors, or NULL
  *                            if the icon must not be recolored
@@ -1214,17 +1214,17 @@ load_gicon_with_colors (StTextureCache    *cache,
  * asynchronously.
  *
  * This will load @icon as a full-color icon; if you want a symbolic
- * icon, you must use st_texture_cache_load_icon_name().
+ * icon, you must use mx_st_texture_cache_load_icon_name().
  *
  * Return Value: (transfer none): A new #ClutterActor for the icon, or %NULL if not found
  */
 ClutterActor *
-st_texture_cache_load_gicon (StTextureCache    *cache,
+mx_st_texture_cache_load_gicon (MxStTextureCache    *cache,
                              StThemeNode       *theme_node,
                              GIcon             *icon,
                              gint               size)
 {
-  return load_gicon_with_colors (cache, icon, size, theme_node ? st_theme_node_get_icon_colors (theme_node) : NULL);
+  return load_gicon_with_colors (cache, icon, size, theme_node ? mx_st_theme_node_get_icon_colors (theme_node) : NULL);
 }
 
 typedef struct {
@@ -1241,7 +1241,7 @@ load_from_pixbuf (GdkPixbuf *pixbuf)
   int width = gdk_pixbuf_get_width (pixbuf);
   int height = gdk_pixbuf_get_height (pixbuf);
 
-  texture = create_default_texture (st_texture_cache_get_default ());
+  texture = create_default_texture (mx_st_texture_cache_get_default ());
 
   clutter_actor_set_size (CLUTTER_ACTOR (texture), width, height);
 
@@ -1329,8 +1329,8 @@ load_sliced_image (GSimpleAsyncResult *result,
 }
 
 /**
- * st_texture_cache_load_sliced_image:
- * @cache: A #StTextureCache
+ * mx_st_texture_cache_load_sliced_image:
+ * @cache: A #MxStTextureCache
  * @path: Path to a filename
  * @grid_width: Width in pixels
  * @grid_height: Height in pixels
@@ -1343,7 +1343,7 @@ load_sliced_image (GSimpleAsyncResult *result,
  * Returns: (transfer none): A new ClutterGroup
  */
 ClutterGroup *
-st_texture_cache_load_sliced_image (StTextureCache    *cache,
+mx_st_texture_cache_load_sliced_image (MxStTextureCache    *cache,
                                     const gchar       *path,
                                     gint               grid_width,
                                     gint               grid_height)
@@ -1359,7 +1359,7 @@ st_texture_cache_load_sliced_image (StTextureCache    *cache,
   data->group = group;
   g_object_ref (G_OBJECT (group));
 
-  result = g_simple_async_result_new (G_OBJECT (cache), on_sliced_image_loaded, data, st_texture_cache_load_sliced_image);
+  result = g_simple_async_result_new (G_OBJECT (cache), on_sliced_image_loaded, data, mx_st_texture_cache_load_sliced_image);
 
   g_object_set_data_full (G_OBJECT (result), "load_sliced_image", data, on_data_destroy);
   g_simple_async_result_run_in_thread (result, load_sliced_image, G_PRIORITY_DEFAULT, NULL);
@@ -1368,28 +1368,6 @@ st_texture_cache_load_sliced_image (StTextureCache    *cache,
 
   return group;
 }
-
-/**
- * StIconType:
- * @ST_ICON_SYMBOLIC: a symbolic (ie, mostly monochrome) icon
- * @ST_ICON_FULLCOLOR: a full-color icon
- * @ST_ICON_APPLICATION: a full-color icon, which is expected
- *   to be an application icon
- * @ST_ICON_DOCUMENT: a full-color icon, which is expected
- *   to be a document (MIME type) icon
- *
- * Describes what style of icon is desired in a call to
- * st_texture_cache_load_icon_name() or st_texture_cache_load_gicon().
- * Use %ST_ICON_SYMBOLIC for symbolic icons (eg, for the panel and
- * much of the rest of the shell chrome) or %ST_ICON_FULLCOLOR for a
- * full-color icon.
- *
- * If you know that the requested icon is either an application icon
- * or a document type icon, you should use %ST_ICON_APPLICATION or
- * %ST_ICON_DOCUMENT, which may do a better job of selecting the
- * correct theme icon for those types. If you are unsure what kind of
- * icon you are loading, use %ST_ICON_FULLCOLOR.
- */
 
 /* generates names like g_themed_icon_new_with_default_fallbacks(),
  * but *only* symbolic names
@@ -1432,35 +1410,35 @@ symbolic_names_for_icon (const char *name)
 }
 
 /**
- * st_texture_cache_load_icon_name:
+ * mx_st_texture_cache_load_icon_name:
  * @cache: The texture cache instance
  * @theme_node: (allow-none): a #StThemeNode
  * @name: Name of a themed icon
  * @icon_type: the type of icon to load
  * @size: Size of themed
  *
- * Load a themed icon into a texture. See the #StIconType documentation
+ * Load a themed icon into a texture. See the #MxIconType documentation
  * for an explanation of how @icon_type affects the returned icon. The
  * colors used for symbolic icons are derived from @theme_node.
  *
  * Return Value: (transfer none): A new #ClutterTexture for the icon
  */
 ClutterActor *
-st_texture_cache_load_icon_name (StTextureCache    *cache,
+mx_st_texture_cache_load_icon_name (MxStTextureCache    *cache,
                                  StThemeNode       *theme_node,
                                  const char        *name,
-                                 StIconType         icon_type,
+                                 MxIconType         icon_type,
                                  gint               size)
 {
   ClutterActor *texture;
   GIcon *themed;
   char **names;
 
-  g_return_val_if_fail (!(icon_type == ST_ICON_SYMBOLIC && theme_node == NULL), NULL);
+  g_return_val_if_fail (!(icon_type == MX_ICON_SYMBOLIC && theme_node == NULL), NULL);
 
   switch (icon_type)
     {
-    case ST_ICON_APPLICATION:
+    case MX_ICON_APPLICATION:
       themed = g_themed_icon_new (name);
       texture = load_gicon_with_colors (cache, themed, size, NULL);
       g_object_unref (themed);
@@ -1472,7 +1450,7 @@ st_texture_cache_load_icon_name (StTextureCache    *cache,
         }
       return CLUTTER_ACTOR (texture);
       break;
-    case ST_ICON_DOCUMENT:
+    case MX_ICON_DOCUMENT:
       themed = g_themed_icon_new (name);
       texture = load_gicon_with_colors (cache, themed, size, NULL);
       g_object_unref (themed);
@@ -1485,17 +1463,17 @@ st_texture_cache_load_icon_name (StTextureCache    *cache,
 
       return CLUTTER_ACTOR (texture);
       break;
-    case ST_ICON_SYMBOLIC:
+    case MX_ICON_SYMBOLIC:
       names = symbolic_names_for_icon (name);
       themed = g_themed_icon_new_from_names (names, -1);
       g_strfreev (names);
       texture = load_gicon_with_colors (cache, themed, size,
-                                        st_theme_node_get_icon_colors (theme_node));
+                                        mx_st_theme_node_get_icon_colors (theme_node));
       g_object_unref (themed);
 
       return CLUTTER_ACTOR (texture);
       break;
-    case ST_ICON_FULLCOLOR:
+    case MX_ICON_FULLCOLOR:
       themed = g_themed_icon_new_with_default_fallbacks (name);
       texture = load_gicon_with_colors (cache, themed, size, NULL);
       g_object_unref (themed);
@@ -1514,7 +1492,7 @@ st_texture_cache_load_icon_name (StTextureCache    *cache,
 }
 
 /**
- * st_texture_cache_load_uri_async:
+ * mx_st_texture_cache_load_uri_async:
  *
  * @cache: The texture cache instance
  * @uri: uri of the image file from which to create a pixbuf
@@ -1528,7 +1506,7 @@ st_texture_cache_load_icon_name (StTextureCache    *cache,
  * Return value: (transfer none): A new #ClutterActor with no image loaded initially.
  */
 ClutterActor *
-st_texture_cache_load_uri_async (StTextureCache *cache,
+mx_st_texture_cache_load_uri_async (MxStTextureCache *cache,
                                  const gchar    *uri,
                                  int             available_width,
                                  int             available_height)
@@ -1540,19 +1518,19 @@ st_texture_cache_load_uri_async (StTextureCache *cache,
 
   data = g_new0 (AsyncTextureLoadData, 1);
   data->key = g_strconcat (CACHE_PREFIX_URI, uri, NULL);
-  data->policy = ST_TEXTURE_CACHE_POLICY_NONE;
+  data->policy = MX_ST_TEXTURE_CACHE_POLICY_NONE;
   data->uri = g_strdup (uri);
   data->width = available_width;
   data->height = available_height;
-  data->textures = g_slist_prepend (data->textures, g_object_ref (texture));
+  data->textures = g_slimx_st_prepend (data->textures, g_object_ref (texture));
   load_uri_pixbuf_async (cache, uri, available_width, available_height, NULL, on_pixbuf_loaded, data);
 
   return CLUTTER_ACTOR (texture);
 }
 
 static CoglHandle
-st_texture_cache_load_uri_sync_to_cogl_texture (StTextureCache *cache,
-                                                StTextureCachePolicy policy,
+mx_st_texture_cache_load_uri_sync_to_cogl_texture (MxStTextureCache *cache,
+                                                MxStTextureCachePolicy policy,
                                                 const gchar    *uri,
                                                 int             available_width,
                                                 int             available_height,
@@ -1575,7 +1553,7 @@ st_texture_cache_load_uri_sync_to_cogl_texture (StTextureCache *cache,
       texdata = pixbuf_to_cogl_handle (pixbuf, FALSE);
       g_object_unref (pixbuf);
 
-      if (policy == ST_TEXTURE_CACHE_POLICY_FOREVER)
+      if (policy == MX_ST_TEXTURE_CACHE_POLICY_FOREVER)
         {
           cogl_handle_ref (texdata);
           g_hash_table_insert (cache->priv->keyed_cache, g_strdup (key), texdata);
@@ -1590,8 +1568,8 @@ out:
 }
 
 static cairo_surface_t *
-st_texture_cache_load_uri_sync_to_cairo_surface (StTextureCache        *cache,
-                                                 StTextureCachePolicy   policy,
+mx_st_texture_cache_load_uri_sync_to_cairo_surface (MxStTextureCache        *cache,
+                                                 MxStTextureCachePolicy   policy,
                                                  const gchar           *uri,
                                                  int                    available_width,
                                                  int                    available_height,
@@ -1614,7 +1592,7 @@ st_texture_cache_load_uri_sync_to_cairo_surface (StTextureCache        *cache,
       surface = pixbuf_to_cairo_surface (pixbuf);
       g_object_unref (pixbuf);
 
-      if (policy == ST_TEXTURE_CACHE_POLICY_FOREVER)
+      if (policy == MX_ST_TEXTURE_CACHE_POLICY_FOREVER)
         {
           cairo_surface_reference (surface);
           g_hash_table_insert (cache->priv->keyed_cache, g_strdup (key), surface);
@@ -1629,7 +1607,7 @@ out:
 }
 
 /**
- * st_texture_cache_load_uri_sync:
+ * mx_st_texture_cache_load_uri_sync:
  *
  * @cache: The texture cache instance
  * @policy: Requested lifecycle of cached data
@@ -1647,8 +1625,8 @@ out:
  *               generated succesfully, %NULL otherwise
  */
 ClutterActor *
-st_texture_cache_load_uri_sync (StTextureCache *cache,
-                                StTextureCachePolicy policy,
+mx_st_texture_cache_load_uri_sync (MxStTextureCache *cache,
+                                MxStTextureCachePolicy policy,
                                 const gchar       *uri,
                                 int                available_width,
                                 int                available_height,
@@ -1657,7 +1635,7 @@ st_texture_cache_load_uri_sync (StTextureCache *cache,
   CoglHandle texdata;
   ClutterTexture *texture;
 
-  texdata = st_texture_cache_load_uri_sync_to_cogl_texture (cache, policy, uri, available_width, available_height, error);
+  texdata = mx_st_texture_cache_load_uri_sync_to_cogl_texture (cache, policy, uri, available_width, available_height, error);
 
   if (texdata == COGL_INVALID_HANDLE)
     return NULL;
@@ -1670,8 +1648,8 @@ st_texture_cache_load_uri_sync (StTextureCache *cache,
 }
 
 /**
- * st_texture_cache_load_file_to_cogl_texture:
- * @cache: A #StTextureCache
+ * mx_st_texture_cache_load_file_to_cogl_texture:
+ * @cache: A #MxStTextureCache
  * @file_path: Path to a file in supported image format
  *
  * This function synchronously loads the given file path
@@ -1681,7 +1659,7 @@ st_texture_cache_load_uri_sync (StTextureCache *cache,
  * Returns: (transfer full): a new #CoglHandle
  */
 CoglHandle
-st_texture_cache_load_file_to_cogl_texture (StTextureCache *cache,
+mx_st_texture_cache_load_file_to_cogl_texture (MxStTextureCache *cache,
                                             const gchar    *file_path)
 {
   CoglHandle texture;
@@ -1692,7 +1670,7 @@ st_texture_cache_load_file_to_cogl_texture (StTextureCache *cache,
   file = g_file_new_for_path (file_path);
   uri = g_file_get_uri (file);
 
-  texture = st_texture_cache_load_uri_sync_to_cogl_texture (cache, ST_TEXTURE_CACHE_POLICY_FOREVER,
+  texture = mx_st_texture_cache_load_uri_sync_to_cogl_texture (cache, MX_ST_TEXTURE_CACHE_POLICY_FOREVER,
                                                             uri, -1, -1, &error);
   g_object_unref (file);
   g_free (uri);
@@ -1707,8 +1685,8 @@ st_texture_cache_load_file_to_cogl_texture (StTextureCache *cache,
 }
 
 /**
- * st_texture_cache_load_file_to_cairo_surface:
- * @cache: A #StTextureCache
+ * mx_st_texture_cache_load_file_to_cairo_surface:
+ * @cache: A #MxStTextureCache
  * @file_path: Path to a file in supported image format
  *
  * This function synchronously loads the given file path
@@ -1718,7 +1696,7 @@ st_texture_cache_load_file_to_cogl_texture (StTextureCache *cache,
  * Returns: (transfer full): a new #cairo_surface_t *
  */
 cairo_surface_t *
-st_texture_cache_load_file_to_cairo_surface (StTextureCache *cache,
+mx_st_texture_cache_load_file_to_cairo_surface (MxStTextureCache *cache,
                                              const gchar    *file_path)
 {
   cairo_surface_t *surface;
@@ -1729,7 +1707,7 @@ st_texture_cache_load_file_to_cairo_surface (StTextureCache *cache,
   file = g_file_new_for_path (file_path);
   uri = g_file_get_uri (file);
 
-  surface = st_texture_cache_load_uri_sync_to_cairo_surface (cache, ST_TEXTURE_CACHE_POLICY_FOREVER,
+  surface = mx_st_texture_cache_load_uri_sync_to_cairo_surface (cache, MX_ST_TEXTURE_CACHE_POLICY_FOREVER,
                                                              uri, -1, -1, &error);
   g_object_unref (file);
   g_free (uri);
@@ -1744,8 +1722,8 @@ st_texture_cache_load_file_to_cairo_surface (StTextureCache *cache,
 }
 
 /**
- * st_texture_cache_load_file_simple:
- * @cache: A #StTextureCache
+ * mx_st_texture_cache_load_file_simple:
+ * @cache: A #MxStTextureCache
  * @file_path: Filesystem path
  *
  * Synchronously load an image into a texture.  The texture will be cached
@@ -1754,7 +1732,7 @@ st_texture_cache_load_file_to_cairo_surface (StTextureCache *cache,
  * Returns: (transfer none): A new #ClutterTexture
  */
 ClutterActor *
-st_texture_cache_load_file_simple (StTextureCache *cache,
+mx_st_texture_cache_load_file_simple (MxStTextureCache *cache,
                                    const gchar    *file_path)
 {
   GFile *file;
@@ -1765,7 +1743,7 @@ st_texture_cache_load_file_simple (StTextureCache *cache,
   file = g_file_new_for_path (file_path);
   uri = g_file_get_uri (file);
 
-  texture = st_texture_cache_load_uri_sync (cache, ST_TEXTURE_CACHE_POLICY_FOREVER,
+  texture = mx_st_texture_cache_load_uri_sync (cache, MX_ST_TEXTURE_CACHE_POLICY_FOREVER,
                                             uri, -1, -1, &error);
   if (texture == NULL)
     {
@@ -1777,7 +1755,7 @@ st_texture_cache_load_file_simple (StTextureCache *cache,
 }
 
 /**
- * st_texture_cache_load_from_data:
+ * mx_st_texture_cache_load_from_data:
  * @cache: The texture cache instance
  * @data: Image data in PNG, GIF, etc format
  * @len: length of @data
@@ -1793,7 +1771,7 @@ st_texture_cache_load_file_simple (StTextureCache *cache,
  *               generated succesfully, %NULL otherwise
  */
 ClutterActor *
-st_texture_cache_load_from_data (StTextureCache    *cache,
+mx_st_texture_cache_load_from_data (MxStTextureCache    *cache,
                                  const guchar      *data,
                                  gsize              len,
                                  int                size,
@@ -1838,8 +1816,8 @@ st_texture_cache_load_from_data (StTextureCache    *cache,
 }
 
 /**
- * st_texture_cache_load_from_raw:
- * @cache: a #StTextureCache
+ * mx_st_texture_cache_load_from_raw:
+ * @cache: a #MxStTextureCache
  * @data: (array length=len): raw pixel data
  * @len: the length of @data
  * @has_alpha: whether @data includes an alpha channel
@@ -1854,7 +1832,7 @@ st_texture_cache_load_from_data (StTextureCache    *cache,
  * pixbuf created from @data and the other parameters.
  **/
 ClutterActor *
-st_texture_cache_load_from_raw (StTextureCache    *cache,
+mx_st_texture_cache_load_from_raw (MxStTextureCache    *cache,
                                 const guchar      *data,
                                 gsize              len,
                                 gboolean           has_alpha,
@@ -1898,7 +1876,7 @@ st_texture_cache_load_from_raw (StTextureCache    *cache,
 }
 
 /**
- * st_texture_cache_load_thumbnail:
+ * mx_st_texture_cache_load_thumbnail:
  * @cache:
  * @size: Size in pixels to use for thumbnail
  * @uri: Source URI
@@ -1909,12 +1887,12 @@ st_texture_cache_load_from_raw (StTextureCache    *cache,
  * may be shared with other objects.  This implies the texture data is cached.
  *
  * The current caching policy is permanent; to uncache, you must explicitly
- * call st_texture_cache_unref_thumbnail().
+ * call mx_st_texture_cache_unref_thumbnail().
  *
  * Returns: (transfer none): A new #ClutterActor
  */
 ClutterActor *
-st_texture_cache_load_thumbnail (StTextureCache    *cache,
+mx_st_texture_cache_load_thumbnail (MxStTextureCache    *cache,
                                  int                size,
                                  const char        *uri,
                                  const char        *mimetype)
@@ -1928,7 +1906,7 @@ st_texture_cache_load_thumbnail (StTextureCache    *cache,
   if (!g_str_has_prefix (uri, "file://"))
     {
       GIcon *icon = icon_for_mimetype (mimetype);
-      return st_texture_cache_load_gicon (cache, NULL, icon, size);
+      return mx_st_texture_cache_load_gicon (cache, NULL, icon, size);
     }
 
   texture = create_default_texture (cache);
@@ -1941,14 +1919,14 @@ st_texture_cache_load_thumbnail (StTextureCache    *cache,
     {
       data = g_new0 (AsyncTextureLoadData, 1);
       data->key = g_strdup (key);
-      data->policy = ST_TEXTURE_CACHE_POLICY_FOREVER;
+      data->policy = MX_ST_TEXTURE_CACHE_POLICY_FOREVER;
       data->uri = g_strdup (uri);
       data->mimetype = g_strdup (mimetype);
       data->thumbnail = TRUE;
       data->width = size;
       data->height = size;
       data->enforced_square = TRUE;
-      data->textures = g_slist_prepend (data->textures, g_object_ref (texture));
+      data->textures = g_slimx_st_prepend (data->textures, g_object_ref (texture));
       load_thumbnail_async (cache, uri, mimetype, size, NULL, on_pixbuf_loaded, data);
     }
   else
@@ -1975,12 +1953,12 @@ pixbuf_byte_size (GdkPixbuf *pixbuf)
 }
 
 /**
- * st_texture_cache_pixbuf_equal:
+ * mx_st_texture_cache_pixbuf_equal:
  *
  * Returns: %TRUE iff the given pixbufs are bytewise-equal
  */
 gboolean
-st_texture_cache_pixbuf_equal (StTextureCache *cache, GdkPixbuf *a, GdkPixbuf *b)
+mx_st_texture_cache_pixbuf_equal (MxStTextureCache *cache, GdkPixbuf *a, GdkPixbuf *b)
 {
   size_t size_a = pixbuf_byte_size (a);
   size_t size_b = pixbuf_byte_size (b);
@@ -1989,17 +1967,17 @@ st_texture_cache_pixbuf_equal (StTextureCache *cache, GdkPixbuf *a, GdkPixbuf *b
   return memcmp (gdk_pixbuf_get_pixels (a), gdk_pixbuf_get_pixels (b), size_a) == 0;
 }
 
-static StTextureCache *instance = NULL;
+static MxStTextureCache *instance = NULL;
 
 /**
- * st_texture_cache_get_default:
+ * mx_st_texture_cache_get_default:
  *
  * Return value: (transfer none): The global texture cache
  */
-StTextureCache*
-st_texture_cache_get_default (void)
+MxStTextureCache*
+mx_st_texture_cache_get_default (void)
 {
   if (instance == NULL)
-    instance = g_object_new (ST_TYPE_TEXTURE_CACHE, NULL);
+    instance = g_object_new (MX_ST_TYPE_TEXTURE_CACHE, NULL);
   return instance;
 }
