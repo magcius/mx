@@ -190,7 +190,7 @@ mx_st_theme_context_get_for_stage (ClutterStage *stage)
  */
 void
 mx_st_theme_context_set_theme (MxStThemeContext          *context,
-                            StTheme                 *theme)
+                               MxStTheme                 *theme)
 {
   g_return_if_fail (MX_IS_ST_THEME_CONTEXT (context));
   g_return_if_fail (theme == NULL || MX_IS_ST_THEME (theme));

@@ -25,7 +25,7 @@
 
 G_BEGIN_DECLS
 
-struct _StThemeNode {
+struct _MxStThemeNode {
   GObject parent;
 
   MxStThemeContext *context;
@@ -105,16 +105,16 @@ struct _StThemeNode {
   CoglHandle corner_material[4];
 };
 
-struct _StThemeNodeClass {
+struct _MxStThemeNodeClass {
   GObjectClass parent_class;
 
 };
 
-void _st_theme_node_ensure_background (StThemeNode *node);
-void _st_theme_node_ensure_geometry (StThemeNode *node);
+void _mx_st_theme_node_ensure_background (MxStThemeNode *node);
+void _mx_st_theme_node_ensure_geometry (MxStThemeNode *node);
 
-void _st_theme_node_init_drawing_state (StThemeNode *node);
-void _st_theme_node_free_drawing_state (StThemeNode *node);
+void _mx_st_theme_node_init_drawing_state (MxStThemeNode *node);
+void _mx_st_theme_node_free_drawing_state (MxStThemeNode *node);
 
 G_END_DECLS
 
