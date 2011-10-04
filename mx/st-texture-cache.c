@@ -21,6 +21,7 @@
 
 #include "config.h"
 
+#include "st-icon-colors.h"
 #include "st-texture-cache.h"
 #include <gtk/gtk.h>
 #define GNOME_DESKTOP_USE_UNSTABLE_API

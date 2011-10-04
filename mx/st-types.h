@@ -32,12 +32,6 @@
 G_BEGIN_DECLS
 
 typedef enum {
-  ST_ALIGN_START,
-  ST_ALIGN_MIDDLE,
-  ST_ALIGN_END
-} StAlign;
-
-typedef enum {
   ST_ICON_SYMBOLIC,
   ST_ICON_FULLCOLOR,
   ST_ICON_APPLICATION,

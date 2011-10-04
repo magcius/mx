@@ -25,41 +25,9 @@
 
 #include <glib.h>
 #include <cairo.h>
+#include "mx-widget.h"
 #include "st-shadow.h"
 #include "st-types.h"
-
-G_BEGIN_DECLS
-
-#define I_(str)         (g_intern_static_string ((str)))
-
-#define ST_PARAM_READABLE     \
-        (G_PARAM_READABLE |     \
-         G_PARAM_STATIC_NICK | G_PARAM_STATIC_NAME | G_PARAM_STATIC_BLURB)
-
-#define ST_PARAM_READWRITE    \
-        (G_PARAM_READABLE | G_PARAM_WRITABLE | \
-         G_PARAM_STATIC_NICK | G_PARAM_STATIC_NAME | G_PARAM_STATIC_BLURB)
-
-G_END_DECLS
-
-void _st_actor_get_preferred_width  (ClutterActor *actor,
-                                     gfloat        for_height,
-                                     gboolean      y_fill,
-                                     gfloat       *min_width_p,
-                                     gfloat       *natural_width_p);
-void _st_actor_get_preferred_height (ClutterActor *actor,
-                                     gfloat        for_width,
-                                     gboolean      x_fill,
-                                     gfloat       *min_height_p,
-                                     gfloat       *natural_height_p);
-
-void _st_allocate_fill (StWidget        *parent,
-                        ClutterActor    *child,
-                        ClutterActorBox *childbox,
-                        StAlign          x_align,
-                        StAlign          y_align,
-                        gboolean         x_fill,
-                        gboolean         y_fill);
 
 void _st_set_text_from_style (ClutterText *text,
                               StThemeNode *theme_node);
