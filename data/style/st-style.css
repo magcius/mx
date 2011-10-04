@@ -1,0 +1,28 @@
+
+stage {
+    font: 16pt serif;
+}
+
+.red {
+    background-color: red;
+}
+
+.green {
+    background-color: green;
+}
+
+.blue {
+    background-color: blue;
+}
+
+.bold {
+    font-weight: bold;
+}
+
+.italic {
+    font-style: italic;
+}
+
+.big {
+    font-size: 150%;
+}

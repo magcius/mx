@@ -45,6 +45,9 @@
 #include "mx-enum-types.h"
 #include "mx-settings.h"
 
+
+#include "st-theme-context.h"
+
 /*
  * Forward declaration for sake of MxWidgetChild
  */
@@ -53,9 +56,13 @@ struct _MxWidgetPrivate
   MxPadding     border;
   MxPadding     padding;
 
+  MxStThemeNode   *theme_node;
+  MxStTheme       *theme;
+
   MxStyle       *style;
   gchar         *pseudo_class;
   gchar         *style_class;
+  gchar         *inline_style;
   MxBorderImage *mx_border_image;
 
   ClutterActor *border_image;
@@ -74,6 +81,10 @@ struct _MxWidgetPrivate
 
   guint         tooltip_timeout;
   guint         tooltip_delay;
+
+  gboolean      is_stylable : 1;
+  gboolean      is_style_dirty : 1;
+
 };
 
 /**
@@ -110,6 +121,7 @@ static GParamSpec *widget_properties[LAST_PROP];
 enum
 {
   LONG_PRESS,
+  ST_STYLE_CHANGED,
 
   LAST_SIGNAL
 };
@@ -446,6 +458,42 @@ mx_widget_allocate (ClutterActor          *actor,
                                            flags);
 }
 
+static void notify_children_of_style_change (ClutterContainer *container);
+
+static void
+notify_children_of_style_change_foreach (ClutterActor *actor,
+                                         gpointer      user_data)
+{
+  if (MX_IS_WIDGET (actor))
+    mx_widget_st_style_changed (MX_WIDGET (actor));
+  else if (CLUTTER_IS_CONTAINER (actor))
+    notify_children_of_style_change ((ClutterContainer *)actor);
+}
+
+static void
+notify_children_of_style_change (ClutterContainer *container)
+{
+  /* notify our children that their parent stylable has changed */
+  clutter_container_foreach (container,
+                             notify_children_of_style_change_foreach,
+                             NULL);
+}
+
+static void
+mx_widget_real_style_changed (MxWidget *self)
+{
+  MxWidgetPrivate *priv = MX_WIDGET (self)->priv;
+
+  /* application has request this widget is not stylable */
+  if (!priv->is_stylable)
+    return;
+
+  clutter_actor_queue_redraw ((ClutterActor *) self);
+
+  if (CLUTTER_IS_CONTAINER (self))
+    notify_children_of_style_change ((ClutterContainer *)self);
+}
+
 static void
 mx_widget_real_paint_background (MxWidget           *self,
                                  ClutterActor       *background,
@@ -487,8 +535,20 @@ mx_widget_real_paint_background (MxWidget           *self,
 static void
 mx_widget_paint (ClutterActor *self)
 {
-  MxWidgetPrivate *priv = MX_WIDGET (self)->priv;
-  MxWidgetClass *klass = MX_WIDGET_GET_CLASS (self);
+  MxStThemeNode *theme_node;
+  ClutterActorBox allocation;
+  guint8 opacity;
+
+  theme_node = mx_widget_get_theme_node (MX_WIDGET (self));
+
+  clutter_actor_get_allocation_box (self, &allocation);
+
+  opacity = clutter_actor_get_paint_opacity (self);
+
+  mx_st_theme_node_paint (theme_node, &allocation, opacity);
+
+
+  /****
 
   klass->paint_background (MX_WIDGET (self),
                            priv->border_image,
@@ -502,6 +562,8 @@ mx_widget_paint (ClutterActor *self)
 
   if (priv->menu)
     clutter_actor_paint (CLUTTER_ACTOR (priv->menu));
+
+  ****/
 }
 
 static void
@@ -1104,6 +1166,7 @@ mx_widget_class_init (MxWidgetClass *klass)
   actor_class->get_paint_volume = mx_widget_get_paint_volume;
 
   klass->paint_background = mx_widget_real_paint_background;
+  klass->style_changed = mx_widget_real_style_changed;
 
   /* stylable interface properties */
   g_object_class_override_property (gobject_class, PROP_STYLE, "style");
@@ -1185,6 +1248,22 @@ mx_widget_class_init (MxWidgetClass *klass)
                   G_TYPE_BOOLEAN, 3, G_TYPE_FLOAT, G_TYPE_FLOAT,
                   MX_TYPE_LONG_PRESS_ACTION);
 
+
+  /**
+   * MxWidget::st-style-changed:
+   * @widget: the #MxWidget
+   *
+   * Emitted when the style information that the widget derives from the
+   * theme changes
+   */
+  widget_signals[ST_STYLE_CHANGED] =
+    g_signal_new ("st-style-changed",
+                  G_TYPE_FROM_CLASS (klass),
+                  G_SIGNAL_RUN_LAST,
+                  G_STRUCT_OFFSET (MxWidgetClass, style_changed),
+                  NULL, NULL,
+                  _mx_marshal_VOID__VOID,
+                  G_TYPE_NONE, 0);
 }
 
 static MxStyle *
@@ -1828,4 +1907,127 @@ scriptable_iface_init (ClutterScriptableIface *iface)
                                           (CLUTTER_TYPE_SCRIPTABLE);
 
   iface->set_custom_property = widget_scriptable_set_custom_property;
+}
+
+static void
+mx_widget_recompute_style (MxWidget    *widget,
+                           MxStThemeNode *old_theme_node)
+{
+  MxStThemeNode *new_theme_node = mx_widget_get_theme_node (widget);
+  gboolean paint_equal;
+
+  if (!old_theme_node ||
+      !mx_st_theme_node_geometry_equal (old_theme_node, new_theme_node))
+    clutter_actor_queue_relayout ((ClutterActor *) widget);
+
+  paint_equal = old_theme_node && mx_st_theme_node_paint_equal (old_theme_node, new_theme_node);
+
+  if (paint_equal)
+    mx_st_theme_node_copy_cached_paint_state (new_theme_node, old_theme_node);
+
+  g_signal_emit (widget, widget_signals[ST_STYLE_CHANGED], 0);
+  widget->priv->is_style_dirty = FALSE;
+}
+
+
+void
+mx_widget_st_style_changed (MxWidget *widget)
+{
+  MxStThemeNode *old_theme_node = NULL;
+
+  widget->priv->is_style_dirty = TRUE;
+  if (widget->priv->theme_node)
+    {
+      old_theme_node = widget->priv->theme_node;
+      widget->priv->theme_node = NULL;
+    }
+
+  /* update the style only if we are mapped */
+  if (CLUTTER_ACTOR_IS_MAPPED (CLUTTER_ACTOR (widget)))
+    mx_widget_recompute_style (widget, old_theme_node);
+
+  if (old_theme_node)
+    g_object_unref (old_theme_node);
+}
+
+static void
+on_theme_context_changed (MxStThemeContext *context,
+                          ClutterStage     *stage)
+{
+  notify_children_of_style_change (CLUTTER_CONTAINER (stage));
+}
+
+static MxStThemeNode *
+get_root_theme_node (ClutterStage *stage)
+{
+  MxStThemeContext *context = mx_st_theme_context_get_for_stage (stage);
+
+  if (!g_object_get_data (G_OBJECT (context), "st-theme-initialized"))
+    {
+      g_object_set_data (G_OBJECT (context), "st-theme-initialized", GUINT_TO_POINTER (1));
+      g_signal_connect (G_OBJECT (context), "changed",
+                        G_CALLBACK (on_theme_context_changed), stage);
+    }
+
+  return mx_st_theme_context_get_root_node (context);
+}
+
+/**
+ * mx_widget_get_theme_node:
+ * @widget: an #MxWidget
+ *
+ * Gets the theme node holding style information for the widget.
+ * The theme node is used to access standard and custom CSS
+ * properties of the widget.
+ *
+ * Note: it is a fatal error to call this on a widget that is
+ *  not been added to a stage.
+ *
+ * Return value: (transfer none): the theme node for the widget.
+ *   This is owned by the widget. When attributes of the widget
+ *   or the environment that affect the styling change (for example
+ *   the style_class property of the widget), it will be recreated,
+ *   and the ::style-changed signal will be emitted on the widget.
+ */
+MxStThemeNode *
+mx_widget_get_theme_node (MxWidget *widget)
+{
+  MxWidgetPrivate *priv = widget->priv;
+
+  if (priv->theme_node == NULL)
+    {
+      MxStThemeNode *parent_node = NULL;
+      ClutterStage *stage = NULL;
+      ClutterActor *parent;
+
+      parent = clutter_actor_get_parent (CLUTTER_ACTOR (widget));
+      while (parent != NULL)
+        {
+          if (parent_node == NULL && MX_IS_WIDGET (parent))
+            parent_node = mx_widget_get_theme_node (MX_WIDGET (parent));
+          else if (CLUTTER_IS_STAGE (parent))
+            stage = CLUTTER_STAGE (parent);
+
+          parent = clutter_actor_get_parent (parent);
+        }
+
+      if (stage == NULL)
+        {
+          g_error ("mx_widget_get_theme_node called on the widget which is not in the stage.");
+        }
+
+      if (parent_node == NULL)
+        parent_node = get_root_theme_node (CLUTTER_STAGE (stage));
+
+      priv->theme_node = mx_st_theme_node_new (mx_st_theme_context_get_for_stage (stage),
+                                            parent_node, priv->theme,
+                                            G_OBJECT_TYPE (widget),
+                                            clutter_actor_get_name (CLUTTER_ACTOR (widget)),
+                                            priv->style_class,
+                                            priv->pseudo_class,
+                                            priv->inline_style);
+    }
+
+  return priv->theme_node;
+
 }

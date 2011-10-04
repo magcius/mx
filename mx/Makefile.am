@@ -94,6 +94,13 @@ source_h = \
 	$(top_srcdir)/mx/mx-window.h		\
 	$(top_srcdir)/mx/mx-floating-widget.h \
 	$(top_srcdir)/mx/mx-kinetic-scroll-view.h \
+	$(top_srcdir)/mx/st-theme.h		\
+	$(top_srcdir)/mx/st-theme-context.h	\
+	$(top_srcdir)/mx/st-theme-node.h	\
+	$(top_srcdir)/mx/st-border-image.h	\
+	$(top_srcdir)/mx/st-shadow.h	\
+	$(top_srcdir)/mx/st-texture-cache.h	\
+	$(top_srcdir)/mx/st-icon-colors.h	\
 	$(NULL)
 
 source_h_priv = \
@@ -103,6 +110,9 @@ source_h_priv = \
 	$(top_srcdir)/mx/mx-progress-bar-fill.h	\
 	$(top_srcdir)/mx/mx-private.h		\
 	$(top_srcdir)/mx/mx-settings-provider.h	\
+	$(top_srcdir)/mx/st-theme-private.h	\
+	$(top_srcdir)/mx/st-theme-node-private.h	\
+	$(top_srcdir)/mx/st-private.h	\
 	$(NULL)
 
 source_c = \
@@ -169,6 +179,15 @@ source_c = \
 	$(top_srcdir)/mx/mx-window.c		\
 	$(top_srcdir)/mx/mx-floating-widget.c	\
 	$(top_srcdir)/mx/mx-kinetic-scroll-view.c \
+	$(top_srcdir)/mx/st-theme.c		\
+	$(top_srcdir)/mx/st-theme-context.c	\
+	$(top_srcdir)/mx/st-theme-node.c	\
+	$(top_srcdir)/mx/st-theme-node-drawing.c	\
+	$(top_srcdir)/mx/st-border-image.c	\
+	$(top_srcdir)/mx/st-shadow.c	\
+	$(top_srcdir)/mx/st-texture-cache.c	\
+	$(top_srcdir)/mx/st-icon-colors.c	\
+	$(top_srcdir)/mx/st-private.c \
 	$(NULL)
 
 EXTRA_DIST = \

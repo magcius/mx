@@ -226,6 +226,34 @@ typedef enum /*< prefix=MX_TOOLTIP_ANIMATION >*/
   MX_TOOLTIP_ANIMATION_FADE
 } MxTooltipAnimation;
 
+/**
+ * MxStIconType:
+ * @MX_ICON_SYMBOLIC: a symbolic (ie, mostly monochrome) icon
+ * @MX_ICON_FULLCOLOR: a full-color icon
+ * @MX_ICON_APPLICATION: a full-color icon, which is expected
+ *   to be an application icon
+ * @MX_ICON_DOCUMENT: a full-color icon, which is expected
+ *   to be a document (MIME type) icon
+ *
+ * Describes what style of icon is desired in a call to
+ * mx_st_texture_cache_load_icon_name() or mx_st_texture_cache_load_gicon().
+ * Use %MX_ICON_SYMBOLIC for symbolic icons (eg, for the panel and
+ * much of the rest of the shell chrome) or %MX_ICON_FULLCOLOR for a
+ * full-color icon.
+ *
+ * If you know that the requested icon is either an application icon
+ * or a document type icon, you should use %MX_ICON_APPLICATION or
+ * %MX_ICON_DOCUMENT, which may do a better job of selecting the
+ * correct theme icon for those types. If you are unsure what kind of
+ * icon you are loading, use %MX_ICON_FULLCOLOR.
+ */
+typedef enum {
+  MX_ICON_SYMBOLIC,
+  MX_ICON_FULLCOLOR,
+  MX_ICON_APPLICATION,
+  MX_ICON_DOCUMENT
+} MxStIconType;
+
 G_END_DECLS
 
 #endif /* __MX_TYPES_H__ */

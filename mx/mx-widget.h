@@ -32,6 +32,9 @@
 #include <mx/mx-types.h>
 #include <mx/mx-style.h>
 
+#include <mx/st-theme.h>
+#include <mx/st-theme-node.h>
+
 G_BEGIN_DECLS
 
 #define MX_TYPE_WIDGET                 (mx_widget_get_type ())
@@ -90,6 +93,8 @@ struct _MxWidgetClass
   void (* apply_style) (MxWidget *widget,
                         MxStyle  *style);
 
+  void (* style_changed) (MxWidget         *self);
+
   /*< private >*/
   /* padding for future expansion */
   void (*_padding_0) (void);
@@ -100,7 +105,6 @@ struct _MxWidgetClass
   void (*_padding_5) (void);
   void (*_padding_6) (void);
   void (*_padding_7) (void);
-  void (*_padding_8) (void);
 };
 
 GType mx_widget_get_type (void) G_GNUC_CONST;
@@ -140,6 +144,10 @@ void          mx_widget_get_available_area   (MxWidget              *widget,
                                               const ClutterActorBox *allocation,
                                               ClutterActorBox       *area);
 
+void          mx_widget_st_style_changed     (MxWidget  *widget);
+
+MxStThemeNode *
+mx_widget_get_theme_node (MxWidget *widget);
 
 G_END_DECLS
 
