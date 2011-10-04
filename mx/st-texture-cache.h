@@ -27,6 +27,7 @@
 #include <clutter/clutter.h>
 
 #include <mx/mx-types.h>
+#include <mx/st-types.h>
 #include <mx/st-theme-node.h>
 
 #define ST_TYPE_TEXTURE_CACHE                 (st_texture_cache_get_type ())
