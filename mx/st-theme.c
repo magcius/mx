@@ -29,7 +29,7 @@
  *   coalesce properties with the same name.
  *
  * In moving it to GNOME Shell:
- *  - Renamed again to StTheme
+ *  - Renamed again to MxStTheme
  *  - Reformatted to match the gnome-shell coding style
  *  - Removed notion of "theme engine" from hippo-canvas
  *  - pseudo-class matching changed from link enum to strings
@@ -45,21 +45,21 @@
 #include "st-theme-node.h"
 #include "st-theme-private.h"
 
-static GObject *st_theme_constructor (GType                  type,
+static GObject *mx_st_theme_constructor (GType                  type,
                                       guint                  n_construct_properties,
                                       GObjectConstructParam *construct_properties);
 
-static void st_theme_finalize     (GObject      *object);
-static void st_theme_set_property (GObject      *object,
+static void mx_st_theme_finalize     (GObject      *object);
+static void mx_st_theme_set_property (GObject      *object,
                                    guint         prop_id,
                                    const GValue *value,
                                    GParamSpec   *pspec);
-static void st_theme_get_property (GObject      *object,
+static void mx_st_theme_get_property (GObject      *object,
                                    guint         prop_id,
                                    GValue       *value,
                                    GParamSpec   *pspec);
 
-struct _StTheme
+struct _MxStTheme
 {
   GObject parent;
 
@@ -74,7 +74,7 @@ struct _StTheme
   CRCascade *cascade;
 };
 
-struct _StThemeClass
+struct _MxStThemeClass
 {
   GObjectClass parent_class;
 };
@@ -87,14 +87,14 @@ enum
   PROP_DEFAULT_STYLESHEET
 };
 
-G_DEFINE_TYPE (StTheme, st_theme, G_TYPE_OBJECT)
+G_DEFINE_TYPE (MxStTheme, mx_st_theme, G_TYPE_OBJECT)
 
 /* Quick strcmp.  Test only for == 0 or != 0, not < 0 or > 0.  */
 #define strqcmp(str,lit,lit_len) \
   (strlen (str) != (lit_len) || memcmp (str, lit, lit_len))
 
 static void
-st_theme_init (StTheme *theme)
+mx_st_theme_init (MxStTheme *theme)
 {
   theme->stylesheets_by_filename = g_hash_table_new_full (g_str_hash, g_str_equal,
                                                           (GDestroyNotify)g_free, (GDestroyNotify)cr_stylesheet_unref);
@@ -102,17 +102,17 @@ st_theme_init (StTheme *theme)
 }
 
 static void
-st_theme_class_init (StThemeClass *klass)
+mx_st_theme_class_init (MxStThemeClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-  object_class->constructor = st_theme_constructor;
-  object_class->finalize = st_theme_finalize;
-  object_class->set_property = st_theme_set_property;
-  object_class->get_property = st_theme_get_property;
+  object_class->constructor = mx_st_theme_constructor;
+  object_class->finalize = mx_st_theme_finalize;
+  object_class->set_property = mx_st_theme_set_property;
+  object_class->get_property = mx_st_theme_get_property;
 
   /**
-   * StTheme:application-stylesheet:
+   * MxStTheme:application-stylesheet:
    *
    * The highest priority stylesheet, representing application-specific
    * styling; this is associated with the CSS "author" stylesheet.
@@ -126,7 +126,7 @@ st_theme_class_init (StThemeClass *klass)
                                                         G_PARAM_READABLE | G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
 
   /**
-   * StTheme:theme-stylesheet:
+   * MxStTheme:theme-stylesheet:
    *
    * The second priority stylesheet, representing theme-specific styling;
    * this is associated with the CSS "user" stylesheet.
@@ -140,7 +140,7 @@ st_theme_class_init (StThemeClass *klass)
                                                         G_PARAM_READABLE | G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
 
   /**
-   * StTheme:default-stylesheet:
+   * MxStTheme:default-stylesheet:
    *
    * The lowest priority stylesheet, representing global default
    * styling; this is associated with the CSS "user agent" stylesheet.
@@ -180,7 +180,7 @@ parse_stylesheet (const char  *filename,
 }
 
 CRDeclaration *
-_st_theme_parse_declaration_list (const char *str)
+_mx_st_theme_parse_declaration_list (const char *str)
 {
   return cr_declaration_parse_list_from_buf ((const guchar *)str,
                                              CR_UTF_8);
@@ -203,7 +203,7 @@ parse_stylesheet_nofail (const char *filename)
 }
 
 static void
-insert_stylesheet (StTheme      *theme,
+insert_stylesheet (MxStTheme      *theme,
                    const char   *filename,
                    CRStyleSheet *stylesheet)
 {
@@ -220,7 +220,7 @@ insert_stylesheet (StTheme      *theme,
 }
 
 gboolean
-st_theme_load_stylesheet (StTheme    *theme,
+mx_st_theme_load_stylesheet (MxStTheme    *theme,
                           const char *path,
                           GError    **error)
 {
@@ -238,7 +238,7 @@ st_theme_load_stylesheet (StTheme    *theme,
 }
 
 void
-st_theme_unload_stylesheet (StTheme    *theme,
+mx_st_theme_unload_stylesheet (MxStTheme    *theme,
                             const char *path)
 {
   CRStyleSheet *stylesheet;
@@ -257,14 +257,14 @@ st_theme_unload_stylesheet (StTheme    *theme,
 }
 
 /**
- * st_theme_get_custom_stylesheets:
- * @theme: an #StTheme
+ * mx_st_theme_get_custom_stylesheets:
+ * @theme: an #MxStTheme
  *
  * Returns: (transfer full) (element-type utf8): the list of stylesheet filenames
- *          that were loaded with st_theme_load_stylesheet()
+ *          that were loaded with mx_st_theme_load_stylesheet()
  */
 GSList*
-st_theme_get_custom_stylesheets (StTheme *theme)
+mx_st_theme_get_custom_stylesheets (MxStTheme *theme)
 {
   GSList *result = NULL;
   GSList *iter;
@@ -281,20 +281,20 @@ st_theme_get_custom_stylesheets (StTheme *theme)
 }
 
 static GObject *
-st_theme_constructor (GType                  type,
+mx_st_theme_constructor (GType                  type,
                       guint                  n_construct_properties,
                       GObjectConstructParam *construct_properties)
 {
   GObject *object;
-  StTheme *theme;
+  MxStTheme *theme;
   CRStyleSheet *application_stylesheet;
   CRStyleSheet *theme_stylesheet;
   CRStyleSheet *default_stylesheet;
 
-  object = (*G_OBJECT_CLASS (st_theme_parent_class)->constructor) (type,
+  object = (*G_OBJECT_CLASS (mx_st_theme_parent_class)->constructor) (type,
                                                                       n_construct_properties,
                                                                       construct_properties);
-  theme = ST_THEME (object);
+  theme = MX_ST_THEME (object);
 
   application_stylesheet = parse_stylesheet_nofail (theme->application_stylesheet);
   theme_stylesheet = parse_stylesheet_nofail (theme->theme_stylesheet);
@@ -315,9 +315,9 @@ st_theme_constructor (GType                  type,
 }
 
 static void
-st_theme_finalize (GObject * object)
+mx_st_theme_finalize (GObject * object)
 {
-  StTheme *theme = ST_THEME (object);
+  MxStTheme *theme = MX_ST_THEME (object);
 
   g_slist_foreach (theme->custom_stylesheets, (GFunc) cr_stylesheet_unref, NULL);
   g_slist_free (theme->custom_stylesheets);
@@ -336,16 +336,16 @@ st_theme_finalize (GObject * object)
       theme->cascade = NULL;
     }
 
-  G_OBJECT_CLASS (st_theme_parent_class)->finalize (object);
+  G_OBJECT_CLASS (mx_st_theme_parent_class)->finalize (object);
 }
 
 static void
-st_theme_set_property (GObject      *object,
+mx_st_theme_set_property (GObject      *object,
                        guint         prop_id,
                        const GValue *value,
                        GParamSpec   *pspec)
 {
-  StTheme *theme = ST_THEME (object);
+  MxStTheme *theme = MX_ST_THEME (object);
 
   switch (prop_id)
     {
@@ -392,12 +392,12 @@ st_theme_set_property (GObject      *object,
 }
 
 static void
-st_theme_get_property (GObject    *object,
+mx_st_theme_get_property (GObject    *object,
                        guint       prop_id,
                        GValue     *value,
                        GParamSpec *pspec)
 {
-  StTheme *theme = ST_THEME (object);
+  MxStTheme *theme = MX_ST_THEME (object);
 
   switch (prop_id)
     {
@@ -417,7 +417,7 @@ st_theme_get_property (GObject    *object,
 }
 
 /**
- * st_theme_new:
+ * mx_st_theme_new:
  * @application_stylesheet: The highest priority stylesheet, representing application-specific
  *   styling; this is associated with the CSS "author" stylesheet, may be %NULL
  * @theme_stylesheet: The second priority stylesheet, representing theme-specific styling ;
@@ -427,12 +427,12 @@ st_theme_get_property (GObject    *object,
  *
  * Return value: the newly created theme object
  **/
-StTheme *
-st_theme_new (const char       *application_stylesheet,
+MxStTheme *
+mx_st_theme_new (const char       *application_stylesheet,
               const char       *theme_stylesheet,
               const char       *default_stylesheet)
 {
-  StTheme *theme = g_object_new (ST_TYPE_THEME,
+  MxStTheme *theme = g_object_new (ST_TYPE_THEME,
                                     "application-stylesheet", application_stylesheet,
                                     "theme-stylesheet", theme_stylesheet,
                                     "default-stylesheet", default_stylesheet,
@@ -468,9 +468,9 @@ string_in_list (GString    *stryng,
 }
 
 static gboolean
-pseudo_class_add_sel_matches_style (StTheme         *a_this,
+pseudo_class_add_sel_matches_style (MxStTheme         *a_this,
                                     CRAdditionalSel *a_add_sel,
-                                    StThemeNode     *a_node)
+                                    MxStThemeNode     *a_node)
 {
   const char *node_pseudo_class;
 
@@ -482,7 +482,7 @@ pseudo_class_add_sel_matches_style (StTheme         *a_this,
                         && a_add_sel->content.pseudo->name->stryng->str
                         && a_node, FALSE);
 
-  node_pseudo_class = st_theme_node_get_pseudo_class (a_node);
+  node_pseudo_class = mx_st_theme_node_get_pseudo_class (a_node);
 
   if (node_pseudo_class == NULL)
     return FALSE;
@@ -498,7 +498,7 @@ pseudo_class_add_sel_matches_style (StTheme         *a_this,
  */
 static gboolean
 class_add_sel_matches_style (CRAdditionalSel *a_add_sel,
-                             StThemeNode     *a_node)
+                             MxStThemeNode     *a_node)
 {
   const char *element_class;
 
@@ -509,7 +509,7 @@ class_add_sel_matches_style (CRAdditionalSel *a_add_sel,
                         && a_add_sel->content.class_name->stryng->str
                         && a_node, FALSE);
 
-  element_class = st_theme_node_get_element_class (a_node);
+  element_class = mx_st_theme_node_get_element_class (a_node);
   if (element_class == NULL)
     return FALSE;
 
@@ -524,7 +524,7 @@ class_add_sel_matches_style (CRAdditionalSel *a_add_sel,
  */
 static gboolean
 id_add_sel_matches_style (CRAdditionalSel *a_add_sel,
-                          StThemeNode     *a_node)
+                          MxStThemeNode     *a_node)
 {
   gboolean result = FALSE;
   const char *id;
@@ -539,7 +539,7 @@ id_add_sel_matches_style (CRAdditionalSel *a_add_sel,
                         && a_add_sel->type == ID_ADD_SELECTOR
                         && a_node, FALSE);
 
-  id = st_theme_node_get_element_id (a_node);
+  id = mx_st_theme_node_get_element_id (a_node);
 
   if (id != NULL)
     {
@@ -561,9 +561,9 @@ id_add_sel_matches_style (CRAdditionalSel *a_add_sel,
  *@return TRUE is a_add_sel matches a_node, FALSE otherwise.
  */
 static gboolean
-additional_selector_matches_style (StTheme         *a_this,
+additional_selector_matches_style (MxStTheme         *a_this,
                                    CRAdditionalSel *a_add_sel,
-                                   StThemeNode     *a_node)
+                                   MxStThemeNode     *a_node)
 {
   CRAdditionalSel *cur_add_sel = NULL;
 
@@ -633,15 +633,15 @@ element_name_matches_type (const char *element_name,
  *know what you are doing.
  */
 static enum CRStatus
-sel_matches_style_real (StTheme     *a_this,
+sel_matches_style_real (MxStTheme     *a_this,
                         CRSimpleSel *a_sel,
-                        StThemeNode *a_node,
+                        MxStThemeNode *a_node,
                         gboolean    *a_result,
                         gboolean     a_eval_sel_list_from_end,
                         gboolean     a_recurse)
 {
   CRSimpleSel *cur_sel = NULL;
-  StThemeNode *cur_node = NULL;
+  MxStThemeNode *cur_node = NULL;
   GType cur_type;
 
   *a_result = FALSE;
@@ -658,7 +658,7 @@ sel_matches_style_real (StTheme     *a_this,
     }
 
   cur_node = a_node;
-  cur_type = st_theme_node_get_element_type (cur_node);
+  cur_type = mx_st_theme_node_get_element_type (cur_node);
 
   while (cur_sel)
     {
@@ -724,13 +724,13 @@ sel_matches_style_real (StTheme     *a_this,
 
         case COMB_WS:           /*descendant selector */
           {
-            StThemeNode *n = NULL;
+            MxStThemeNode *n = NULL;
 
             /*
              *walk the element tree upward looking for a parent
              *style that matches the preceding selector.
              */
-            for (n = st_theme_node_get_parent (a_node); n; n = st_theme_node_get_parent (n))
+            for (n = mx_st_theme_node_get_parent (a_node); n; n = mx_st_theme_node_get_parent (n))
               {
                 enum CRStatus status;
                 gboolean matches = FALSE;
@@ -743,7 +743,7 @@ sel_matches_style_real (StTheme     *a_this,
                 if (matches)
                   {
                     cur_node = n;
-                    cur_type = st_theme_node_get_element_type (cur_node);
+                    cur_type = mx_st_theme_node_get_element_type (cur_node);
                     break;
                   }
               }
@@ -772,10 +772,10 @@ sel_matches_style_real (StTheme     *a_this,
           goto done;
 
         case COMB_GT:
-          cur_node = st_theme_node_get_parent (cur_node);
+          cur_node = mx_st_theme_node_get_parent (cur_node);
           if (!cur_node)
             goto done;
-          cur_type = st_theme_node_get_element_type (cur_node);
+          cur_type = mx_st_theme_node_get_element_type (cur_node);
           break;
 
         default:
@@ -796,9 +796,9 @@ done:
 }
 
 static void
-add_matched_properties (StTheme      *a_this,
+add_matched_properties (MxStTheme      *a_this,
                         CRStyleSheet *a_nodesheet,
-                        StThemeNode  *a_node,
+                        MxStThemeNode  *a_node,
                         GPtrArray    *props)
 {
   CRStatement *cur_stmt = NULL;
@@ -853,7 +853,7 @@ add_matched_properties (StTheme      *a_this,
                 char *filename = NULL;
 
                 if (import_rule->url->stryng && import_rule->url->stryng->str)
-                  filename = _st_theme_resolve_url (a_this,
+                  filename = _mx_st_theme_resolve_url (a_this,
                                                     a_nodesheet,
                                                     import_rule->url->stryng->str);
 
@@ -970,8 +970,8 @@ compare_declarations (gconstpointer a,
 }
 
 GPtrArray *
-_st_theme_get_matched_properties (StTheme        *theme,
-                                  StThemeNode    *node)
+_mx_st_theme_get_matched_properties (MxStTheme        *theme,
+                                  MxStThemeNode    *node)
 {
   enum CRStyleOrigin origin = 0;
   CRStyleSheet *sheet = NULL;
@@ -1005,7 +1005,7 @@ _st_theme_get_matched_properties (StTheme        *theme,
  * will fail on many examples.
  */
 char *
-_st_theme_resolve_url (StTheme      *theme,
+_mx_st_theme_resolve_url (MxStTheme      *theme,
                        CRStyleSheet *base_stylesheet,
                        const char   *url)
 {

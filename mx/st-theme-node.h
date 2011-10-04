@@ -45,18 +45,18 @@ G_BEGIN_DECLS
  * in implementing a #ClutterActor with borders and padding.
  */
 
-typedef struct _StTheme          StTheme;
-typedef struct _StThemeContext   StThemeContext;
+typedef struct _MxStTheme          MxStTheme;
+typedef struct _MxStThemeContext   MxStThemeContext;
 
 typedef struct _MxStThemeNode      MxStThemeNode;
 typedef struct _MxStThemeNodeClass MxStThemeNodeClass;
 
-#define ST_TYPE_THEME_NODE              (mx_st_theme_node_get_type ())
-#define MX_ST_THEME_NODE(object)           (G_TYPE_CHECK_INSTANCE_CAST ((object), ST_TYPE_THEME_NODE, MxStThemeNode))
-#define MX_ST_THEME_NODE_CLASS(klass)      (G_TYPE_CHECK_CLASS_CAST ((klass),     ST_TYPE_THEME_NODE, MxStThemeNodeClass))
-#define ST_IS_THEME_NODE(object)        (G_TYPE_CHECK_INSTANCE_TYPE ((object), ST_TYPE_THEME_NODE))
-#define ST_IS_THEME_NODE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass),     ST_TYPE_THEME_NODE))
-#define MX_ST_THEME_NODE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj),     ST_TYPE_THEME_NODE, MxStThemeNodeClass))
+#define MX_TYPE_ST_THEME_NODE              (mx_st_theme_node_get_type ())
+#define MX_ST_THEME_NODE(object)           (G_TYPE_CHECK_INSTANCE_CAST ((object), MX_TYPE_ST_THEME_NODE, MxStThemeNode))
+#define MX_ST_THEME_NODE_CLASS(klass)      (G_TYPE_CHECK_CLASS_CAST ((klass),     MX_TYPE_ST_THEME_NODE, MxStThemeNodeClass))
+#define MX_IS_ST_THEME_NODE(object)        (G_TYPE_CHECK_INSTANCE_TYPE ((object), MX_TYPE_ST_THEME_NODE))
+#define MX_IS_ST_THEME_NODE_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass),     MX_TYPE_ST_THEME_NODE))
+#define MX_ST_THEME_NODE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj),     MX_TYPE_ST_THEME_NODE, MxStThemeNodeClass))
 
 typedef enum {
     ST_SIDE_TOP,
@@ -96,9 +96,9 @@ typedef enum {
 
 GType mx_st_theme_node_get_type (void) G_GNUC_CONST;
 
-MxStThemeNode *mx_st_theme_node_new (StThemeContext *context,
+MxStThemeNode *mx_st_theme_node_new (MxStThemeContext *context,
                                 MxStThemeNode    *parent_node,   /* can be null */
-                                StTheme        *theme,         /* can be null */
+                                MxStTheme        *theme,         /* can be null */
                                 GType           element_type,
                                 const char     *element_id,
                                 const char     *element_class,
@@ -107,7 +107,7 @@ MxStThemeNode *mx_st_theme_node_new (StThemeContext *context,
 
 MxStThemeNode *mx_st_theme_node_get_parent (MxStThemeNode *node);
 
-StTheme *mx_st_theme_node_get_theme (MxStThemeNode *node);
+MxStTheme *mx_st_theme_node_get_theme (MxStThemeNode *node);
 
 gboolean    mx_st_theme_node_equal (MxStThemeNode *node_a, MxStThemeNode *node_b);
 

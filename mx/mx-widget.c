@@ -494,7 +494,7 @@ mx_widget_real_paint_background (MxWidget           *self,
 static void
 mx_widget_paint (ClutterActor *self)
 {
-  StThemeNode *theme_node;
+  MxStThemeNode *theme_node;
   ClutterActorBox allocation;
   guint8 opacity;
 
@@ -504,7 +504,7 @@ mx_widget_paint (ClutterActor *self)
 
   opacity = clutter_actor_get_paint_opacity (self);
 
-  st_theme_node_paint (theme_node, &allocation, opacity);
+  mx_st_theme_node_paint (theme_node, &allocation, opacity);
 
 
   /****
@@ -1853,10 +1853,10 @@ scriptable_iface_init (ClutterScriptableIface *iface)
 
 
 
-static StThemeNode *
+static MxStThemeNode *
 get_root_theme_node (ClutterStage *stage)
 {
-  StThemeContext *context = st_theme_context_get_for_stage (stage);
+  MxStThemeContext *context = mx_st_theme_context_get_for_stage (stage);
 
   if (!g_object_get_data (G_OBJECT (context), "st-theme-initialized"))
     {
@@ -1865,7 +1865,7 @@ get_root_theme_node (ClutterStage *stage)
       /*                   G_CALLBACK (on_theme_context_changed), stage); */
     }
 
-  return st_theme_context_get_root_node (context);
+  return mx_st_theme_context_get_root_node (context);
 }
 
 /**
@@ -1885,14 +1885,14 @@ get_root_theme_node (ClutterStage *stage)
  *   the style_class property of the widget), it will be recreated,
  *   and the ::style-changed signal will be emitted on the widget.
  */
-StThemeNode *
+MxStThemeNode *
 mx_widget_get_theme_node (MxWidget *widget)
 {
   MxWidgetPrivate *priv = widget->priv;
 
   if (priv->theme_node == NULL)
     {
-      StThemeNode *parent_node = NULL;
+      MxStThemeNode *parent_node = NULL;
       ClutterStage *stage = NULL;
       ClutterActor *parent;
 
@@ -1915,7 +1915,7 @@ mx_widget_get_theme_node (MxWidget *widget)
       if (parent_node == NULL)
         parent_node = get_root_theme_node (CLUTTER_STAGE (stage));
 
-      priv->theme_node = st_theme_node_new (st_theme_context_get_for_stage (stage),
+      priv->theme_node = mx_st_theme_node_new (mx_st_theme_context_get_for_stage (stage),
                                             parent_node, priv->theme,
                                             G_OBJECT_TYPE (widget),
                                             clutter_actor_get_name (CLUTTER_ACTOR (widget)),

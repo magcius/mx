@@ -29,12 +29,12 @@
 #include <mx/mx-types.h>
 #include <mx/st-theme-node.h>
 
-#define MX_ST_TYPE_TEXTURE_CACHE                 (st_texture_cache_get_type ())
-#define MX_ST_TEXTURE_CACHE(obj)                 (G_TYPE_CHECK_INSTANCE_CAST ((obj), MX_ST_TYPE_TEXTURE_CACHE, MxStTextureCache))
-#define MX_ST_TEXTURE_CACHE_CLASS(klass)         (G_TYPE_CHECK_CLASS_CAST ((klass), MX_ST_TYPE_TEXTURE_CACHE, MxStTextureCacheClass))
-#define MX_ST_IS_TEXTURE_CACHE(obj)              (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MX_ST_TYPE_TEXTURE_CACHE))
-#define MX_ST_IS_TEXTURE_CACHE_CLASS(klass)      (G_TYPE_CHECK_CLASS_TYPE ((klass), MX_ST_TYPE_TEXTURE_CACHE))
-#define MX_ST_TEXTURE_CACHE_GET_CLASS(obj)       (G_TYPE_INSTANCE_GET_CLASS ((obj), MX_ST_TYPE_TEXTURE_CACHE, MxStTextureCacheClass))
+#define MX_TYPE_ST_TEXTURE_CACHE                 (st_texture_cache_get_type ())
+#define MX_ST_TEXTURE_CACHE(obj)                 (G_TYPE_CHECK_INSTANCE_CAST ((obj), MX_TYPE_ST_TEXTURE_CACHE, MxStTextureCache))
+#define MX_ST_TEXTURE_CACHE_CLASS(klass)         (G_TYPE_CHECK_CLASS_CAST ((klass), MX_TYPE_ST_TEXTURE_CACHE, MxStTextureCacheClass))
+#define MX_IS_ST_TEXTURE_CACHE(obj)              (G_TYPE_CHECK_INSTANCE_TYPE ((obj), MX_TYPE_ST_TEXTURE_CACHE))
+#define MX_IS_ST_TEXTURE_CACHE_CLASS(klass)      (G_TYPE_CHECK_CLASS_TYPE ((klass), MX_TYPE_ST_TEXTURE_CACHE))
+#define MX_ST_TEXTURE_CACHE_GET_CLASS(obj)       (G_TYPE_INSTANCE_GET_CLASS ((obj), MX_TYPE_ST_TEXTURE_CACHE, MxStTextureCacheClass))
 
 typedef struct _MxStTextureCache MxStTextureCache;
 typedef struct _MxStTextureCacheClass MxStTextureCacheClass;
