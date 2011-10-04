@@ -81,6 +81,10 @@ struct _MxWidgetPrivate
 
   guint         tooltip_timeout;
   guint         tooltip_delay;
+
+  gboolean      is_stylable : 1;
+  gboolean      is_style_dirty : 1;
+
 };
 
 /**
@@ -117,6 +121,7 @@ static GParamSpec *widget_properties[LAST_PROP];
 enum
 {
   LONG_PRESS,
+  STYLE_CHANGED,
 
   LAST_SIGNAL
 };
@@ -451,6 +456,42 @@ mx_widget_allocate (ClutterActor          *actor,
   if (priv->menu)
     clutter_actor_allocate_preferred_size (CLUTTER_ACTOR (priv->menu),
                                            flags);
+}
+
+static void notify_children_of_style_change (ClutterContainer *container);
+
+static void
+notify_children_of_style_change_foreach (ClutterActor *actor,
+                                         gpointer      user_data)
+{
+  if (MX_IS_WIDGET (actor))
+    mx_widget_st_style_changed (MX_WIDGET (actor));
+  else if (CLUTTER_IS_CONTAINER (actor))
+    notify_children_of_style_change ((ClutterContainer *)actor);
+}
+
+static void
+notify_children_of_style_change (ClutterContainer *container)
+{
+  /* notify our children that their parent stylable has changed */
+  clutter_container_foreach (container,
+                             notify_children_of_style_change_foreach,
+                             NULL);
+}
+
+static void
+mx_widget_real_style_changed (MxWidget *self)
+{
+  MxWidgetPrivate *priv = MX_WIDGET (self)->priv;
+
+  /* application has request this widget is not stylable */
+  if (!priv->is_stylable)
+    return;
+
+  clutter_actor_queue_redraw ((ClutterActor *) self);
+
+  if (CLUTTER_IS_CONTAINER (self))
+    notify_children_of_style_change ((ClutterContainer *)self);
 }
 
 static void
@@ -1125,6 +1166,7 @@ mx_widget_class_init (MxWidgetClass *klass)
   actor_class->get_paint_volume = mx_widget_get_paint_volume;
 
   klass->paint_background = mx_widget_real_paint_background;
+  klass->style_changed = mx_widget_real_style_changed;
 
   /* stylable interface properties */
   g_object_class_override_property (gobject_class, PROP_STYLE, "style");
@@ -1206,6 +1248,22 @@ mx_widget_class_init (MxWidgetClass *klass)
                   G_TYPE_BOOLEAN, 3, G_TYPE_FLOAT, G_TYPE_FLOAT,
                   MX_TYPE_LONG_PRESS_ACTION);
 
+
+  /**
+   * MxWidget::style-changed:
+   * @widget: the #MxWidget
+   *
+   * Emitted when the style information that the widget derives from the
+   * theme changes
+   */
+  widget_signals[STYLE_CHANGED] =
+    g_signal_new ("style-changed",
+                  G_TYPE_FROM_CLASS (klass),
+                  G_SIGNAL_RUN_LAST,
+                  G_STRUCT_OFFSET (MxWidgetClass, style_changed),
+                  NULL, NULL,
+                  _mx_marshal_VOID__VOID,
+                  G_TYPE_NONE, 0);
 }
 
 static MxStyle *
@@ -1851,7 +1909,53 @@ scriptable_iface_init (ClutterScriptableIface *iface)
   iface->set_custom_property = widget_scriptable_set_custom_property;
 }
 
+static void
+mx_widget_recompute_style (MxWidget    *widget,
+                           MxStThemeNode *old_theme_node)
+{
+  MxStThemeNode *new_theme_node = mx_widget_get_theme_node (widget);
+  gboolean paint_equal;
 
+  if (!old_theme_node ||
+      !mx_st_theme_node_geometry_equal (old_theme_node, new_theme_node))
+    clutter_actor_queue_relayout ((ClutterActor *) widget);
+
+  paint_equal = old_theme_node && mx_st_theme_node_paint_equal (old_theme_node, new_theme_node);
+
+  if (paint_equal)
+    mx_st_theme_node_copy_cached_paint_state (new_theme_node, old_theme_node);
+
+  g_signal_emit (widget, widget_signals[STYLE_CHANGED], 0);
+  widget->priv->is_style_dirty = FALSE;
+}
+
+
+void
+mx_widget_st_style_changed (MxWidget *widget)
+{
+  MxStThemeNode *old_theme_node = NULL;
+
+  widget->priv->is_style_dirty = TRUE;
+  if (widget->priv->theme_node)
+    {
+      old_theme_node = widget->priv->theme_node;
+      widget->priv->theme_node = NULL;
+    }
+
+  /* update the style only if we are mapped */
+  if (CLUTTER_ACTOR_IS_MAPPED (CLUTTER_ACTOR (widget)))
+    mx_widget_recompute_style (widget, old_theme_node);
+
+  if (old_theme_node)
+    g_object_unref (old_theme_node);
+}
+
+static void
+on_theme_context_changed (MxStThemeContext *context,
+                          ClutterStage     *stage)
+{
+  notify_children_of_style_change (CLUTTER_CONTAINER (stage));
+}
 
 static MxStThemeNode *
 get_root_theme_node (ClutterStage *stage)
@@ -1861,8 +1965,8 @@ get_root_theme_node (ClutterStage *stage)
   if (!g_object_get_data (G_OBJECT (context), "st-theme-initialized"))
     {
       g_object_set_data (G_OBJECT (context), "st-theme-initialized", GUINT_TO_POINTER (1));
-      /* g_signal_connect (G_OBJECT (context), "changed", */
-      /*                   G_CALLBACK (on_theme_context_changed), stage); */
+      g_signal_connect (G_OBJECT (context), "changed",
+                        G_CALLBACK (on_theme_context_changed), stage);
     }
 
   return mx_st_theme_context_get_root_node (context);
