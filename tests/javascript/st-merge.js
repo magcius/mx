@@ -18,11 +18,13 @@
  * Boston, MA 02111-1307, USA.
  *
  */
-
 const Clutter = imports.gi.Clutter;
 const Mx = imports.gi.Mx;
 
 Clutter.init (null);
+
+Mx.Style.get_default ().load_from_file ("tests.css");
+
 
 let script = new Clutter.Script ();
 script.load_from_file ("buttons.json", -1);
