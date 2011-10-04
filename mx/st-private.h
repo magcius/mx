@@ -28,9 +28,6 @@
 #include "mx-widget.h"
 #include "st-shadow.h"
 
-void _st_set_text_from_style (ClutterText *text,
-                              StThemeNode *theme_node);
-
 CoglHandle _st_create_texture_material (CoglHandle src_texture);
 
 /* Helper for widgets which need to draw additional shadows */

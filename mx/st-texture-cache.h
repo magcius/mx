@@ -61,7 +61,7 @@ typedef enum {
 
 GType mx_st_texture_cache_get_type (void) G_GNUC_CONST;
 
-MxStTextureCache* st_texture_cache_get_default (void);
+MxStTextureCache* mx_st_texture_cache_get_default (void);
 
 ClutterGroup *
 mx_st_texture_cache_load_sliced_image (MxStTextureCache    *cache,
@@ -74,13 +74,13 @@ ClutterActor *mx_st_texture_cache_bind_pixbuf_property (MxStTextureCache    *cac
                                                      const char        *property_name);
 
 ClutterActor *mx_st_texture_cache_load_icon_name (MxStTextureCache *cache,
-                                               StThemeNode    *theme_node,
+                                               MxStThemeNode    *theme_node,
                                                const char     *name,
                                                MxStIconType      icon_type,
                                                gint            size);
 
 ClutterActor *mx_st_texture_cache_load_gicon (MxStTextureCache *cache,
-                                           StThemeNode    *theme_node,
+                                           MxStThemeNode    *theme_node,
                                            GIcon          *icon,
                                            gint            size);
 

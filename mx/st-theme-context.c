@@ -30,8 +30,8 @@ struct _MxStThemeContext {
 
   double resolution;
   PangoFontDescription *font;
-  StThemeNode *root_node;
-  StTheme *theme;
+  MxStThemeNode *root_node;
+  MxStTheme *theme;
 };
 
 struct _MxStThemeContextClass {
@@ -52,7 +52,7 @@ static guint signals[LAST_SIGNAL] = { 0, };
 
 G_DEFINE_TYPE (MxStThemeContext, mx_st_theme_context, G_TYPE_OBJECT)
 
-static void on_icon_theme_changed (StTextureCache *cache,
+static void on_icon_theme_changed (MxStTextureCache *cache,
                                    MxStThemeContext *context);
 
 static void
