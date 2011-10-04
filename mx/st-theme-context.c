@@ -116,7 +116,7 @@ mx_st_theme_context_new (void)
 {
   MxStThemeContext *context;
 
-  context = g_object_new (ST_TYPE_THEME_CONTEXT, NULL);
+  context = g_object_new (MX_TYPE_ST_THEME_CONTEXT, NULL);
 
   return context;
 }
@@ -133,7 +133,7 @@ on_stage_destroy (ClutterStage *stage)
 static void
 mx_st_theme_context_changed (MxStThemeContext *context)
 {
-  StThemeNode *old_root = context->root_node;
+  MxStThemeNode *old_root = context->root_node;
   context->root_node = NULL;
 
   g_signal_emit (context, signals[CHANGED], 0);
@@ -143,7 +143,7 @@ mx_st_theme_context_changed (MxStThemeContext *context)
 }
 
 static void
-on_icon_theme_changed (StTextureCache *cache,
+on_icon_theme_changed (MxStTextureCache *cache,
                        MxStThemeContext *context)
 {
   /* Note that an icon theme change isn't really a change of the MxStThemeContext;
@@ -192,8 +192,8 @@ void
 mx_st_theme_context_set_theme (MxStThemeContext          *context,
                             StTheme                 *theme)
 {
-  g_return_if_fail (ST_IS_THEME_CONTEXT (context));
-  g_return_if_fail (theme == NULL || ST_IS_THEME (theme));
+  g_return_if_fail (MX_IS_ST_THEME_CONTEXT (context));
+  g_return_if_fail (theme == NULL || MX_IS_ST_THEME (theme));
 
   if (context->theme != theme)
     {
@@ -217,10 +217,10 @@ mx_st_theme_context_set_theme (MxStThemeContext          *context,
  *
  * Return value: (transfer none): the default theme for the context
  */
-StTheme *
+MxStTheme *
 mx_st_theme_context_get_theme (MxStThemeContext *context)
 {
-  g_return_val_if_fail (ST_IS_THEME_CONTEXT (context), NULL);
+  g_return_val_if_fail (MX_IS_ST_THEME_CONTEXT (context), NULL);
 
   return context->theme;
 }
@@ -240,7 +240,7 @@ void
 mx_st_theme_context_set_resolution (MxStThemeContext *context,
                                  double          resolution)
 {
-  g_return_if_fail (ST_IS_THEME_CONTEXT (context));
+  g_return_if_fail (MX_IS_ST_THEME_CONTEXT (context));
 
   if (resolution == context->resolution)
     return;
@@ -259,7 +259,7 @@ mx_st_theme_context_set_resolution (MxStThemeContext *context,
 void
 mx_st_theme_context_set_default_resolution (MxStThemeContext *context)
 {
-  g_return_if_fail (ST_IS_THEME_CONTEXT (context));
+  g_return_if_fail (MX_IS_ST_THEME_CONTEXT (context));
 
   if (context->resolution == DEFAULT_RESOLUTION)
     return;
@@ -280,7 +280,7 @@ mx_st_theme_context_set_default_resolution (MxStThemeContext *context)
 double
 mx_st_theme_context_get_resolution (MxStThemeContext *context)
 {
-  g_return_val_if_fail (ST_IS_THEME_CONTEXT (context), DEFAULT_RESOLUTION);
+  g_return_val_if_fail (MX_IS_ST_THEME_CONTEXT (context), DEFAULT_RESOLUTION);
 
   return context->resolution;
 }
@@ -300,7 +300,7 @@ void
 mx_st_theme_context_set_font (MxStThemeContext             *context,
                            const PangoFontDescription *font)
 {
-  g_return_if_fail (ST_IS_THEME_CONTEXT (context));
+  g_return_if_fail (MX_IS_ST_THEME_CONTEXT (context));
   g_return_if_fail (font != NULL);
 
   if (context->font == font ||
@@ -323,7 +323,7 @@ mx_st_theme_context_set_font (MxStThemeContext             *context,
 const PangoFontDescription *
 mx_st_theme_context_get_font (MxStThemeContext *context)
 {
-  g_return_val_if_fail (ST_IS_THEME_CONTEXT (context), NULL);
+  g_return_val_if_fail (MX_IS_ST_THEME_CONTEXT (context), NULL);
 
   return context->font;
 }
@@ -338,7 +338,7 @@ mx_st_theme_context_get_font (MxStThemeContext *context)
  *
  * Return value: (transfer none): the root node of the context's style tree
  */
-StThemeNode *
+MxStThemeNode *
 mx_st_theme_context_get_root_node (MxStThemeContext *context)
 {
   if (context->root_node == NULL)

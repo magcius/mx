@@ -28,9 +28,9 @@ G_BEGIN_DECLS
 struct _StThemeNode {
   GObject parent;
 
-  StThemeContext *context;
-  StThemeNode *parent_node;
-  StTheme *theme;
+  MxStThemeContext *context;
+  MxStThemeNode *parent_node;
+  MxStTheme *theme;
 
   PangoFontDescription *font_desc;
 
