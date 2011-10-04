@@ -56,8 +56,8 @@ struct _MxWidgetPrivate
   MxPadding     border;
   MxPadding     padding;
 
-  StThemeNode   *theme_node;
-  StTheme       *theme;
+  MxStThemeNode   *theme_node;
+  MxStTheme       *theme;
 
   MxStyle       *style;
   gchar         *pseudo_class;

@@ -53,8 +53,8 @@ MxStThemeContext *mx_st_theme_context_new           (void);
 MxStThemeContext *mx_st_theme_context_get_for_stage (ClutterStage *stage);
 
 void                        mx_st_theme_context_set_theme      (MxStThemeContext             *context,
-                                                             StTheme                    *theme);
-StTheme *                   mx_st_theme_context_get_theme      (MxStThemeContext             *context);
+                                                             MxStTheme                    *theme);
+MxStTheme *                   mx_st_theme_context_get_theme      (MxStThemeContext             *context);
 
 void                        mx_st_theme_context_set_resolution (MxStThemeContext             *context,
                                                              gdouble                     resolution);
@@ -64,7 +64,7 @@ void                        mx_st_theme_context_set_font       (MxStThemeContext
                                                              const PangoFontDescription *font);
 const PangoFontDescription *mx_st_theme_context_get_font       (MxStThemeContext             *context);
 
-StThemeNode *               mx_st_theme_context_get_root_node  (MxStThemeContext             *context);
+MxStThemeNode *               mx_st_theme_context_get_root_node  (MxStThemeContext             *context);
 
 G_END_DECLS
 
