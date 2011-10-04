@@ -32,6 +32,9 @@
 #include <mx/mx-types.h>
 #include <mx/mx-style.h>
 
+#include <mx/st-theme.h>
+#include <mx/st-theme-node.h>
+
 G_BEGIN_DECLS
 
 #define MX_TYPE_WIDGET                 (mx_widget_get_type ())

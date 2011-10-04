@@ -45,6 +45,9 @@
 #include "mx-enum-types.h"
 #include "mx-settings.h"
 
+
+#include "st-theme-context.h"
+
 /*
  * Forward declaration for sake of MxWidgetChild
  */
@@ -52,6 +55,9 @@ struct _MxWidgetPrivate
 {
   MxPadding     border;
   MxPadding     padding;
+
+  StThemeNode   *theme_node;
+  StTheme       *theme;
 
   MxStyle       *style;
   gchar         *pseudo_class;
@@ -490,6 +496,17 @@ mx_widget_paint (ClutterActor *self)
   MxWidgetPrivate *priv = MX_WIDGET (self)->priv;
   MxWidgetClass *klass = MX_WIDGET_GET_CLASS (self);
 
+  theme_node = st_widget_get_theme_node (self);
+
+  clutter_actor_get_allocation_box (actor, &allocation);
+
+  opacity = clutter_actor_get_paint_opacity (actor);
+
+  st_theme_node_paint (theme_node, &allocation, opacity);
+
+
+  /****
+
   klass->paint_background (MX_WIDGET (self),
                            priv->border_image,
                            priv->bg_color);
@@ -502,6 +519,8 @@ mx_widget_paint (ClutterActor *self)
 
   if (priv->menu)
     clutter_actor_paint (CLUTTER_ACTOR (priv->menu));
+
+  ****/
 }
 
 static void
@@ -1828,4 +1847,87 @@ scriptable_iface_init (ClutterScriptableIface *iface)
                                           (CLUTTER_TYPE_SCRIPTABLE);
 
   iface->set_custom_property = widget_scriptable_set_custom_property;
+}
+
+
+
+
+
+/**
+ * mx_widget_get_theme_node:
+ * @widget: an #MxWidget
+ *
+ * Gets the theme node holding style information for the widget.
+ * The theme node is used to access standard and custom CSS
+ * properties of the widget.
+ *
+ * Note: it is a fatal error to call this on a widget that is
+ *  not been added to a stage.
+ *
+ * Return value: (transfer none): the theme node for the widget.
+ *   This is owned by the widget. When attributes of the widget
+ *   or the environment that affect the styling change (for example
+ *   the style_class property of the widget), it will be recreated,
+ *   and the ::style-changed signal will be emitted on the widget.
+ */
+StThemeNode *
+mx_widget_get_theme_node (MxWidget *widget)
+{
+  MxWidgetPrivate *priv = widget->priv;
+
+  if (priv->theme_node == NULL)
+    {
+      StThemeNode *parent_node = NULL;
+      ClutterStage *stage = NULL;
+      ClutterActor *parent;
+      char *pseudo_class, *direction_pseudo_class;
+
+      parent = clutter_actor_get_parent (CLUTTER_ACTOR (widget));
+      while (parent != NULL)
+        {
+          if (parent_node == NULL && ST_IS_WIDGET (parent))
+            parent_node = st_widget_get_theme_node (ST_WIDGET (parent));
+          else if (CLUTTER_IS_STAGE (parent))
+            stage = CLUTTER_STAGE (parent);
+
+          parent = clutter_actor_get_parent (parent);
+        }
+
+      if (stage == NULL)
+        {
+          g_error ("mx_widget_get_theme_node called on the widget which is not in the stage.");
+        }
+
+      if (parent_node == NULL)
+        parent_node = get_root_theme_node (CLUTTER_STAGE (stage));
+
+      /* Always append a "magic" pseudo class indicating the text
+       * direction, to allow to adapt the CSS when necessary without
+       * requiring separate style sheets.
+       */
+      if (st_widget_get_direction (widget) == ST_TEXT_DIRECTION_RTL)
+        direction_pseudo_class = "rtl";
+      else
+        direction_pseudo_class = "ltr";
+
+      if (priv->pseudo_class)
+        pseudo_class = g_strconcat(priv->pseudo_class, " ",
+                                   direction_pseudo_class, NULL);
+      else
+        pseudo_class = direction_pseudo_class;
+
+      priv->theme_node = st_theme_node_new (st_theme_context_get_for_stage (stage),
+                                            parent_node, priv->theme,
+                                            G_OBJECT_TYPE (widget),
+                                            clutter_actor_get_name (CLUTTER_ACTOR (widget)),
+                                            priv->style_class,
+                                            pseudo_class,
+                                            priv->inline_style);
+
+      if (pseudo_class != direction_pseudo_class)
+        g_free (pseudo_class);
+    }
+
+  return priv->theme_node;
+
 }

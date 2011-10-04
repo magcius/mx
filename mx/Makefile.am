@@ -94,6 +94,9 @@ source_h = \
 	$(top_srcdir)/mx/mx-window.h		\
 	$(top_srcdir)/mx/mx-floating-widget.h \
 	$(top_srcdir)/mx/mx-kinetic-scroll-view.h \
+	$(top_srcdir)/mx/st-theme.h		\
+	$(top_srcdir)/mx/st-theme-context.h	\
+	$(top_srcdir)/mx/st-theme-node.h	\
 	$(NULL)
 
 source_h_priv = \
@@ -103,6 +106,8 @@ source_h_priv = \
 	$(top_srcdir)/mx/mx-progress-bar-fill.h	\
 	$(top_srcdir)/mx/mx-private.h		\
 	$(top_srcdir)/mx/mx-settings-provider.h	\
+	$(top_srcdir)/mx/st-theme-private.h	\
+	$(top_srcdir)/mx/st-theme-node-private.h	\
 	$(NULL)
 
 source_c = \
@@ -169,6 +174,10 @@ source_c = \
 	$(top_srcdir)/mx/mx-window.c		\
 	$(top_srcdir)/mx/mx-floating-widget.c	\
 	$(top_srcdir)/mx/mx-kinetic-scroll-view.c \
+	$(top_srcdir)/mx/st-theme.c		\
+	$(top_srcdir)/mx/st-theme-context.c	\
+	$(top_srcdir)/mx/st-theme-node.c	\
+	$(top_srcdir)/mx/st-theme-node-drawing.c	\
 	$(NULL)
 
 EXTRA_DIST = \
