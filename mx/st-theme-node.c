@@ -326,7 +326,7 @@ ensure_properties (MxStThemeNode *node)
       node->properties_computed = TRUE;
 
       if (node->theme)
-        properties = _st_theme_get_matched_properties (node->theme, node);
+        properties = _mx_st_theme_get_matched_properties (node->theme, node);
 
       if (node->inline_style)
         {
@@ -335,7 +335,7 @@ ensure_properties (MxStThemeNode *node)
           if (!properties)
             properties = g_ptr_array_new ();
 
-          node->inline_properties = _st_theme_parse_declaration_list (node->inline_style);
+          node->inline_properties = _mx_st_theme_parse_declaration_list (node->inline_style);
           for (cur_decl = node->inline_properties; cur_decl; cur_decl = cur_decl->next)
             g_ptr_array_add (properties, cur_decl);
         }
@@ -694,7 +694,7 @@ get_parent_font (MxStThemeNode *node)
   if (node->parent_node)
     return mx_st_theme_node_get_font (node->parent_node);
   else
-    return st_theme_context_get_font (node->context);
+    return mx_st_theme_context_get_font (node->context);
 }
 
 static GetFromTermResult
@@ -813,7 +813,7 @@ get_length_from_term (MxStThemeNode *node,
       break;
     case POINTS:
       {
-        double resolution = st_theme_context_get_resolution (node->context);
+        double resolution = mx_st_theme_context_get_resolution (node->context);
         *length = num->val * multiplier * (resolution / 72.);
       }
       break;
@@ -835,7 +835,7 @@ get_length_from_term (MxStThemeNode *node,
           }
         else
           {
-            double resolution = st_theme_context_get_resolution (node->context);
+            double resolution = mx_st_theme_context_get_resolution (node->context);
             *length = num->val * multiplier * (resolution / 72.) * font_size;
           }
       }
@@ -1629,7 +1629,7 @@ _mx_st_theme_node_ensure_background (MxStThemeNode *node)
                   else
                     base_stylesheet = NULL;
 
-                  node->background_image = _st_theme_resolve_url (node->theme,
+                  node->background_image = _mx_st_theme_resolve_url (node->theme,
                                                                   base_stylesheet,
                                                                   term->content.str->stryng->str);
                 }
@@ -1689,7 +1689,7 @@ _mx_st_theme_node_ensure_background (MxStThemeNode *node)
                 base_stylesheet = NULL;
 
               g_free (node->background_image);
-              node->background_image = _st_theme_resolve_url (node->theme,
+              node->background_image = _mx_st_theme_resolve_url (node->theme,
                                                               base_stylesheet,
                                                               decl->value->content.str->stryng->str);
             }
@@ -2092,7 +2092,7 @@ font_size_from_term (MxStThemeNode *node,
 {
   if (term->type == TERM_IDENT)
     {
-      double resolution = st_theme_context_get_resolution (node->context);
+      double resolution = mx_st_theme_context_get_resolution (node->context);
       /* We work in integers to avoid double comparisons when converting back
        * from a size in pixels to a logical size.
        */
@@ -2299,7 +2299,7 @@ mx_st_theme_node_get_font (MxStThemeNode *node)
   parent_size = pango_font_description_get_size (node->font_desc);
   if (!pango_font_description_get_size_is_absolute (node->font_desc))
     {
-      double resolution = st_theme_context_get_resolution (node->context);
+      double resolution = mx_st_theme_context_get_resolution (node->context);
       parent_size *= (resolution / 72.);
     }
 
@@ -2585,7 +2585,7 @@ mx_st_theme_node_get_border_image (MxStThemeNode *node)
           else
             base_stylesheet = NULL;
 
-          filename = _st_theme_resolve_url (node->theme, base_stylesheet, url);
+          filename = _mx_st_theme_resolve_url (node->theme, base_stylesheet, url);
           if (filename == NULL)
             goto next_property;
 
