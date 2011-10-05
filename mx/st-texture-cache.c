@@ -125,7 +125,6 @@ typedef struct {
   char *uri;
   char *mimetype;
   gboolean thumbnail;
-  GIcon *icon;
   gint width;
   gint height;
   StIconColors *colors;
@@ -562,7 +561,6 @@ typedef struct {
   gboolean enforced_square;
   char *mimetype;
   char *checksum;
-  GIcon *icon;
   guint width;
   guint height;
   GSList *textures;
