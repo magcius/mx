@@ -55,11 +55,6 @@ struct _MxTextureCachePrivate
   GRegex     *is_uri;
 };
 
-enum
-{
-  PROP_0,
-};
-
 static MxTextureCache* __cache_singleton = NULL;
 
 /*
