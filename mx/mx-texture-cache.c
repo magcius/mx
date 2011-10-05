@@ -55,12 +55,6 @@ struct _MxTextureCachePrivate
   GRegex     *is_uri;
 };
 
-typedef struct FinalizedClosure
-{
-  gchar          *uri;
-  MxTextureCache *cache;
-} FinalizedClosure;
-
 enum
 {
   PROP_0,
@@ -200,21 +194,6 @@ mx_texture_cache_get_default (void)
   return __cache_singleton;
 }
 
-#if 0
-static void
-on_texure_finalized (gpointer data,
-                     GObject *where_the_object_was)
-{
-  FinalizedClosure *closure = (FinalizedClosure *) data;
-  MxTextureCachePrivate *priv = TEXTURE_CACHE_PRIVATE(closure->cache);
-
-  g_hash_table_remove (priv->cache, closure->uri);
-
-  g_free(closure->uri);
-  g_free(closure);
-}
-#endif
-
 /**
  * mx_texture_cache_get_size:
  * @self: A #MxTextureCache
@@ -236,19 +215,9 @@ add_texture_to_cache (MxTextureCache     *self,
                       const gchar        *uri,
                       MxTextureCacheItem *item)
 {
-  /*  FinalizedClosure        *closure; */
   MxTextureCachePrivate *priv = TEXTURE_CACHE_PRIVATE(self);
 
   g_hash_table_insert (priv->cache, g_strdup (uri), item);
-
-#if 0
-  /* Make sure we can remove from hash */
-  closure = g_new0 (FinalizedClosure, 1);
-  closure->uri = g_strdup (uri);
-  closure->cache = self;
-
-  g_object_weak_ref (G_OBJECT (res), on_texure_finalized, closure);
-#endif
 }
 
 /* NOTE: you should unref the returned texture when not needed */
