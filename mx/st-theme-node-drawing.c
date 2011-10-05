@@ -190,20 +190,13 @@ corner_to_string (StCornerSpec *corner)
                           corner->border_width_2);
 }
 
-typedef struct {
-  MxStThemeNode *node;
-  StCornerSpec *corner;
-} LoadCornerData;
-
 static CoglHandle
-load_corner (MxStTextureCache  *cache,
+load_corner (StTextureCache  *cache,
              const char      *key,
              void            *datap,
              GError         **error)
 {
-  LoadCornerData *data = datap;
-
-  return create_corner_material (data->corner);
+  return create_corner_material ((StCornerSpec *) datap);
 }
 
 /* To match the CSS specification, we want the border to look like it was
@@ -348,7 +341,6 @@ mx_st_theme_node_lookup_corner (MxStThemeNode    *node,
   char *key;
   MxStTextureCache *cache;
   StCornerSpec corner;
-  LoadCornerData data;
   guint radius[4];
 
   if (node->border_radius[corner_id] == 0)
@@ -389,10 +381,7 @@ mx_st_theme_node_lookup_corner (MxStThemeNode    *node,
     return COGL_INVALID_HANDLE;
 
   key = corner_to_string (&corner);
-
-  data.node = node;
-  data.corner = &corner;
-  texture = mx_st_texture_cache_load (cache, key, MX_ST_TEXTURE_CACHE_POLICY_NONE, load_corner, &data, NULL);
+  texture = mx_st_texture_cache_load (cache, key, MX_ST_TEXTURE_CACHE_POLICY_NONE, load_corner, &corner, NULL);
   material = _st_create_texture_material (texture);
   cogl_handle_unref (texture);
 
