@@ -42,6 +42,13 @@
 #include "mx-marshal.h"
 #include "mx-private.h"
 
+#define CACHE_PREFIX_GICON "gicon:"
+#define CACHE_PREFIX_URI "uri:"
+#define CACHE_PREFIX_URI_FOR_CAIRO "uri-for-cairo:"
+#define CACHE_PREFIX_THUMBNAIL_URI "thumbnail-uri:"
+#define CACHE_PREFIX_RAW_CHECKSUM "raw-checksum:"
+#define CACHE_PREFIX_COMPRESSED_CHECKSUM "compressed-checksum:"
+
 G_DEFINE_TYPE (MxTextureCache, mx_texture_cache, G_TYPE_OBJECT)
 
 #define TEXTURE_CACHE_PRIVATE(o) \
@@ -53,6 +60,8 @@ struct _MxTextureCachePrivate
 {
   GHashTable *cache;
   GRegex     *is_uri;
+
+  GHashTable *outstanding_requests;
 };
 
 static MxTextureCache* __cache_singleton = NULL;
@@ -74,6 +83,16 @@ typedef struct
   CoglHandle     *texture;
   GDestroyNotify  destroy_func;
 } MxTextureCacheMetaEntry;
+
+typedef struct {
+  MxTextureCachePolicy policy;
+  char *key;
+  char *uri;
+  char *checksum;
+  guint width;
+  guint height;
+  GSList *textures;
+} MxTextureCacheAsyncLoadData;
 
 static MxTextureCacheItem *
 mx_texture_cache_item_new (void)
@@ -135,9 +154,15 @@ mx_texture_cache_finalize (GObject *object)
 
   if (priv->cache)
     g_hash_table_unref (priv->cache);
+  priv->cache = NULL;
 
   if (priv->is_uri)
     g_regex_unref (priv->is_uri);
+  priv->is_uri = NULL;
+
+  if (priv->outstanding_requests)
+    g_hash_table_destroy (self->priv->outstanding_requests);
+  priv->outstanding_requests = NULL;
 
   G_OBJECT_CLASS (mx_texture_cache_parent_class)->finalize (object);
 }
@@ -168,6 +193,11 @@ mx_texture_cache_init (MxTextureCache *self)
 
   priv->is_uri = g_regex_new ("^([a-zA-Z0-9+.-]+)://.*",
                               G_REGEX_OPTIMIZE, 0, &error);
+
+  priv->outstanding_requests =
+    g_hash_table_new_full (g_str_hash, g_str_equal,
+                           g_free, NULL);
+
   if (!priv->is_uri)
     g_error (G_STRLOC ": Unable to compile regex: %s", error->message);
 }
