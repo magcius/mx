@@ -113,41 +113,6 @@ mx_texture_cache_item_free (MxTextureCacheItem *item)
 }
 
 static void
-mx_texture_cache_set_property (GObject      *object,
-                               guint         prop_id,
-                               const GValue *value,
-                               GParamSpec   *pspec)
-{
-  switch (prop_id)
-    {
-    default:
-      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-      break;
-    }
-}
-
-static void
-mx_texture_cache_get_property (GObject    *object,
-                               guint       prop_id,
-                               GValue     *value,
-                               GParamSpec *pspec)
-{
-  switch (prop_id)
-    {
-    default:
-      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-      break;
-    }
-}
-
-static void
-mx_texture_cache_dispose (GObject *object)
-{
-  if (G_OBJECT_CLASS (mx_texture_cache_parent_class)->dispose)
-    G_OBJECT_CLASS (mx_texture_cache_parent_class)->dispose (object);
-}
-
-static void
 mx_texture_cache_finalize (GObject *object)
 {
   MxTextureCachePrivate *priv = TEXTURE_CACHE_PRIVATE(object);
@@ -174,9 +139,6 @@ mx_texture_cache_class_init (MxTextureCacheClass *klass)
 
   g_type_class_add_private (klass, sizeof (MxTextureCachePrivate));
 
-  object_class->get_property = mx_texture_cache_get_property;
-  object_class->set_property = mx_texture_cache_set_property;
-  object_class->dispose = mx_texture_cache_dispose;
   object_class->finalize = mx_texture_cache_finalize;
 
 }
