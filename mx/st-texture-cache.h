@@ -115,15 +115,15 @@ ClutterActor *mx_st_texture_cache_load_from_data (MxStTextureCache    *cache,
                                                gsize              len,
                                                int                size,
                                                GError           **error);
-ClutterActor *mx_st_texture_cache_load_from_raw  (MxStTextureCache    *cache,
-                                               const guchar      *data,
-                                               gsize              len,
-                                               gboolean           has_alpha,
-                                               int                width,
-                                               int                height,
-                                               int                rowstride,
-                                               int                size,
-                                               GError           **error);
+ClutterActor *
+mx_st_texture_cache_load_from_raw (MxStTextureCache    *cache,
+                                   const guchar      *data,
+                                   gsize              len,
+                                   gboolean           has_alpha,
+                                   int                width,
+                                   int                height,
+                                   int                rowstride,
+                                   GError           **error);
 
 /**
  * MxStTextureCacheLoader: (skip)

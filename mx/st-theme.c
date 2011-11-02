@@ -1019,7 +1019,6 @@ _mx_st_theme_resolve_url (MxStTheme      *theme,
       g_str_has_prefix (url, "FILE:"))
     {
       GError *error = NULL;
-      char *filename;
 
       filename = g_filename_from_uri (url, NULL, &error);
       if (filename == NULL)

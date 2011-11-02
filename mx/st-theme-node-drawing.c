@@ -35,7 +35,6 @@
 #include "st-theme-context.h"
 #include "st-texture-cache.h"
 #include "st-theme-node-private.h"
-#include "st-icon-colors.h"
 
 /****
  * Rounded corners
@@ -191,7 +190,7 @@ corner_to_string (StCornerSpec *corner)
 }
 
 static CoglHandle
-load_corner (StTextureCache  *cache,
+load_corner (MxStTextureCache  *cache,
              const char      *key,
              void            *datap,
              GError         **error)
@@ -343,12 +342,13 @@ mx_st_theme_node_lookup_corner (MxStThemeNode    *node,
   StCornerSpec corner;
   guint radius[4];
 
-  if (node->border_radius[corner_id] == 0)
-    return COGL_INVALID_HANDLE;
-
   cache = mx_st_texture_cache_get_default ();
 
   mx_st_theme_node_reduce_border_radius (node, radius);
+
+  if (radius[corner_id] == 0)
+    return COGL_INVALID_HANDLE;
+
   corner.radius = radius[corner_id];
   corner.color = node->background_color;
   mx_st_theme_node_get_corner_border_widths (node, corner_id,

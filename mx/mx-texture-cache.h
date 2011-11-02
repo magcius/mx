@@ -86,9 +86,9 @@ typedef struct {
 } MxTextureCacheClass;
 
 typedef enum {
-  MX_ST_TEXTURE_CACHE_POLICY_NONE,
-  MX_ST_TEXTURE_CACHE_POLICY_FOREVER
-} MxStTextureCachePolicy;
+  MX_TEXTURE_CACHE_POLICY_NONE,
+  MX_TEXTURE_CACHE_POLICY_FOREVER
+} MxTextureCachePolicy;
 
 GType mx_texture_cache_get_type (void);
 

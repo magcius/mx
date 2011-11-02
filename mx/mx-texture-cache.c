@@ -161,7 +161,7 @@ mx_texture_cache_finalize (GObject *object)
   priv->is_uri = NULL;
 
   if (priv->outstanding_requests)
-    g_hash_table_destroy (self->priv->outstanding_requests);
+    g_hash_table_destroy (priv->outstanding_requests);
   priv->outstanding_requests = NULL;
 
   G_OBJECT_CLASS (mx_texture_cache_parent_class)->finalize (object);
