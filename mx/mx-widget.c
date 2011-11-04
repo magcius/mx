@@ -1122,17 +1122,81 @@ mx_widget_parent_set (ClutterActor *actor,
     }
 }
 
+static void
+mx_widget_get_preferred_width (ClutterActor *self,
+                               gfloat        for_height,
+                               gfloat       *min_width_p,
+                               gfloat       *natural_width_p)
+{
+  MxStThemeNode *theme_node = mx_widget_get_theme_node (MX_WIDGET (self));
+
+  /* Most subclasses will override this and not chain down. However,
+   * if they do not, then we need to override ClutterActor's default
+   * behavior (request 0x0) to take CSS-specified minimums into
+   * account (which st_theme_node_adjust_preferred_width() will do.)
+   */
+
+  if (min_width_p)
+    *min_width_p = 0;
+
+  if (natural_width_p)
+    *natural_width_p = 0;
+
+  mx_st_theme_node_adjust_preferred_width (theme_node,
+                                           min_width_p,
+                                           natural_width_p);
+}
+
+static void
+mx_widget_get_preferred_height (ClutterActor *self,
+                                gfloat        for_width,
+                                gfloat       *min_height_p,
+                                gfloat       *natural_height_p)
+{
+  MxStThemeNode *theme_node = mx_widget_get_theme_node (MX_WIDGET (self));
+
+  /* See mx_widget_get_preferred_width() */
+
+  if (min_height_p)
+    *min_height_p = 0;
+
+  if (natural_height_p)
+    *natural_height_p = 0;
+
+  mx_st_theme_node_adjust_preferred_height (theme_node,
+                                            min_height,
+                                            natural_height_p);
+}
+
 static gboolean
 mx_widget_get_paint_volume (ClutterActor       *actor,
                             ClutterPaintVolume *volume)
 {
+  ClutterActorBox paint_box, actor_box;
+  ClutterVertex origin;
+  MxStThemeNode *theme_node;
+
   /* the allocation of scrollable widgets cannot be used as the paint volume
    * because it does not account for any transformations applied during
    * scrolling */
   if (MX_IS_SCROLLABLE (actor))
     return FALSE;
 
-  return clutter_paint_volume_set_from_allocation (volume, actor);
+  theme_node = mx_widget_get_theme_node (MX_WIDGET (actor));
+
+  clutter_actor_get_allocation_box (self, &alloc_box);
+
+  st_theme_node_get_paint_box (theme_node, &alloc_box, &paint_box);
+
+  origin.x = paint_box.x1 - alloc_box.x1;
+  origin.y = paint_box.y1 - alloc_box.y1;
+  origin.z = 0.0f;
+
+  clutter_paint_volume_set_origin (volume, &origin);
+  clutter_paint_volume_set_width (volume, paint_box.x2 - paint_box.x1);
+  clutter_paint_volume_set_height (volume, paint_box.y2 - paint_box.y1);
+
+  return TRUE;
 }
 
 static void
@@ -1163,6 +1227,8 @@ mx_widget_class_init (MxWidgetClass *klass)
   actor_class->hide = mx_widget_hide;
   actor_class->parent_set = mx_widget_parent_set;
 
+  actor_class->get_preferred_width = mx_widget_get_preferred_width;
+  actor_class->get_preferred_height = mx_widget_get_preferred_height;
   actor_class->get_paint_volume = mx_widget_get_paint_volume;
 
   klass->paint_background = mx_widget_real_paint_background;
@@ -1306,11 +1372,13 @@ _mx_widget_set_style_class (MxStylable  *actor,
       g_object_notify_by_pspec (G_OBJECT (actor),
                                 widget_properties[PROP_STYLE_CLASS]);
     }
+
+  mx_widget_st_style_changed (MX_WIDGET (actor));
 }
 
 static void
 _mx_stylable_set_style_pseudo_class (MxStylable  *actor,
-                                   const gchar *pseudo_class)
+                                     const gchar *pseudo_class)
 {
   MxWidgetPrivate *priv;
 
@@ -1326,6 +1394,8 @@ _mx_stylable_set_style_pseudo_class (MxStylable  *actor,
       g_object_notify_by_pspec (G_OBJECT (actor),
                                 widget_properties[PROP_STYLE_PSEUDO_CLASS]);
     }
+
+  mx_widget_st_style_changed (MX_WIDGET (actor));
 }
 
 static const gchar*
