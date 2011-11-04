@@ -99,7 +99,6 @@ source_h = \
 	$(top_srcdir)/mx/st-theme-node.h	\
 	$(top_srcdir)/mx/st-border-image.h	\
 	$(top_srcdir)/mx/st-shadow.h	\
-	$(top_srcdir)/mx/st-texture-cache.h	\
 	$(top_srcdir)/mx/st-icon-colors.h	\
 	$(NULL)
 
@@ -185,7 +184,6 @@ source_c = \
 	$(top_srcdir)/mx/st-theme-node-drawing.c	\
 	$(top_srcdir)/mx/st-border-image.c	\
 	$(top_srcdir)/mx/st-shadow.c	\
-	$(top_srcdir)/mx/st-texture-cache.c	\
 	$(top_srcdir)/mx/st-icon-colors.c	\
 	$(top_srcdir)/mx/st-private.c \
 	$(NULL)

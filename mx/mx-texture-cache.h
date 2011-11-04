@@ -127,8 +127,23 @@ void            mx_texture_cache_insert_meta (MxTextureCache *self,
                                               CoglHandle     *texture,
                                               GDestroyNotify  destroy_func);
 
+ClutterActor *mx_texture_cache_bind_pixbuf_property (MxTextureCache    *cache,
+                                                     GObject           *object,
+                                                     const char        *property_name);
+
+ClutterActor *mx_texture_cache_load_uri_async (MxTextureCache    *cache,
+                                               const gchar       *uri,
+                                               int                available_width,
+                                               int                available_height);
+
+CoglHandle    mx_texture_cache_load_file_to_cogl_texture (MxTextureCache *cache,
+                                                          const gchar    *file_path);
+
 void mx_texture_cache_load_cache (MxTextureCache *self,
                                   const char     *filename);
+
+cairo_surface_t *mx_texture_cache_load_file_to_cairo_surface (MxTextureCache *cache,
+                                                              const gchar    *file_path);
 
 /**
  * MxTextureCacheLoader: (skip)

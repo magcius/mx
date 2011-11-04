@@ -29,11 +29,11 @@
 #include <stdlib.h>
 #include <math.h>
 
+#include "mx-texture-cache.h"
 #include "st-shadow.h"
 #include "st-private.h"
 #include "st-theme-private.h"
 #include "st-theme-context.h"
-#include "st-texture-cache.h"
 #include "st-theme-node-private.h"
 
 /****
@@ -190,7 +190,7 @@ corner_to_string (StCornerSpec *corner)
 }
 
 static CoglHandle
-load_corner (MxStTextureCache  *cache,
+load_corner (MxTextureCache  *cache,
              const char      *key,
              void            *datap,
              GError         **error)
@@ -338,11 +338,11 @@ mx_st_theme_node_lookup_corner (MxStThemeNode    *node,
 {
   CoglHandle texture, material;
   char *key;
-  MxStTextureCache *cache;
+  MxTextureCache *cache;
   StCornerSpec corner;
   guint radius[4];
 
-  cache = mx_st_texture_cache_get_default ();
+  cache = mx_texture_cache_get_default ();
 
   mx_st_theme_node_reduce_border_radius (node, radius);
 
@@ -381,7 +381,7 @@ mx_st_theme_node_lookup_corner (MxStThemeNode    *node,
     return COGL_INVALID_HANDLE;
 
   key = corner_to_string (&corner);
-  texture = mx_st_texture_cache_load (cache, key, MX_ST_TEXTURE_CACHE_POLICY_NONE, load_corner, &corner, NULL);
+  texture = mx_texture_cache_load (cache, key, MX_TEXTURE_CACHE_POLICY_NONE, load_corner, &corner, NULL);
   material = _st_create_texture_material (texture);
   cogl_handle_unref (texture);
 
@@ -537,13 +537,13 @@ create_cairo_pattern_of_background_image (MxStThemeNode *node,
   int file_width;
   int file_height;
 
-  MxStTextureCache *texture_cache;
+  MxTextureCache *texture_cache;
 
   file = mx_st_theme_node_get_background_image (node);
 
-  texture_cache = mx_st_texture_cache_get_default ();
+  texture_cache = mx_texture_cache_get_default ();
 
-  surface = mx_st_texture_cache_load_file_to_cairo_surface (texture_cache, file);
+  surface = mx_texture_cache_load_file_to_cairo_surface (texture_cache, file);
 
   if (surface == NULL)
     return NULL;
@@ -1304,7 +1304,7 @@ mx_st_theme_node_render_resources (MxStThemeNode   *node,
                                 float          width,
                                 float          height)
 {
-  MxStTextureCache *texture_cache;
+  MxTextureCache *texture_cache;
   StBorderImage *border_image;
   gboolean has_border;
   gboolean has_border_radius;
@@ -1314,7 +1314,7 @@ mx_st_theme_node_render_resources (MxStThemeNode   *node,
   StShadow *background_image_shadow_spec;
   const char *background_image;
 
-  texture_cache = mx_st_texture_cache_get_default ();
+  texture_cache = mx_texture_cache_get_default ();
 
   /* FIXME - need to separate this into things that need to be recomputed on
    * geometry change versus things that can be cached regardless, such as
@@ -1378,7 +1378,7 @@ mx_st_theme_node_render_resources (MxStThemeNode   *node,
 
       filename = st_border_image_get_filename (border_image);
 
-      node->border_slices_texture = mx_st_texture_cache_load_file_to_cogl_texture (texture_cache, filename);
+      node->border_slices_texture = mx_texture_cache_load_file_to_cogl_texture (texture_cache, filename);
     }
 
   if (node->border_slices_texture)
@@ -1446,7 +1446,7 @@ mx_st_theme_node_render_resources (MxStThemeNode   *node,
     {
       CoglHandle texture;
 
-      texture = mx_st_texture_cache_load_file_to_cogl_texture (texture_cache, background_image);
+      texture = mx_texture_cache_load_file_to_cogl_texture (texture_cache, background_image);
 
       /* If no background position is specified, then we will automatically scale
        * the background to fit within the node allocation. But, if a background

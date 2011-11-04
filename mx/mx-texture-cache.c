@@ -44,7 +44,6 @@
 
 #define CACHE_PREFIX_GICON "gicon:"
 #define CACHE_PREFIX_URI "uri:"
-#define CACHE_PREFIX_URI_FOR_CAIRO "uri-for-cairo:"
 #define CACHE_PREFIX_THUMBNAIL_URI "thumbnail-uri:"
 #define CACHE_PREFIX_RAW_CHECKSUM "raw-checksum:"
 #define CACHE_PREFIX_COMPRESSED_CHECKSUM "compressed-checksum:"
@@ -299,6 +298,7 @@ mx_texture_cache_uri_to_filename (const gchar *uri)
 
 #include "mx-texture-cache-pixbuf.c"
 #include "mx-texture-cache-bind.c"
+#include "mx-texture-cache-cairo.c"
 #include "mx-texture-cache-compat.c"
 
 static void
@@ -339,8 +339,7 @@ load_texture_async (MxTextureCache              *cache,
   g_object_unref (result);
 }
 
-
-static MxTextureCacheItem *
+CoglHandle
 mx_texture_cache_load (MxTextureCache       *cache,
                        const char           *key,
                        MxTextureCachePolicy  policy,
@@ -349,27 +348,25 @@ mx_texture_cache_load (MxTextureCache       *cache,
                        GError              **error)
 {
   MxTextureCachePrivate *priv;
+  CoglHandle texture;
   MxTextureCacheItem *item;
 
   priv = TEXTURE_CACHE_PRIVATE (cache);
 
   item = g_hash_table_lookup (priv->cache, key);
-  if (item == NULL)
+  if (item != NULL)
+    return item->ptr;
+
+  texture = load (cache, key, data, error);
+  if (texture)
     {
-      CoglHandle texture;
-
-      texture = load (cache, key, data, error);
-      if (texture)
-        {
-          item = mx_texture_cache_item_new ();
-          item->ptr = texture;
-          add_texture_to_cache (cache, g_strdup (key), item);
-        }
-      else
-        return NULL;
+      item = mx_texture_cache_item_new ();
+      item->ptr = texture;
+      add_texture_to_cache (cache, g_strdup (key), item);
+      return texture;
     }
-
-  return item;
+  else
+    return COGL_INVALID_HANDLE;
 }
 
 /* We want to preserve the aspect ratio by default, also the default
@@ -420,6 +417,90 @@ mx_texture_cache_load_uri_async (MxTextureCache *cache,
   load_texture_async (cache, data);
 
   return CLUTTER_ACTOR (texture);
+}
+
+static CoglHandle
+mx_texture_cache_load_uri_sync_to_cogl_texture (MxTextureCache *cache,
+                                                MxTextureCachePolicy policy,
+                                                const gchar    *uri,
+                                                int             available_width,
+                                                int             available_height,
+                                                GError         **error)
+{
+  CoglHandle texdata;
+  GdkPixbuf *pixbuf;
+  char *key;
+  MxTextureCachePrivate *priv;
+  MxTextureCacheItem *item;
+
+  priv = TEXTURE_CACHE_PRIVATE (cache);
+
+  texdata = COGL_INVALID_HANDLE;
+
+  key = g_strconcat (CACHE_PREFIX_URI, uri, NULL);
+
+  item = g_hash_table_lookup (priv->cache, key);
+
+  if (item == NULL)
+    {
+      pixbuf = impl_load_pixbuf_file (uri, available_width, available_height, error);
+      if (!pixbuf)
+        goto out;
+
+      texdata = pixbuf_to_cogl_handle (pixbuf, FALSE);
+      g_object_unref (pixbuf);
+
+      if (policy == MX_TEXTURE_CACHE_POLICY_FOREVER)
+        {
+          item = mx_texture_cache_item_new ();
+          item->ptr = texdata;
+          cogl_handle_ref (texdata);
+          g_hash_table_insert (priv->cache, g_strdup (key), item);
+        }
+    }
+  else
+    cogl_handle_ref (texdata);
+
+out:
+  g_free (key);
+  return texdata;
+}
+
+/**
+ * mx_texture_cache_load_file_to_cogl_texture:
+ * @cache: A #MxTextureCache
+ * @file_path: Path to a file in supported image format
+ *
+ * This function synchronously loads the given file path
+ * into a COGL texture.  On error, a warning is emitted
+ * and %COGL_INVALID_HANDLE is returned.
+ *
+ * Returns: (transfer full): a new #CoglHandle
+ */
+CoglHandle
+mx_texture_cache_load_file_to_cogl_texture (MxTextureCache *cache,
+                                            const gchar    *file_path)
+{
+  CoglHandle texture;
+  GFile *file;
+  char *uri;
+  GError *error = NULL;
+
+  file = g_file_new_for_path (file_path);
+  uri = g_file_get_uri (file);
+
+  texture = mx_texture_cache_load_uri_sync_to_cogl_texture (cache, MX_TEXTURE_CACHE_POLICY_FOREVER,
+                                                            uri, -1, -1, &error);
+  g_object_unref (file);
+  g_free (uri);
+
+  if (texture == NULL)
+    {
+      g_warning ("Failed to load %s: %s", file_path, error->message);
+      g_clear_error (&error);
+      return COGL_INVALID_HANDLE;
+    }
+  return texture;
 }
 
 /**
