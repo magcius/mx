@@ -29,8 +29,6 @@
 #include "st-theme-context.h"
 #include "st-theme-node-private.h"
 
-static void mx_st_theme_node_init               (MxStThemeNode          *node);
-static void mx_st_theme_node_class_init         (MxStThemeNodeClass     *klass);
 static void mx_st_theme_node_dispose           (GObject                 *object);
 static void mx_st_theme_node_finalize           (GObject                 *object);
 
@@ -2466,6 +2464,65 @@ mx_st_theme_node_get_font (MxStThemeNode *node)
 }
 
 /**
+ * mx_st_theme_node_update_text:
+ * @theme_node: Source #StThemeNode
+ * @text: Target #ClutterText
+ *
+ * Set various GObject properties of the @text object using
+ * CSS information from @theme_node.
+ */
+void
+mx_st_theme_node_update_text (MxStThemeNode *theme_node,
+                              ClutterText   *text)
+{
+
+  ClutterColor color;
+  StTextDecoration decoration;
+  PangoAttrList *attribs;
+  const PangoFontDescription *font;
+  gchar *font_string;
+  StTextAlign align;
+
+  mx_st_theme_node_get_foreground_color (theme_node, &color);
+  clutter_text_set_color (text, &color);
+
+  font = mx_st_theme_node_get_font (theme_node);
+  font_string = pango_font_description_to_string (font);
+  clutter_text_set_font_name (text, font_string);
+  g_free (font_string);
+
+  attribs = pango_attr_list_new ();
+
+  decoration = mx_st_theme_node_get_text_decoration (theme_node);
+  if (decoration & ST_TEXT_DECORATION_UNDERLINE)
+    {
+      PangoAttribute *underline = pango_attr_underline_new (PANGO_UNDERLINE_SINGLE);
+      pango_attr_list_insert (attribs, underline);
+    }
+  if (decoration & ST_TEXT_DECORATION_LINE_THROUGH)
+    {
+      PangoAttribute *strikethrough = pango_attr_strikethrough_new (TRUE);
+      pango_attr_list_insert (attribs, strikethrough);
+    }
+  /* Pango doesn't have an equivalent attribute for _OVERLINE, and we deliberately
+   * skip BLINK (for now...)
+   */
+
+  clutter_text_set_attributes (text, attribs);
+
+  pango_attr_list_unref (attribs);
+
+  align = mx_st_theme_node_get_text_align (theme_node);
+  if(align == ST_TEXT_ALIGN_JUSTIFY) {
+    clutter_text_set_justify (text, TRUE);
+    clutter_text_set_line_alignment (text, PANGO_ALIGN_LEFT);
+  } else {
+    clutter_text_set_justify (text, FALSE);
+    clutter_text_set_line_alignment (text, (PangoAlignment) align);
+  }
+}
+
+/**
  * mx_st_theme_node_get_border_image:
  * @node: a #MxStThemeNode
  *
@@ -2497,7 +2554,7 @@ mx_st_theme_node_get_border_image (MxStThemeNode *node)
           CRStyleSheet *base_stylesheet;
           int borders[4];
           int n_borders = 0;
-          int i;
+          int j;
 
           const char *url;
           int border_top;
@@ -2527,7 +2584,7 @@ mx_st_theme_node_get_border_image (MxStThemeNode *node)
           /* Followed by 0 to 4 numbers or percentages. *Not lengths*. The interpretation
            * of a number is supposed to be pixels if the image is pixel based, otherwise CSS pixels.
            */
-          for (i = 0; i < 4; i++)
+          for (j = 0; j < 4; j++)
             {
               if (term == NULL)
                 break;

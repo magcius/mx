@@ -245,6 +245,9 @@ void mx_st_theme_node_paint (MxStThemeNode            *node,
 void mx_st_theme_node_copy_cached_paint_state (MxStThemeNode *node,
                                             MxStThemeNode *other);
 
+void mx_st_theme_node_update_text (MxStThemeNode *theme_node,
+                                   ClutterText   *text);
+
 G_END_DECLS
 
 #endif /* __MX_ST_THEME_NODE_H__ */
