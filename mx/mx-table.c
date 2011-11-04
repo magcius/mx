@@ -1338,13 +1338,10 @@ mx_table_preferred_allocate (ClutterActor          *self,
   gint i;
   MxTable *table;
   MxTablePrivate *priv;
-  MxPadding padding;
   DimensionData *rows, *columns;
 
   table = MX_TABLE (self);
   priv = MX_TABLE (self)->priv;
-
-  mx_widget_get_padding (MX_WIDGET (self), &padding);
 
   col_spacing = (priv->col_spacing);
   row_spacing = (priv->row_spacing);
@@ -1434,7 +1431,7 @@ mx_table_preferred_allocate (ClutterActor          *self,
         }
 
       /* calculate child x */
-      child_x = (int) padding.left;
+      child_x = (int) box->x1;
       for (i = 0; i < col; i++)
         {
           if (columns[i].is_visible)
@@ -1445,7 +1442,7 @@ mx_table_preferred_allocate (ClutterActor          *self,
         }
 
       /* calculate child y */
-      child_y = (int) padding.top;
+      child_y = (int) box->y1;
       for (i = 0; i < row; i++)
         {
           if (rows[i].is_visible)
@@ -1461,7 +1458,6 @@ mx_table_preferred_allocate (ClutterActor          *self,
 
       childbox.y1 = (float) child_y;
       childbox.y2 = (float) MAX (0, child_y + row_height);
-
 
       mx_allocate_align_fill (child, &childbox, x_align, y_align, x_fill, y_fill);
 
@@ -1541,16 +1537,20 @@ mx_table_allocate (ClutterActor          *self,
                    ClutterAllocationFlags flags)
 {
   MxTablePrivate *priv = MX_TABLE (self)->priv;
+  MxStThemeNode *theme_node = mx_widget_get_theme_node (MX_WIDGET (self));
+  ClutterActorBox content_box;
 
   CLUTTER_ACTOR_CLASS (mx_table_parent_class)->allocate (self, box, flags);
 
   if (priv->n_cols < 1 || priv->n_rows < 1)
     return;
 
+  mx_st_theme_node_get_content_box (theme_node, box, &content_box);
+
   if (priv->homogeneous)
-    mx_table_homogeneous_allocate (self, box, flags);
+    mx_table_homogeneous_allocate (self, &content_box, flags);
   else
-    mx_table_preferred_allocate (self, box, flags);
+    mx_table_preferred_allocate (self, &content_box, flags);
 }
 
 static void
@@ -1562,8 +1562,8 @@ mx_table_get_preferred_width (ClutterActor *self,
   gfloat total_min_width, total_pref_width;
   MxTablePrivate *priv = MX_TABLE (self)->priv;
   gint i;
-  MxPadding padding;
   DimensionData *columns;
+  MxStThemeNode *theme_node = mx_widget_get_theme_node (MX_WIDGET (self));
 
   if (priv->n_cols < 1)
     {
@@ -1572,16 +1572,15 @@ mx_table_get_preferred_width (ClutterActor *self,
       return;
     }
 
+  mx_st_theme_node_adjust_for_height (theme_node, &for_height);
+
   /* use min_widths to help allocation of height-for-width widgets */
   mx_table_calculate_dimensions (MX_TABLE (self), -1, for_height);
 
   columns = &g_array_index (priv->columns, DimensionData, 0);
 
-  mx_widget_get_padding (MX_WIDGET (self), &padding);
-
-  /* start off with padding plus row spacing */
-  total_min_width = padding.left + padding.right + (priv->visible_cols - 1) *
-                    (float)(priv->col_spacing);
+  /* start off with row spacing */
+  total_min_width = (priv->visible_cols - 1) * (float)(priv->col_spacing);
   total_pref_width = total_min_width;
 
   for (i = 0; i < priv->n_cols; i++)
@@ -1594,6 +1593,8 @@ mx_table_get_preferred_width (ClutterActor *self,
     *min_width_p = total_min_width;
   if (natural_width_p)
     *natural_width_p = total_pref_width;
+
+  mx_st_theme_node_adjust_preferred_width (theme_node, min_width_p, natural_width_p);
 }
 
 static void
@@ -1605,8 +1606,8 @@ mx_table_get_preferred_height (ClutterActor *self,
   gfloat total_min_height, total_pref_height;
   MxTablePrivate *priv = MX_TABLE (self)->priv;
   gint i;
-  MxPadding padding;
   DimensionData *rows;
+  MxStThemeNode *theme_node = mx_widget_get_theme_node (MX_WIDGET (self));
 
   if (priv->n_rows < 1)
     {
@@ -1615,16 +1616,15 @@ mx_table_get_preferred_height (ClutterActor *self,
       return;
     }
 
+  mx_st_theme_node_adjust_for_width (theme_node, &for_width);
+
   /* use min_widths to help allocation of height-for-width widgets */
   mx_table_calculate_dimensions (MX_TABLE (self), for_width, -1);
 
   rows = &g_array_index (priv->rows, DimensionData, 0);
 
-  mx_widget_get_padding (MX_WIDGET (self), &padding);
-
-  /* start off with padding plus row spacing */
-  total_min_height = padding.top + padding.bottom + (priv->visible_rows - 1) *
-                     (float)(priv->row_spacing);
+  /* start off with row spacing */
+  total_min_height = (priv->visible_rows - 1) * (float)(priv->row_spacing);
 
   total_pref_height = total_min_height;
 
@@ -1638,6 +1638,8 @@ mx_table_get_preferred_height (ClutterActor *self,
     *min_height_p = total_min_height;
   if (natural_height_p)
     *natural_height_p = total_pref_height;
+
+  mx_st_theme_node_adjust_preferred_width (theme_node, min_height_p, natural_height_p);
 }
 
 static void

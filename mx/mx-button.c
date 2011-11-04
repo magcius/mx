@@ -200,8 +200,13 @@ mx_button_update_label_style (MxButton *button)
 {
   MxButtonPrivate *priv = button->priv;
 
+  mx_st_theme_node_update_text (mx_widget_get_theme_node (MX_WIDGET (button)),
+                                CLUTTER_TEXT (priv->label));
+
+#if 0
   mx_stylable_apply_clutter_text_attributes (MX_STYLABLE (button),
                                              CLUTTER_TEXT (priv->label));
+#endif
 }
 
 

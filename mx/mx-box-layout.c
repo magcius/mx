@@ -827,11 +827,9 @@ mx_box_layout_get_preferred_width (ClutterActor *actor,
                                    gfloat       *natural_width_p)
 {
   MxBoxLayoutPrivate *priv = MX_BOX_LAYOUT (actor)->priv;
-  MxPadding padding = { 0, };
+  MxStThemeNode *theme_node = mx_widget_get_theme_node (MX_WIDGET (actor));
   gint n_children = 0;
   GList *l;
-
-  mx_widget_get_padding (MX_WIDGET (actor), &padding);
 
   if (min_width_p)
     *min_width_p = 0;
@@ -839,8 +837,7 @@ mx_box_layout_get_preferred_width (ClutterActor *actor,
   if (natural_width_p)
     *natural_width_p = 0;
 
-  if (for_height > 0)
-    for_height = MAX (0, for_height - padding.top - padding.bottom);
+  mx_st_theme_node_adjust_for_height (theme_node, &for_height);
 
   for (l = priv->children; l; l = g_list_next (l))
     {
@@ -881,7 +878,6 @@ mx_box_layout_get_preferred_width (ClutterActor *actor,
         }
     }
 
-
   if (priv->orientation == MX_ORIENTATION_HORIZONTAL && n_children > 1)
     {
       if (min_width_p)
@@ -891,11 +887,7 @@ mx_box_layout_get_preferred_width (ClutterActor *actor,
         *natural_width_p += priv->spacing * (n_children - 1);
     }
 
-  if (min_width_p)
-    *min_width_p += padding.left + padding.right;
-
-  if (natural_width_p)
-    *natural_width_p += padding.left + padding.right;
+  mx_st_theme_node_adjust_preferred_width (theme_node, min_width_p, natural_width_p);
 }
 
 static void
@@ -905,22 +897,17 @@ mx_box_layout_get_preferred_height (ClutterActor *actor,
                                     gfloat       *natural_height_p)
 {
   MxBoxLayoutPrivate *priv = MX_BOX_LAYOUT (actor)->priv;
-  MxPadding padding = { 0, };
+  MxStThemeNode *theme_node = mx_widget_get_theme_node (MX_WIDGET (actor));
   gint n_children = 0;
   GList *l;
 
-  mx_widget_get_padding (MX_WIDGET (actor), &padding);
-
+  mx_st_theme_node_adjust_for_width (theme_node, &for_width);
 
   if (min_height_p)
     *min_height_p = 0;
 
   if (natural_height_p)
     *natural_height_p = 0;
-
-  if (for_width > 0)
-    for_width = MAX (0, for_width - padding.left - padding.right);
-
 
   for (l = priv->children; l; l = g_list_next (l))
     {
@@ -969,11 +956,7 @@ mx_box_layout_get_preferred_height (ClutterActor *actor,
         *natural_height_p += priv->spacing * (n_children - 1);
     }
 
-  if (min_height_p)
-    *min_height_p += padding.top + padding.bottom;
-
-  if (natural_height_p)
-    *natural_height_p += padding.top + padding.bottom;
+  mx_st_theme_node_adjust_preferred_height (theme_node, min_height_p, natural_height_p);
 }
 
 static void
@@ -982,13 +965,14 @@ mx_box_layout_allocate (ClutterActor          *actor,
                         ClutterAllocationFlags flags)
 {
   MxBoxLayoutPrivate *priv = MX_BOX_LAYOUT (actor)->priv;
+  MxStThemeNode *theme_node = mx_widget_get_theme_node (MX_WIDGET (actor));
   gfloat avail_width, avail_height, pref_width, pref_height;
-  MxPadding padding = { 0, };
   gboolean allocate_pref;
   gfloat extra_space = 0;
   gfloat position = 0;
   GList *l;
   gint n_expand_children, n_children;
+  ClutterActorBox content_box;
 
   CLUTTER_ACTOR_CLASS (mx_box_layout_parent_class)->allocate (actor, box,
                                                               flags);
@@ -1025,10 +1009,6 @@ mx_box_layout_allocate (ClutterActor          *actor,
   if (n_children == 0)
     return;
 
-  mx_widget_get_padding (MX_WIDGET (actor), &padding);
-
-  /* do not take off padding just yet, as we are comparing this to the values
-   * from get_preferred_height/width which will include padding */
   avail_width  = box->x2 - box->x1;
   avail_height = box->y2 - box->y1;
 
@@ -1039,7 +1019,7 @@ mx_box_layout_allocate (ClutterActor          *actor,
                                           &min_height, &pref_height);
       pref_width = avail_width;
 
-      if (!priv->vadjustment && (pref_height > box->y2 - box->y1))
+      if (!priv->vadjustment && (pref_height > avail_height))
         {
           /* allocated less than the preferred height and not scrolling */
           allocate_pref = FALSE;
@@ -1055,9 +1035,9 @@ mx_box_layout_allocate (ClutterActor          *actor,
                                          &min_width, &pref_width);
       pref_height = avail_height;
 
-      if (!priv->hadjustment && (pref_width > box->x2 - box->x1))
+      if (!priv->hadjustment && (pref_width > avail_width))
         {
-          /* allocated less than the preferred width and not scrolling */
+          /* allocated less than the preferred width and no t scrolling */
           allocate_pref = FALSE;
           extra_space = avail_width - min_width;
         }
@@ -1065,13 +1045,10 @@ mx_box_layout_allocate (ClutterActor          *actor,
         allocate_pref = TRUE;
     }
 
-  /* remove the padding values from the available and preferred sizes so we
-   * can use them for allocating the children */
-  avail_width -= padding.left + padding.right;
-  avail_height -= padding.top + padding.bottom;
+  mx_st_theme_node_get_content_box (theme_node, box, &content_box);
 
-  pref_width -= padding.left + padding.right;
-  pref_height -= padding.top + padding.bottom;
+  avail_width  = content_box.x2 - content_box.x1;
+  avail_height = content_box.y2 - content_box.y1;
 
   /* update adjustments for scrolling */
   if (priv->vadjustment)
@@ -1157,9 +1134,9 @@ mx_box_layout_allocate (ClutterActor          *actor,
     }
 
   if (priv->orientation == MX_ORIENTATION_VERTICAL)
-    position = padding.top;
+    position = content_box.y1;
   else
-    position = padding.left;
+    position = content_box.x1;
 
   for (l = priv->children; l; l = l->next)
     {
@@ -1201,8 +1178,8 @@ mx_box_layout_allocate (ClutterActor          *actor,
                 extra_space = 0;
             }
 
-          child_box.x1 = padding.left;
-          child_box.x2 = avail_width + padding.left;
+          child_box.x1 = content_box.x1;
+          child_box.x2 = child_box.x1 + avail_width;
         }
       else
         {
@@ -1231,8 +1208,8 @@ mx_box_layout_allocate (ClutterActor          *actor,
                 extra_space = 0;
             }
 
-          child_box.y1 = padding.top;
-          child_box.y2 = avail_height + padding.top;
+          child_box.y1 = content_box.y1;
+          child_box.y2 = child_box.y1 + avail_height;
         }
 
       /* Adjust the box for alignment/fill */
@@ -1440,10 +1417,29 @@ mx_box_layout_pick (ClutterActor       *actor,
 }
 
 static void
+mx_box_layout_style_changed (MxWidget *widget)
+{
+  MxBoxLayout *layout = MX_BOX_LAYOUT (widget);
+  MxBoxLayoutPrivate *priv = layout->priv;
+  MxStThemeNode *theme_node = mx_widget_get_theme_node (widget);
+  guint spacing;
+
+  spacing = mx_st_theme_node_get_length (theme_node, "spacing");
+  if (!priv->ignore_css_spacing && (priv->spacing != spacing))
+    {
+      priv->spacing = (int)(spacing + 0.5);
+      clutter_actor_queue_relayout (CLUTTER_ACTOR (widget));
+    }
+
+  MX_WIDGET_CLASS (mx_box_layout_parent_class)->style_changed (widget);
+}
+
+static void
 mx_box_layout_class_init (MxBoxLayoutClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   ClutterActorClass *actor_class = CLUTTER_ACTOR_CLASS (klass);
+  MxWidgetClass *widget_class = MX_WIDGET_CLASS (klass);
   GParamSpec *pspec;
 
   g_type_class_add_private (klass, sizeof (MxBoxLayoutPrivate));
@@ -1461,6 +1457,8 @@ mx_box_layout_class_init (MxBoxLayoutClass *klass)
 
   actor_class->paint = mx_box_layout_paint;
   actor_class->pick = mx_box_layout_pick;
+
+  widget_class->style_changed = mx_box_layout_style_changed;
 
   pspec = g_param_spec_enum ("orientation",
                              "Orientation",
@@ -1510,40 +1508,15 @@ mx_box_layout_free_allocation (ClutterActorBox *box)
 }
 
 static void
-mx_box_layout_style_changed (MxWidget *widget,
-                             gpointer  userdata)
-{
-  MxBoxLayout *layout = MX_BOX_LAYOUT (widget);
-  MxBoxLayoutPrivate *priv = layout->priv;
-  guint spacing;
-
-  mx_stylable_get (MX_STYLABLE (widget),
-                   "x-mx-spacing", &spacing,
-                   NULL);
-
-  if (!priv->ignore_css_spacing && (priv->spacing != spacing))
-    {
-      priv->spacing = spacing;
-      clutter_actor_queue_relayout (CLUTTER_ACTOR (widget));
-    }
-
-  clutter_actor_queue_redraw (CLUTTER_ACTOR (widget));
-}
-
-static void
 mx_box_layout_init (MxBoxLayout *self)
 {
   self->priv = BOX_LAYOUT_PRIVATE (self);
-
 
   self->priv->start_allocations = g_hash_table_new_full (g_direct_hash,
                                                          g_direct_equal,
                                                          NULL,
                                                          (GDestroyNotify)
                                                          mx_box_layout_free_allocation);
-
-  g_signal_connect (self, "style-changed",
-                    G_CALLBACK (mx_box_layout_style_changed), NULL);
 
   self->priv->scroll_to_focused = TRUE;
 }

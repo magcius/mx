@@ -246,15 +246,10 @@ mx_bin_allocate_child (MxBin                  *bin,
 
   if (priv->child)
     {
-      MxPadding padding;
+      MxStThemeNode *theme_node = mx_widget_get_theme_node (MX_WIDGET (bin));
       ClutterActorBox allocation = { 0, };
 
-      mx_widget_get_padding (MX_WIDGET (bin), &padding);
-
-      allocation.x1 = padding.left;
-      allocation.x2 = box->x2 - box->x1 - padding.right;
-      allocation.y1 = padding.top;
-      allocation.y2 = box->y2 - box->y1 - padding.bottom;
+      mx_st_theme_node_get_content_box (theme_node, box, &allocation);
 
       mx_allocate_align_fill (priv->child,
                               &allocation,
@@ -274,36 +269,26 @@ mx_bin_get_preferred_width (ClutterActor *self,
                             gfloat       *natural_width_p)
 {
   MxBinPrivate *priv = MX_BIN (self)->priv;
-  gfloat min_width, natural_width;
-  gfloat available_height;
-  MxPadding padding = { 0, };
+  MxStThemeNode *theme_node = mx_widget_get_theme_node (MX_WIDGET (self));
 
-  mx_widget_get_padding (MX_WIDGET (self), &padding);
-
-  available_height = for_height - padding.top - padding.bottom;
-
-  min_width = natural_width = padding.left + padding.right;
+  mx_st_theme_node_adjust_for_height (theme_node, &for_height);
 
   if (priv->child == NULL || !CLUTTER_ACTOR_IS_VISIBLE (priv->child))
     {
       if (min_width_p)
-        *min_width_p = min_width;
+        *min_width_p = 0;
 
       if (natural_width_p)
-        *natural_width_p = natural_width;
+        *natural_width_p = 0;
     }
   else
     {
-      clutter_actor_get_preferred_width (priv->child, available_height,
+      clutter_actor_get_preferred_width (priv->child, for_height,
                                          min_width_p,
                                          natural_width_p);
-
-      if (min_width_p)
-        *min_width_p += min_width;
-
-      if (natural_width_p)
-        *natural_width_p += natural_width;
     }
+
+  mx_st_theme_node_adjust_preferred_width (theme_node, min_width_p, natural_width_p);
 }
 
 static void
@@ -313,36 +298,24 @@ mx_bin_get_preferred_height (ClutterActor *self,
                              gfloat       *natural_height_p)
 {
   MxBinPrivate *priv = MX_BIN (self)->priv;
-  gfloat min_height, natural_height;
-  gfloat available_width;
-  MxPadding padding = { 0, };
-
-  mx_widget_get_padding (MX_WIDGET (self), &padding);
-
-  available_width = for_width - padding.left - padding.right;
-
-  min_height = natural_height = padding.top + padding.bottom;
+  MxStThemeNode *theme_node = mx_widget_get_theme_node (MX_WIDGET (self));
 
   if (priv->child == NULL || !CLUTTER_ACTOR_IS_VISIBLE (priv->child))
     {
       if (min_height_p)
-        *min_height_p = min_height;
+        *min_height_p = 0;
 
       if (natural_height_p)
-        *natural_height_p = natural_height;
+        *natural_height_p = 0;
     }
   else
     {
-      clutter_actor_get_preferred_height (priv->child, available_width,
+      clutter_actor_get_preferred_height (priv->child, for_width,
                                           min_height_p,
                                           natural_height_p);
-
-      if (min_height_p)
-        *min_height_p += min_height;
-
-      if (natural_height_p)
-        *natural_height_p += natural_height;
     }
+
+  mx_st_theme_node_adjust_preferred_height (theme_node, min_height_p, natural_height_p);
 }
 
 static void
