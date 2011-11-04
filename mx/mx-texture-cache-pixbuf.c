@@ -342,8 +342,8 @@ on_pixbuf_loaded (GObject      *source,
         {
           cogl_handle_ref (texdata);
           item = mx_texture_cache_item_new ();
-          item->ptr = texdata;
-          add_texture_to_cache (cache, g_strdup (data->key), item);
+          item->ptr = cogl_handle_ref (texdata);
+          add_texture_to_cache (cache, data->key, item);
         }
     }
 

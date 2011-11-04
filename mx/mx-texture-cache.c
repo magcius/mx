@@ -353,15 +353,15 @@ mx_texture_cache_load (MxTextureCache       *cache,
 
   item = g_hash_table_lookup (priv->cache, key);
   if (item != NULL)
-    return item->ptr;
+    return cogl_handle_ref (item->ptr);
 
   texture = load (cache, key, data, error);
   if (texture)
     {
       item = mx_texture_cache_item_new ();
       item->ptr = texture;
-      add_texture_to_cache (cache, g_strdup (key), item);
-      return texture;
+      add_texture_to_cache (cache, key, item);
+      return cogl_handle_ref (texture);
     }
   else
     return COGL_INVALID_HANDLE;

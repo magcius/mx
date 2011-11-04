@@ -32,7 +32,7 @@ mx_texture_cache_get_item (MxTextureCache *cache,
         goto out;
 
       item = mx_texture_cache_item_new ();
-      item->ptr = pixbuf_to_cogl_handle (pixbuf, FALSE);
+      item->ptr = cogl_handle_ref (pixbuf_to_cogl_handle (pixbuf, FALSE));
 
       add_texture_to_cache (cache, uri, item);
     }
