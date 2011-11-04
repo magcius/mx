@@ -1872,7 +1872,7 @@ mx_table_get_column_spacing (MxTable *table)
 }
 
 /**
- * mx_table_add_actor:
+ * mx_table_insert_actor:
  * @table: a #MxTable
  * @actor: the child to insert
  * @row: the row to place the child into
@@ -1883,10 +1883,10 @@ mx_table_get_column_spacing (MxTable *table)
  * Note, column and rows numbers start from zero
  */
 void
-mx_table_add_actor (MxTable      *table,
-                    ClutterActor *actor,
-                    gint          row,
-                    gint          column)
+mx_table_insert_actor (MxTable      *table,
+                       ClutterActor *actor,
+                       gint          row,
+                       gint          column)
 {
   MxTableChild *meta;
   ClutterContainer *container;
@@ -1914,7 +1914,7 @@ mx_table_add_actor (MxTable      *table,
 }
 
 /**
- * mx_table_add_actor_with_properties
+ * mx_table_add_actor_with_properties:
  * @table: a #MxTable
  * @actor: the child #ClutterActor
  * @row: the row to place the child into

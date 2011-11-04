@@ -84,10 +84,10 @@ void mx_table_set_row_spacing    (MxTable      *table,
                                   gint          spacing);
 gint mx_table_get_row_spacing    (MxTable      *table);
 
-void mx_table_add_actor          (MxTable      *table,
-                                  ClutterActor *actor,
-                                  gint          row,
-                                  gint          column);
+void mx_table_insert_actor          (MxTable      *table,
+                                     ClutterActor *actor,
+                                     gint          row,
+                                     gint          column);
 
 void mx_table_add_actor_with_properties (MxTable      *table,
                                          ClutterActor *actor,

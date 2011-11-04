@@ -353,7 +353,7 @@ change_widget (MxComboBox *box,
 
           if (MX_IS_TABLE (actor))
             {
-              mx_table_add_actor (MX_TABLE (actor), button, row, col);
+              mx_table_insert_actor (MX_TABLE (actor), button, row, col);
               row++;
               if (row == 10)
                 {
@@ -583,14 +583,14 @@ main (int argc, char **argv)
 
   /* toolbar */
   box = mx_box_layout_new ();
-  mx_box_layout_add_actor_with_properties (MX_BOX_LAYOUT (box),
-                                           create_combo_box (selected_widget),
-                                           0,
-                                           "expand", TRUE,
-                                           "x-fill", FALSE,
-                                           "x-align", MX_ALIGN_START,
-                                           NULL);
-  mx_box_layout_add_actor (MX_BOX_LAYOUT (box), create_rotate_box (window), 1);
+  mx_box_layout_insert_actor_with_properties (MX_BOX_LAYOUT (box),
+                                              create_combo_box (selected_widget),
+                                              0,
+                                              "expand", TRUE,
+                                              "x-fill", FALSE,
+                                              "x-align", MX_ALIGN_START,
+                                              NULL);
+  mx_box_layout_insert_actor (MX_BOX_LAYOUT (box), create_rotate_box (window), 1);
 
   toolbar = mx_window_get_toolbar (window);
   mx_bin_set_child (MX_BIN (toolbar), box);
