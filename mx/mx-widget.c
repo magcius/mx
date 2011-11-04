@@ -1332,7 +1332,7 @@ mx_widget_class_init (MxWidgetClass *klass)
                   G_TYPE_NONE, 0);
 }
 
-static MxStyle *
+MxStyle *
 mx_widget_get_style (MxStylable *stylable)
 {
   MxWidgetPrivate *priv = MX_WIDGET (stylable)->priv;
@@ -1405,7 +1405,7 @@ _mx_stylable_get_style_pseudo_class (MxStylable *actor)
 }
 
 
-static const gchar*
+const gchar*
 _mx_widget_get_style_class (MxStylable *actor)
 {
   return ((MxWidget *) actor)->priv->style_class;

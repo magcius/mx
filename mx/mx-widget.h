@@ -149,6 +149,12 @@ void          mx_widget_st_style_changed     (MxWidget  *widget);
 MxStThemeNode *
 mx_widget_get_theme_node (MxWidget *widget);
 
+MxStyle *
+mx_widget_get_style (MxStylable *stylable);
+
+const gchar*
+_mx_widget_get_style_class (MxStylable *actor);
+
 G_END_DECLS
 
 #endif /* __MX_WIDGET_H__ */
