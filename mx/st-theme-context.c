@@ -114,7 +114,7 @@ on_stage_destroy (ClutterStage *stage)
 {
   MxStThemeContext *context = mx_st_theme_context_get_for_stage (stage);
 
-  g_object_set_data (G_OBJECT (stage), "st-theme-context", NULL);
+  g_object_set_data (G_OBJECT (stage), "mx-theme-context", NULL);
   g_object_unref (context);
 }
 
@@ -145,12 +145,12 @@ mx_st_theme_context_get_for_stage (ClutterStage *stage)
 
   g_return_val_if_fail (CLUTTER_IS_STAGE (stage), NULL);
 
-  context = g_object_get_data (G_OBJECT (stage), "st-theme-context");
+  context = g_object_get_data (G_OBJECT (stage), "mx-theme-context");
   if (context)
     return context;
 
   context = mx_st_theme_context_new ();
-  g_object_set_data (G_OBJECT (stage), "st-theme-context", context);
+  g_object_set_data (G_OBJECT (stage), "mx-theme-context", context);
   g_signal_connect (stage, "destroy",
                     G_CALLBACK (on_stage_destroy), NULL);
 
