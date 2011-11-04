@@ -1164,7 +1164,7 @@ mx_widget_get_preferred_height (ClutterActor *self,
     *natural_height_p = 0;
 
   mx_st_theme_node_adjust_preferred_height (theme_node,
-                                            min_height,
+                                            min_height_p,
                                             natural_height_p);
 }
 
@@ -1172,7 +1172,7 @@ static gboolean
 mx_widget_get_paint_volume (ClutterActor       *actor,
                             ClutterPaintVolume *volume)
 {
-  ClutterActorBox paint_box, actor_box;
+  ClutterActorBox paint_box, alloc_box;
   ClutterVertex origin;
   MxStThemeNode *theme_node;
 
@@ -1182,11 +1182,15 @@ mx_widget_get_paint_volume (ClutterActor       *actor,
   if (MX_IS_SCROLLABLE (actor))
     return FALSE;
 
+  /* Setting the paint volume does not make sense when we don't have any allocation */
+  if (!clutter_actor_has_allocation (actor))
+    return FALSE;
+
   theme_node = mx_widget_get_theme_node (MX_WIDGET (actor));
 
-  clutter_actor_get_allocation_box (self, &alloc_box);
+  clutter_actor_get_allocation_box (actor, &alloc_box);
 
-  st_theme_node_get_paint_box (theme_node, &alloc_box, &paint_box);
+  mx_st_theme_node_get_paint_box (theme_node, &alloc_box, &paint_box);
 
   origin.x = paint_box.x1 - alloc_box.x1;
   origin.y = paint_box.y1 - alloc_box.y1;
