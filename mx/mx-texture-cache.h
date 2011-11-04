@@ -161,6 +161,13 @@ typedef CoglHandle (*MxTextureCacheLoader) (MxTextureCache *cache,
                                             void           *data,
                                             GError        **error);
 
+CoglHandle mx_texture_cache_load (MxTextureCache       *cache,
+                                  const char           *key,
+                                  MxTextureCachePolicy  policy,
+                                  MxTextureCacheLoader  load,
+                                  void                 *data,
+                                  GError              **error);
+
 G_END_DECLS
 
 #endif /* _MX_TEXTURE_CACHE */
