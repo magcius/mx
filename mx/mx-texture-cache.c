@@ -42,9 +42,7 @@
 #include "mx-marshal.h"
 #include "mx-private.h"
 
-#define CACHE_PREFIX_GICON "gicon:"
 #define CACHE_PREFIX_URI "uri:"
-#define CACHE_PREFIX_THUMBNAIL_URI "thumbnail-uri:"
 #define CACHE_PREFIX_RAW_CHECKSUM "raw-checksum:"
 #define CACHE_PREFIX_COMPRESSED_CHECKSUM "compressed-checksum:"
 

@@ -1962,9 +1962,9 @@ get_root_theme_node (ClutterStage *stage)
 {
   MxStThemeContext *context = mx_st_theme_context_get_for_stage (stage);
 
-  if (!g_object_get_data (G_OBJECT (context), "st-theme-initialized"))
+  if (!g_object_get_data (G_OBJECT (context), "mx-theme-initialized"))
     {
-      g_object_set_data (G_OBJECT (context), "st-theme-initialized", GUINT_TO_POINTER (1));
+      g_object_set_data (G_OBJECT (context), "mx-theme-initialized", GUINT_TO_POINTER (1));
       g_signal_connect (G_OBJECT (context), "changed",
                         G_CALLBACK (on_theme_context_changed), stage);
     }
