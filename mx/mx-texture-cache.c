@@ -84,16 +84,6 @@ typedef struct
   GDestroyNotify  destroy_func;
 } MxTextureCacheMetaEntry;
 
-typedef struct {
-  MxTextureCachePolicy policy;
-  char *key;
-  char *uri;
-  char *checksum;
-  guint width;
-  guint height;
-  GSList *textures;
-} MxTextureCacheAsyncLoadData;
-
 static MxTextureCacheItem *
 mx_texture_cache_item_new (void)
 {
@@ -110,6 +100,49 @@ mx_texture_cache_item_free (MxTextureCacheItem *item)
     g_hash_table_unref (item->meta);
 
   g_slice_free (MxTextureCacheItem, item);
+}
+
+typedef struct {
+  MxTextureCache *cache;
+  MxTextureCachePolicy policy;
+  char *key;
+  char *checksum;
+
+  gboolean enforced_square;
+
+  guint width;
+  guint height;
+  GSList *textures;
+
+  GIcon *icon;
+  char *mimetype;
+  StIconColors *colors;
+  char *uri;
+} MxTextureCacheAsyncLoadData;
+
+static void
+mx_texture_cache_async_load_data_free (MxTextureCacheAsyncLoadData *data)
+{
+  if (data->icon)
+    {
+      g_object_unref (data->icon);
+      if (data->colors)
+        st_icon_colors_unref (data->colors);
+    }
+  else if (data->uri)
+    g_free (data->uri);
+
+  if (data->key)
+    g_free (data->key);
+  if (data->checksum)
+    g_free (data->checksum);
+  if (data->mimetype)
+    g_free (data->mimetype);
+
+  if (data->textures)
+    g_slist_free_full (data->textures, (GDestroyNotify) g_object_unref);
+
+  g_slice_free (MxTextureCacheAsyncLoadData, data);
 }
 
 static void
@@ -264,254 +297,129 @@ mx_texture_cache_uri_to_filename (const gchar *uri)
   return file;
 }
 
+#include "mx-texture-cache-pixbuf.c"
+#include "mx-texture-cache-bind.c"
+#include "mx-texture-cache-compat.c"
+
+static void
+load_pixbuf_thread (GSimpleAsyncResult *result,
+                    GObject            *object,
+                    GCancellable       *cancellable)
+{
+  GdkPixbuf *pixbuf;
+  MxTextureCacheAsyncLoadData* data;
+  GError *error = NULL;
+
+  data = g_async_result_get_user_data (G_ASYNC_RESULT (result));
+  g_assert (data != NULL);
+
+  if (data->uri)
+    pixbuf = impl_load_pixbuf_file (data->uri, data->width, data->height, &error);
+  else
+    g_assert_not_reached ();
+
+  if (error != NULL)
+    {
+      g_simple_async_result_set_from_error (result, error);
+      return;
+    }
+
+  if (pixbuf)
+    g_simple_async_result_set_op_res_gpointer (result, g_object_ref (pixbuf),
+                                               g_object_unref);
+}
+
+static void
+load_texture_async (MxTextureCache              *cache,
+                    MxTextureCacheAsyncLoadData *data)
+{
+  GSimpleAsyncResult *result;
+  result = g_simple_async_result_new (G_OBJECT (cache), on_pixbuf_loaded, data, load_texture_async);
+  g_simple_async_result_run_in_thread (result, load_pixbuf_thread, G_PRIORITY_DEFAULT, NULL);
+  g_object_unref (result);
+}
+
+
 static MxTextureCacheItem *
-mx_texture_cache_get_item (MxTextureCache *self,
-                           const gchar    *uri,
-                           gboolean        create_if_not_exists)
+mx_texture_cache_load (MxTextureCache       *cache,
+                       const char           *key,
+                       MxTextureCachePolicy  policy,
+                       MxTextureCacheLoader  load,
+                       void                 *data,
+                       GError              **error)
 {
   MxTextureCachePrivate *priv;
   MxTextureCacheItem *item;
-  gchar *new_file, *new_uri;
-  const gchar *file = NULL;
 
-  priv = TEXTURE_CACHE_PRIVATE (self);
+  priv = TEXTURE_CACHE_PRIVATE (cache);
 
-  /* Make sure we have the URI (and the path if we're loading) */
-  new_file = new_uri = NULL;
-
-  if (g_regex_match (priv->is_uri, uri, 0, NULL))
+  item = g_hash_table_lookup (priv->cache, key);
+  if (item == NULL)
     {
-      if (create_if_not_exists)
-        {
-          file = new_file = mx_texture_cache_uri_to_filename (uri);
-          if (!new_file)
-            return NULL;
-        }
-    }
-  else
-    {
-      file = uri;
-      uri = new_uri = mx_texture_cache_filename_to_uri (file);
-      if (!new_uri)
-        return NULL;
-    }
+      CoglHandle texture;
 
-  item = g_hash_table_lookup (priv->cache, uri);
-
-  if ((!item || !item->ptr) && create_if_not_exists)
-    {
-      gboolean created;
-      GError *err = NULL;
-
-      if (!item)
+      texture = load (cache, key, data, error);
+      if (texture)
         {
           item = mx_texture_cache_item_new ();
-          created = TRUE;
+          item->ptr = texture;
+          add_texture_to_cache (cache, g_strdup (key), item);
         }
       else
-        created = FALSE;
-
-      item->ptr = cogl_texture_new_from_file (file, COGL_TEXTURE_NONE,
-                                              COGL_PIXEL_FORMAT_ANY,
-                                              &err);
-
-      if (!item->ptr)
-        {
-          if (err)
-            {
-              g_warning ("Error loading image: %s", err->message);
-              g_error_free (err);
-            }
-
-          if (created)
-            mx_texture_cache_item_free (item);
-
-          g_free (new_file);
-          g_free (new_uri);
-
-          return NULL;
-        }
-
-      if (created)
-        add_texture_to_cache (self, uri, item);
+        return NULL;
     }
-
-  g_free (new_file);
-  g_free (new_uri);
 
   return item;
 }
 
-/**
- * mx_texture_cache_get_cogl_texture:
- * @self: A #MxTextureCache
- * @uri: A URI or path to an image file
- *
- * Create a #CoglHandle representing a texture of the specified image. Adds
- * the image to the cache if the image had not been previously loaded.
- * Subsequent calls with the same image URI/path will return the #CoglHandle of
- * the previously loaded image with an increased reference count.
- *
- * Returns: (transfer none): a #CoglHandle to the cached texture
+/* We want to preserve the aspect ratio by default, also the default
+ * material for an empty texture is full opacity white, which we
+ * definitely don't want.  Skip that by setting 0 opacity.
  */
-CoglHandle
-mx_texture_cache_get_cogl_texture (MxTextureCache *self,
-                                   const gchar    *uri)
+static ClutterTexture *
+create_default_texture ()
 {
-  MxTextureCacheItem *item;
-
-  g_return_val_if_fail (MX_IS_TEXTURE_CACHE (self), NULL);
-  g_return_val_if_fail (uri != NULL, NULL);
-
-  item = mx_texture_cache_get_item (self, uri, TRUE);
-
-  if (item)
-    return cogl_handle_ref (item->ptr);
-  else
-    return NULL;
+  ClutterTexture * texture = CLUTTER_TEXTURE (clutter_texture_new ());
+  g_object_set (texture, "keep-aspect-ratio", TRUE, "opacity", 0, NULL);
+  return texture;
 }
 
 /**
- * mx_texture_cache_get_texture:
- * @self: A #MxTextureCache
- * @uri: A URI or path to a image file
+ * mx_texture_cache_load_uri_async:
  *
- * Create a new ClutterTexture with the specified image. Adds the image to the
- * cache if the image had not been previously loaded. Subsequent calls with
- * the same image URI/path will return a new ClutterTexture with the previously
- * loaded image.
+ * @cache: The texture cache instance
+ * @uri: uri of the image file from which to create a pixbuf
+ * @available_width: available width for the image, can be -1 if not limited
+ * @available_height: available height for the image, can be -1 if not limited
  *
- * Returns: (transfer none): a newly created ClutterTexture
+ * Asynchronously load an image.   Initially, the returned texture will have a natural
+ * size of zero.  At some later point, either the image will be loaded successfully
+ * and at that point size will be negotiated, or upon an error, no image will be set.
+ *
+ * Return value: (transfer none): A new #ClutterActor with no image loaded initially.
  */
-ClutterTexture*
-mx_texture_cache_get_texture (MxTextureCache *self,
-                              const gchar    *uri)
+ClutterActor *
+mx_texture_cache_load_uri_async (MxTextureCache *cache,
+                                 const gchar    *uri,
+                                 int             available_width,
+                                 int             available_height)
 {
-  MxTextureCacheItem *item;
+  ClutterTexture *texture;
+  MxTextureCacheAsyncLoadData *data;
 
-  g_return_val_if_fail (MX_IS_TEXTURE_CACHE (self), NULL);
-  g_return_val_if_fail (uri != NULL, NULL);
+  texture = create_default_texture ();
 
-  item = mx_texture_cache_get_item (self, uri, TRUE);
+  data = g_new0 (MxTextureCacheAsyncLoadData, 1);
+  data->cache = cache;
+  data->key = g_strconcat (CACHE_PREFIX_URI, uri, NULL);
+  data->policy = MX_TEXTURE_CACHE_POLICY_NONE;
+  data->uri = g_strdup (uri);
+  data->width = available_width;
+  data->height = available_height;
+  data->textures = g_slist_prepend (data->textures, g_object_ref (texture));
+  load_texture_async (cache, data);
 
-  if (item)
-    {
-      ClutterActor *texture = clutter_texture_new ();
-      clutter_texture_set_cogl_texture ((ClutterTexture*) texture, item->ptr);
-
-      return (ClutterTexture *)texture;
-    }
-  else
-    return NULL;
-}
-
-
-/**
- * mx_texture_cache_get_actor:
- * @self: A #MxTextureCache
- * @uri: A URI or path to a image file
- *
- * This is a wrapper around mx_texture_cache_get_texture() which returns
- * a ClutterActor.
- *
- * Returns: (transfer none): a newly created ClutterTexture
- */
-ClutterActor*
-mx_texture_cache_get_actor (MxTextureCache *self,
-                            const gchar    *uri)
-{
-  ClutterTexture *tex;
-
-  g_return_val_if_fail (MX_IS_TEXTURE_CACHE (self), NULL);
-  g_return_val_if_fail (uri != NULL, NULL);
-
-  if ((tex = mx_texture_cache_get_texture (self, uri)))
-    return CLUTTER_ACTOR (tex);
-  else
-    return NULL;
-}
-
-/**
- * mx_texture_cache_get_meta_texture:
- * @self: A #MxTextureCache
- * @uri: A URI or path to an image file
- * @ident: A unique identifier
- *
- * Create a new ClutterTexture using the previously added image associated
- * with the given unique identifier.
- *
- * See mx_texture_cache_insert_meta()
- *
- * Returns: (transfer full): A newly allocated #ClutterTexture, or
- *   %NULL if no image was found
- *
- * Since: 1.2
- */
-ClutterTexture *
-mx_texture_cache_get_meta_texture (MxTextureCache *self,
-                                   const gchar    *uri,
-                                   gpointer        ident)
-{
-  MxTextureCacheItem *item;
-
-  g_return_val_if_fail (MX_IS_TEXTURE_CACHE (self), NULL);
-  g_return_val_if_fail (uri != NULL, NULL);
-
-  item = mx_texture_cache_get_item (self, uri, TRUE);
-
-  if (item && item->meta)
-    {
-      MxTextureCacheMetaEntry *entry = g_hash_table_lookup (item->meta, ident);
-
-      if (entry->texture)
-        {
-          ClutterActor *texture = clutter_texture_new ();
-          clutter_texture_set_cogl_texture ((ClutterTexture*) texture,
-                                            entry->texture);
-          return (ClutterTexture *)texture;
-        }
-    }
-
-  return NULL;
-}
-
-/**
- * mx_texture_cache_get_meta_cogl_texture:
- * @self: A #MxTextureCache
- * @uri: A URI or path to an image file
- * @ident: A unique identifier
- *
- * Retrieves the #CoglHandle of the previously added image associated
- * with the given unique identifier.
- *
- * See mx_texture_cache_insert_meta()
- *
- * Returns: (transfer full): A #CoglHandle to a texture, with an added
- *   reference. %NULL if no image was found.
- *
- * Since: 1.2
- */
-CoglHandle
-mx_texture_cache_get_meta_cogl_texture (MxTextureCache *self,
-                                        const gchar    *uri,
-                                        gpointer        ident)
-{
-  MxTextureCacheItem *item;
-
-  g_return_val_if_fail (MX_IS_TEXTURE_CACHE (self), NULL);
-  g_return_val_if_fail (uri != NULL, NULL);
-
-  item = mx_texture_cache_get_item (self, uri, TRUE);
-
-  if (item && item->meta)
-    {
-      MxTextureCacheMetaEntry *entry = g_hash_table_lookup (item->meta, ident);
-
-      if (entry->texture)
-        return cogl_handle_ref (entry->texture);
-    }
-
-  return NULL;
+  return CLUTTER_ACTOR (texture);
 }
 
 /**

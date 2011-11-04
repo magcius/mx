@@ -130,6 +130,22 @@ void            mx_texture_cache_insert_meta (MxTextureCache *self,
 void mx_texture_cache_load_cache (MxTextureCache *self,
                                   const char     *filename);
 
+/**
+ * MxTextureCacheLoader: (skip)
+ * @cache: a #MxTextureCache
+ * @key: Unique identifier for this texture
+ * @data: Callback user data
+ * @error: A #GError
+ *
+ * See mx_texture_cache_load().  Implementations should return a
+ * texture handle for the given key, or set @error.
+ *
+ */
+typedef CoglHandle (*MxTextureCacheLoader) (MxTextureCache *cache,
+                                            const char     *key,
+                                            void           *data,
+                                            GError        **error);
+
 G_END_DECLS
 
 #endif /* _MX_TEXTURE_CACHE */
