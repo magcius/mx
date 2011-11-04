@@ -100,6 +100,9 @@ void     mx_style_get_valist     (MxStyle      *style,
                                   MxStylable   *stylable,
                                   const gchar  *first_property_name,
                                   va_list       va_args);
+GHashTable *
+mx_style_get_style_sheet_properties (MxStyle    *style,
+                                     MxStylable *stylable);
 
 G_END_DECLS
 

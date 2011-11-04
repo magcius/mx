@@ -329,7 +329,6 @@ mx_style_get_default (void)
   return default_style;
 }
 
-
 static void
 mx_style_transform_css_value (MxStyleSheetValue *css_value,
                               MxStylable        *stylable,
@@ -531,7 +530,14 @@ _mx_style_invalidate_cache (MxStylable *stylable)
     }
 }
 
-static GHashTable *
+/**
+ * mx_style_get_style_sheetb_properties:
+ * @style: the style
+ * @stylable: the stylable widget
+ *
+ * Returns: (transfer none) (element-type utf8 Mx.StyleSheetValue): foo
+ */
+GHashTable *
 mx_style_get_style_sheet_properties (MxStyle    *style,
                                      MxStylable *stylable)
 {

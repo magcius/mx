@@ -300,6 +300,7 @@ Mx_@MX_API_VERSION_AM@_gir_LIBS      = libmx-@MX_API_VERSION@.la
 Mx_@MX_API_VERSION_AM@_gir_FILES     = \
 	$(source_h) \
 	$(top_srcdir)/mx/mx.h \
+	$(top_srcdir)/mx/mx-css.h \
 	$(top_builddir)/mx/mx-version.h \
 	$(top_builddir)/mx/mx-enum-types.h \
 	$(source_c)

@@ -64,6 +64,20 @@ mx_style_sheet_value_free (MxStyleSheetValue *value)
   g_slice_free (MxStyleSheetValue, value);
 }
 
+static MxStyleSheetValue *
+mx_style_sheet_value_copy (MxStyleSheetValue *value)
+{
+  MxStyleSheetValue *n;
+  n = mx_style_sheet_value_new ();
+  n->string = value->string;
+  n->source = value->source;
+  return n;
+}
+
+G_DEFINE_BOXED_TYPE (MxStyleSheetValue,
+                     mx_style_sheet_value,
+                     mx_style_sheet_value_copy,
+                     mx_style_sheet_value_free);
 
 static gchar*
 append (gchar *str1, const gchar *str2)

@@ -38,11 +38,20 @@ struct _MxNode
   MxNode *parent;
 };
 
+#define MX_STYLE_SHEET_VALUE (mx_style_sheet_value_get_type ())
+
+/**
+ * MxStyleSheetValue:
+ * @string: foo
+ * @source: bar
+ */
 struct _MxStyleSheetValue
 {
   const gchar *string;
   const gchar *source;
 };
+
+GType          mx_style_sheet_value_get_type (void) G_GNUC_CONST;
 
 MxStyleSheet*  mx_style_sheet_new            ();
 void           mx_style_sheet_destroy        ();
